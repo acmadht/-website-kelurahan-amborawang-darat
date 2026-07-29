@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function currentUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return signedIn() && currentUser().data.isActive == true;
+    }
+
+    function roleIs(roleName) {
+      return activeUser() && currentUser().data.role == roleName;
+    }
+
+    function isEditor() {
+      return activeUser() && currentUser().data.role in ['superadmin', 'editor'];
+    }
+
+    function isSuperadmin() {
+      return roleIs('superadmin');
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isSuperadmin());
+      allow create, update, delete: if isSuperadmin();
+    }
+
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /pages/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /heroSlides/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /officials/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /rws/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /rts/{docId} {
+      allow read: if true;
+      allow create, delete: if isEditor();
+      allow update: if isEditor() || (
+        roleIs('operator_rt') &&
+        currentUser().data.rtId == docId
+      );
+    }
+
+    match /services/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /posts/{docId} {
+      allow read: if resource.data.status == 'published' || isEditor();
+      allow create, update, delete: if isEditor();
+    }
+
+    match /announcements/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /agendas/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /galleryAlbums/{docId} {
+      allow read: if resource.data.status == 'published' || isEditor();
+      allow create, update, delete: if isEditor();
+    }
+
+    match /galleryPhotos/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isEditor();
+    }
+
+    match /kknTeam/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /kknMembers/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /documents/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /messages/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isEditor();
+    }
+
+    match /activityLogs/{docId} {
+      allow read: if isEditor();
+      allow create: if activeUser();
+      allow update, delete: if false;
+    }
+  }
+}

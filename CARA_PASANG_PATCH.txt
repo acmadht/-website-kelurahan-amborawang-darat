@@ -1,0 +1,11 @@
+1. Matikan npm run dev dengan Ctrl + C.
+2. Ekstrak PATCH_UPLOAD_V2.zip.
+3. Salin seluruh isi patch ke folder proyek website.
+4. Pilih Replace files in the destination.
+5. Isi kembali BOOTSTRAP_ADMIN_PASSWORD di .env.local untuk sementara.
+6. Jalankan: npm install
+7. Jalankan: npm run bootstrap-admin
+8. Jalankan: npm run check-upload
+9. Jalankan: npm run dev
+10. Keluar dari dashboard lalu login kembali.
+11. Coba unggah gambar kecil.
