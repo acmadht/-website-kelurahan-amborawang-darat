@@ -39,14 +39,29 @@ set("siteSettings", "main", {
   whatsappEnabled: true
 });
 set("pages", "profil", {
-  history: "Tuliskan sejarah kelurahan melalui dashboard admin.",
-  vision: "Terwujudnya pelayanan kelurahan yang profesional, transparan, responsif, dan dekat dengan masyarakat.",
-  missions: ["Meningkatkan kualitas pelayanan publik", "Mendorong keterbukaan informasi", "Memperkuat partisipasi masyarakat"],
-  geography: "Tuliskan kondisi geografis wilayah.",
-  boundaries: "Tuliskan batas utara, selatan, timur, dan barat.",
-  potential: "Tuliskan potensi unggulan kelurahan.",
-  facilities: ["Kantor kelurahan", "Sekolah", "Fasilitas kesehatan", "Tempat ibadah"],
-  imageUrl: "/images/office.svg"
+  history: "Amborawang Darat telah menjadi salah satu kelurahan dalam wilayah administratif Kecamatan Samboja, Kabupaten Kutai Kartanegara. Perkembangan permukiman, aktivitas masyarakat, pendidikan, pertanian, perdagangan, dan pelayanan pemerintahan membentuk karakter wilayah ini dari waktu ke waktu.\n\nMelalui Peraturan Daerah Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020, Amborawang Darat ditetapkan sebagai salah satu kelurahan dalam Kecamatan Samboja Barat. Kecamatan baru tersebut mulai menjalankan pemerintahan secara efektif pada 15 Februari 2023. Perubahan administratif ini mendekatkan koordinasi pembangunan dan pelayanan publik kepada masyarakat.\n\nSaat ini, Kelurahan Amborawang Darat terus memperkuat pelayanan administrasi, keterbukaan informasi, partisipasi warga, pengembangan potensi ekonomi lokal, dan pengelolaan lingkungan yang berkelanjutan.",
+  vision: "Terwujudnya Kelurahan Amborawang Darat yang tertib, responsif, transparan, berdaya, dan berkelanjutan dalam memberikan pelayanan kepada masyarakat.",
+  missions: [
+    "Meningkatkan pelayanan publik yang cepat, jelas, ramah, dan mudah diakses.",
+    "Memperkuat keterbukaan informasi serta pengelolaan data kelurahan yang akurat.",
+    "Mendorong partisipasi masyarakat dalam perencanaan, pembangunan, dan pengawasan lingkungan.",
+    "Mendukung pengembangan UMKM, pertanian, pendidikan, dan kegiatan produktif masyarakat.",
+    "Menjaga kebersihan, ketertiban, keamanan, serta keberlanjutan lingkungan kelurahan."
+  ],
+  geography: "Kelurahan Amborawang Darat berada di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Luas wilayahnya sekitar 19,47 km² atau 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan sekitar 5,3 km. Wilayah ini berada pada kawasan beriklim tropis basah dan terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan.",
+  boundaries: "Batas administratif Kelurahan Amborawang Darat ditetapkan melalui Peraturan Bupati Kutai Kartanegara Nomor 43 Tahun 2019. Wilayah yang berbatasan langsung meliputi Kelurahan Margomulyo, Kelurahan Argosari, Kelurahan Amborawang Laut, Kelurahan Salok Api Laut, Kelurahan Salok Api Darat, dan Desa Tani Bhakti.",
+  potential: "Potensi wilayah mencakup pertanian dan hortikultura, usaha mikro dan perdagangan lokal, pendidikan, kegiatan sosial kemasyarakatan, serta posisi strategis pada koridor pengembangan Samboja Barat. Pengembangan potensi diarahkan pada peningkatan nilai tambah usaha warga, penguatan kapasitas sumber daya manusia, perbaikan infrastruktur dasar, dan pengelolaan lingkungan.",
+  facilities: [
+    "Kantor Kelurahan Amborawang Darat dan layanan administrasi masyarakat",
+    "SD Negeri 005 Samboja",
+    "SMP Negeri 2 Samboja",
+    "MI Al Fatah Samboja dan satuan pendidikan keagamaan",
+    "Layanan kesehatan dalam wilayah kerja Puskesmas Sungai Merdeka",
+    "Tempat ibadah dan fasilitas sosial kemasyarakatan",
+    "Jalan Balikpapan–Handil II dan jaringan jalan lingkungan",
+    "Sarana perdagangan serta ruang usaha masyarakat"
+  ],
+  imageUrl: "/images/kantor-kelurahan-amborawang-darat.jpg"
 });
 set("kknTeam", "main", {
   universityName: "Universitas Contoh",
