@@ -10,7 +10,10 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
 
 import styles from "./PublicHeader.module.css";
 import { AMBORAWANG_LOGO } from "@/data/amborawang";
@@ -32,31 +35,12 @@ import type {
   SiteSettings,
 } from "@/types";
 
-/* =========================================================
-   MENU
-========================================================= */
-
 const mainMenu = [
-  {
-    label: "Beranda",
-    href: "/",
-  },
-  {
-    label: "Profil",
-    href: "/profil",
-  },
-  {
-    label: "Pemerintahan",
-    href: "/pemerintahan",
-  },
-  {
-    label: "Layanan",
-    href: "/layanan",
-  },
-  {
-    label: "Berita",
-    href: "/berita",
-  },
+  { label: "Beranda", href: "/" },
+  { label: "Profil", href: "/profil" },
+  { label: "Pemerintahan", href: "/pemerintahan" },
+  { label: "Layanan", href: "/layanan" },
+  { label: "Berita", href: "/berita" },
 ];
 
 const informationMenu = [
@@ -87,10 +71,6 @@ const informationMenu = [
   },
 ];
 
-/* =========================================================
-   SEARCH TYPES
-========================================================= */
-
 type SearchCategory =
   | "Halaman"
   | "Berita"
@@ -109,20 +89,16 @@ interface SearchResult {
   score?: number;
 }
 
-/* =========================================================
-   STATIC SEARCH INDEX
-========================================================= */
-
 const staticSearchItems: SearchResult[] = [
   {
     id: "home",
     title: "Beranda",
     description:
-      "Website resmi Kelurahan Amborawang Darat, Kecamatan Samboja Barat.",
+      "Website resmi Kelurahan Amborawang Darat.",
     href: "/",
     category: "Halaman",
     keywords:
-      "beranda home kelurahan amborawang darat website resmi informasi",
+      "beranda home kelurahan amborawang darat website resmi",
   },
   {
     id: "profil",
@@ -142,13 +118,13 @@ const staticSearchItems: SearchResult[] = [
     href: "/pemerintahan",
     category: "Halaman",
     keywords:
-      "pemerintahan aparatur lurah struktur perangkat pegawai kelurahan",
+      "pemerintahan aparatur lurah struktur perangkat pegawai",
   },
   {
     id: "wilayah",
     title: "Wilayah Kelurahan",
     description:
-      "Informasi wilayah, RT, RW, dan data kewilayahan Kelurahan Amborawang Darat.",
+      "Informasi wilayah dan data kewilayahan Amborawang Darat.",
     href: "/wilayah",
     category: "Halaman",
     keywords:
@@ -158,65 +134,62 @@ const staticSearchItems: SearchResult[] = [
     id: "layanan",
     title: "Layanan Masyarakat",
     description:
-      "Informasi persyaratan, prosedur, dan pelayanan administrasi kelurahan.",
+      "Informasi pelayanan administrasi dan persyaratan kelurahan.",
     href: "/layanan",
     category: "Halaman",
     keywords:
-      "layanan pelayanan surat administrasi persyaratan prosedur masyarakat",
+      "layanan pelayanan surat administrasi persyaratan masyarakat",
   },
   {
     id: "berita",
     title: "Berita Kelurahan",
     description:
-      "Berita, kegiatan, dan informasi terbaru Kelurahan Amborawang Darat.",
+      "Berita dan informasi terbaru Kelurahan Amborawang Darat.",
     href: "/berita",
     category: "Halaman",
     keywords:
-      "berita informasi kegiatan terbaru pengumuman kelurahan",
+      "berita informasi kegiatan terbaru pengumuman",
   },
   {
     id: "galeri",
     title: "Galeri Kegiatan",
     description:
-      "Dokumentasi foto dan kegiatan Kelurahan Amborawang Darat.",
+      "Dokumentasi kegiatan Kelurahan Amborawang Darat.",
     href: "/galeri",
     category: "Halaman",
-    keywords: "galeri foto dokumentasi kegiatan kelurahan",
+    keywords: "galeri foto dokumentasi kegiatan",
   },
   {
     id: "dokumen",
     title: "Dokumen Publik",
     description:
-      "Dokumen, formulir, laporan, dan informasi publik kelurahan.",
+      "Dokumen dan informasi publik Kelurahan Amborawang Darat.",
     href: "/dokumen",
     category: "Halaman",
     keywords:
-      "dokumen formulir download unduh laporan peraturan informasi publik",
+      "dokumen formulir download unduh informasi publik",
   },
   {
     id: "kkn",
-    title: "Tim KKN",
+    title: "Tim KKN Reguler Amborawang Darat",
     description:
-      "Informasi tim dan kegiatan KKN di Kelurahan Amborawang Darat.",
+      "Profil dan struktur Tim KKN Reguler Amborawang Darat 2026.",
     href: "/tim-kkn",
     category: "Halaman",
-    keywords: "kkn mahasiswa universitas kegiatan tim",
+    keywords:
+      "tim kkn kkn reguler kelompok 2 mahasiswa amborawang darat 2026",
   },
   {
     id: "kontak",
     title: "Kontak Kelurahan",
     description:
-      "Alamat, telepon, WhatsApp, dan informasi kontak Kelurahan Amborawang Darat.",
+      "Informasi kontak Kelurahan Amborawang Darat.",
     href: "/kontak",
     category: "Halaman",
     keywords:
-      "kontak alamat telepon whatsapp email kantor kelurahan",
+      "kontak alamat telepon whatsapp email kantor",
   },
 ];
-
-/* =========================================================
-   HELPER
-========================================================= */
 
 function normalizeText(value: string) {
   return value
@@ -228,11 +201,18 @@ function normalizeText(value: string) {
     .trim();
 }
 
-function calculateScore(item: SearchResult, rawQuery: string) {
+function calculateScore(
+  item: SearchResult,
+  rawQuery: string,
+) {
   const query = normalizeText(rawQuery);
   const title = normalizeText(item.title);
-  const description = normalizeText(item.description);
-  const keywords = normalizeText(item.keywords ?? "");
+  const description = normalizeText(
+    item.description,
+  );
+  const keywords = normalizeText(
+    item.keywords ?? "",
+  );
 
   if (!query) return 0;
 
@@ -244,28 +224,31 @@ function calculateScore(item: SearchResult, rawQuery: string) {
   if (keywords.includes(query)) score += 30;
   if (description.includes(query)) score += 20;
 
-  const words = query.split(" ").filter(Boolean);
-
-  words.forEach((word) => {
-    if (title.includes(word)) score += 10;
-    if (keywords.includes(word)) score += 5;
-    if (description.includes(word)) score += 3;
-  });
+  query
+    .split(" ")
+    .filter(Boolean)
+    .forEach((word) => {
+      if (title.includes(word)) score += 10;
+      if (keywords.includes(word)) score += 5;
+      if (description.includes(word)) score += 3;
+    });
 
   return score;
 }
 
-function isActivePath(pathname: string, href: string) {
+function isActivePath(
+  pathname: string,
+  href: string,
+) {
   if (href === "/") {
     return pathname === "/";
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return (
+    pathname === href ||
+    pathname.startsWith(`${href}/`)
+  );
 }
-
-/* =========================================================
-   ICONS
-========================================================= */
 
 function SearchIcon() {
   return (
@@ -358,9 +341,21 @@ function ArrowIcon() {
   );
 }
 
-/* =========================================================
-   COMPONENT
-========================================================= */
+async function promiseWithTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs = 3000,
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => {
+        reject(
+          new Error("Search request timeout"),
+        );
+      }, timeoutMs);
+    }),
+  ]);
+}
 
 export default function PublicHeader({
   settings,
@@ -369,55 +364,64 @@ export default function PublicHeader({
 }) {
   const pathname = usePathname();
 
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [informationOpen, setInformationOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
 
-  const [queryText, setQueryText] = useState("");
-  const [dynamicSearchItems, setDynamicSearchItems] = useState<SearchResult[]>(
-    [],
-  );
+  const [searchOpen, setSearchOpen] =
+    useState(false);
 
-  const [searchDataLoaded, setSearchDataLoaded] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [isScrolled, setIsScrolled] =
+    useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [queryText, setQueryText] =
+    useState("");
 
-  /* =======================================================
-     HEADER SCROLL
-  ======================================================= */
+  const [
+    dynamicSearchItems,
+    setDynamicSearchItems,
+  ] = useState<SearchResult[]>([]);
+
+  const [
+    searchDataLoaded,
+    setSearchDataLoaded,
+  ] = useState(false);
+
+  const [
+    searchBackgroundLoading,
+    setSearchBackgroundLoading,
+  ] = useState(false);
+
+  const inputRef =
+    useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 12);
-    };
+    function handleScroll() {
+      setIsScrolled(
+        window.scrollY > 12,
+      );
+    }
 
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      { passive: true },
+    );
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll,
+      );
     };
   }, []);
 
-  /* =======================================================
-     CLOSE MENU WHEN ROUTE CHANGES
-  ======================================================= */
-
   useEffect(() => {
     setMobileOpen(false);
-    setInformationOpen(false);
     setSearchOpen(false);
     setQueryText("");
   }, [pathname]);
-
-  /* =======================================================
-     SEARCH MODAL BEHAVIOR
-  ======================================================= */
 
   useEffect(() => {
     if (!searchOpen) {
@@ -425,222 +429,306 @@ export default function PublicHeader({
       return;
     }
 
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow =
+      "hidden";
 
-    const timeout = window.setTimeout(() => {
-      inputRef.current?.focus();
-    }, 80);
+    const timeout =
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 60);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    function handleKeyDown(
+      event: KeyboardEvent,
+    ) {
       if (event.key === "Escape") {
         setSearchOpen(false);
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
 
     return () => {
       window.clearTimeout(timeout);
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+
+      document.body.style.overflow =
+        "";
     };
   }, [searchOpen]);
 
-  /* =======================================================
-     LOAD FIRESTORE DATA ONLY WHEN SEARCH IS OPENED
-  ======================================================= */
-
   useEffect(() => {
-    if (!searchOpen || searchDataLoaded || searchLoading) {
+    if (
+      !searchOpen ||
+      searchDataLoaded ||
+      searchBackgroundLoading
+    ) {
       return;
     }
 
     let active = true;
 
     async function loadSearchData() {
-      setSearchLoading(true);
+      setSearchBackgroundLoading(true);
 
       try {
-        let posts: PostItem[] = demoPosts;
-        let services: ServiceItem[] = demoServices;
-        let documents: PublicDocument[] = demoDocuments;
-        let officials: Official[] = demoOfficials;
-        let albums: GalleryAlbum[] = demoAlbums;
+        if (!db) {
+          if (active) {
+            setSearchDataLoaded(true);
+          }
 
-        if (db) {
-          const [
-            postsSnapshot,
-            servicesSnapshot,
-            documentsSnapshot,
-            officialsSnapshot,
-            albumsSnapshot,
-          ] = await Promise.all([
-            getDocs(collection(db, "posts")),
-            getDocs(collection(db, "services")),
-            getDocs(collection(db, "documents")),
-            getDocs(collection(db, "officials")),
-            getDocs(collection(db, "galleryAlbums")),
-          ]);
-
-          posts = postsSnapshot.docs.map((docItem) => ({
-            id: docItem.id,
-            ...docItem.data(),
-          })) as PostItem[];
-
-          services = servicesSnapshot.docs.map((docItem) => ({
-            id: docItem.id,
-            ...docItem.data(),
-          })) as ServiceItem[];
-
-          documents = documentsSnapshot.docs.map((docItem) => ({
-            id: docItem.id,
-            ...docItem.data(),
-          })) as PublicDocument[];
-
-          officials = officialsSnapshot.docs.map((docItem) => ({
-            id: docItem.id,
-            ...docItem.data(),
-          })) as Official[];
-
-          albums = albumsSnapshot.docs.map((docItem) => ({
-            id: docItem.id,
-            ...docItem.data(),
-          })) as GalleryAlbum[];
+          return;
         }
 
-        const items: SearchResult[] = [];
+        const results =
+          await promiseWithTimeout(
+            Promise.allSettled([
+              getDocs(
+                collection(db, "posts"),
+              ),
+              getDocs(
+                collection(
+                  db,
+                  "services",
+                ),
+              ),
+              getDocs(
+                collection(
+                  db,
+                  "documents",
+                ),
+              ),
+              getDocs(
+                collection(
+                  db,
+                  "officials",
+                ),
+              ),
+              getDocs(
+                collection(
+                  db,
+                  "galleryAlbums",
+                ),
+              ),
+            ]),
+            3500,
+          );
 
-        posts
-          .filter((post) => post.status === "published")
-          .forEach((post) => {
-            items.push({
-              id: `post-${post.id ?? post.slug}`,
-              title: post.title,
-              description:
-                post.summary ||
-                post.content?.replace(/<[^>]+>/g, "").slice(0, 160) ||
-                "Berita Kelurahan Amborawang Darat",
-              href: `/berita/${post.slug}`,
-              category: "Berita",
-              keywords: `${post.category ?? ""} ${post.content ?? ""}`,
-            });
-          });
-
-        services
-          .filter((service) => service.isActive)
-          .forEach((service) => {
-            items.push({
-              id: `service-${service.id ?? service.slug}`,
-              title: service.name,
-              description:
-                service.summary ||
-                "Informasi pelayanan Kelurahan Amborawang Darat",
-              href: "/layanan",
-              category: "Layanan",
-              keywords: [
-                service.category,
-                ...(service.requirements ?? []),
-                ...(service.procedures ?? []),
-                service.duration,
-                service.cost,
-              ]
-                .filter(Boolean)
-                .join(" "),
-            });
-          });
-
-        documents
-          .filter((document) => document.isActive)
-          .forEach((document) => {
-            items.push({
-              id: `document-${document.id ?? document.title}`,
-              title: document.title,
-              description:
-                document.description ||
-                "Dokumen publik Kelurahan Amborawang Darat",
-              href: "/dokumen",
-              category: "Dokumen",
-              keywords: `${document.category ?? ""} ${document.year ?? ""} ${document.fileType ?? ""
-                }`,
-            });
-          });
-
-        officials
-          .filter((official) => official.isActive)
-          .forEach((official) => {
-            items.push({
-              id: `official-${official.id ?? official.name}`,
-              title: official.name,
-              description: `${official.title}${official.category ? ` • ${official.category}` : ""
-                }`,
-              href: "/pemerintahan",
-              category: "Pemerintahan",
-              keywords: `${official.title ?? ""} ${official.category ?? ""
-                } ${official.description ?? ""}`,
-            });
-          });
-
-        albums
-          .filter((album) => album.status === "published")
-          .forEach((album) => {
-            items.push({
-              id: `album-${album.id ?? album.slug}`,
-              title: album.title,
-              description:
-                album.description ||
-                "Dokumentasi kegiatan Kelurahan Amborawang Darat",
-              href: "/galeri",
-              category: "Galeri",
-              keywords: `${album.category ?? ""} ${album.location ?? ""
-                } ${album.eventDate ?? ""}`,
-            });
-          });
-
-        if (active) {
-          setDynamicSearchItems(items);
-          setSearchDataLoaded(true);
+        if (!active) {
+          return;
         }
-      } catch (error) {
-        console.error("Gagal memuat data pencarian global:", error);
 
-        if (active) {
-          /* fallback demo tetap digunakan jika Firestore gagal */
-          const fallbackItems: SearchResult[] = [];
+        const items: SearchResult[] =
+          [];
 
-          demoPosts
-            .filter((post) => post.status === "published")
+        const [
+          postsResult,
+          servicesResult,
+          documentsResult,
+          officialsResult,
+          albumsResult,
+        ] = results;
+
+        if (
+          postsResult.status ===
+          "fulfilled"
+        ) {
+          const posts =
+            postsResult.value.docs.map(
+              (docItem) => ({
+                id: docItem.id,
+                ...docItem.data(),
+              }),
+            ) as PostItem[];
+
+          posts
+            .filter(
+              (post) =>
+                post.status ===
+                "published",
+            )
             .forEach((post) => {
-              fallbackItems.push({
-                id: `fallback-post-${post.id ?? post.slug}`,
+              items.push({
+                id: `post-${post.id ?? post.slug}`,
                 title: post.title,
-                description: post.summary,
+                description:
+                  post.summary ||
+                  post.content
+                    ?.replace(
+                      /<[^>]+>/g,
+                      "",
+                    )
+                    .slice(0, 160) ||
+                  "Berita Kelurahan Amborawang Darat",
                 href: `/berita/${post.slug}`,
                 category: "Berita",
                 keywords: `${post.category ?? ""} ${post.content ?? ""}`,
               });
             });
+        }
 
-          demoServices
-            .filter((service) => service.isActive)
+        if (
+          servicesResult.status ===
+          "fulfilled"
+        ) {
+          const services =
+            servicesResult.value.docs.map(
+              (docItem) => ({
+                id: docItem.id,
+                ...docItem.data(),
+              }),
+            ) as ServiceItem[];
+
+          services
+            .filter(
+              (service) =>
+                service.isActive,
+            )
             .forEach((service) => {
-              fallbackItems.push({
-                id: `fallback-service-${service.id ?? service.slug}`,
+              items.push({
+                id: `service-${service.id ?? service.slug}`,
                 title: service.name,
-                description: service.summary,
+                description:
+                  service.summary ||
+                  "Informasi pelayanan Kelurahan Amborawang Darat",
                 href: "/layanan",
                 category: "Layanan",
-                keywords: `${service.category ?? ""} ${(
-                  service.requirements ?? []
-                ).join(" ")}`,
+                keywords: [
+                  service.category,
+                  ...(service.requirements ??
+                    []),
+                  ...(service.procedures ??
+                    []),
+                  service.duration,
+                  service.cost,
+                ]
+                  .filter(Boolean)
+                  .join(" "),
               });
             });
+        }
 
-          setDynamicSearchItems(fallbackItems);
+        if (
+          documentsResult.status ===
+          "fulfilled"
+        ) {
+          const documents =
+            documentsResult.value.docs.map(
+              (docItem) => ({
+                id: docItem.id,
+                ...docItem.data(),
+              }),
+            ) as PublicDocument[];
+
+          documents
+            .filter(
+              (document) =>
+                document.isActive,
+            )
+            .forEach((document) => {
+              items.push({
+                id: `document-${document.id ?? document.title}`,
+                title:
+                  document.title,
+                description:
+                  document.description ||
+                  "Dokumen publik Kelurahan Amborawang Darat",
+                href: "/dokumen",
+                category: "Dokumen",
+                keywords: `${document.category ?? ""} ${document.year ?? ""}`,
+              });
+            });
+        }
+
+        if (
+          officialsResult.status ===
+          "fulfilled"
+        ) {
+          const officials =
+            officialsResult.value.docs.map(
+              (docItem) => ({
+                id: docItem.id,
+                ...docItem.data(),
+              }),
+            ) as Official[];
+
+          officials
+            .filter(
+              (official) =>
+                official.isActive,
+            )
+            .forEach((official) => {
+              items.push({
+                id: `official-${official.id ?? official.name}`,
+                title:
+                  official.name,
+                description:
+                  official.title,
+                href: "/pemerintahan",
+                category:
+                  "Pemerintahan",
+                keywords: `${official.title ?? ""} ${official.category ?? ""}`,
+              });
+            });
+        }
+
+        if (
+          albumsResult.status ===
+          "fulfilled"
+        ) {
+          const albums =
+            albumsResult.value.docs.map(
+              (docItem) => ({
+                id: docItem.id,
+                ...docItem.data(),
+              }),
+            ) as GalleryAlbum[];
+
+          albums
+            .filter(
+              (album) =>
+                album.status ===
+                "published",
+            )
+            .forEach((album) => {
+              items.push({
+                id: `album-${album.id ?? album.slug}`,
+                title: album.title,
+                description:
+                  album.description ||
+                  "Dokumentasi kegiatan Kelurahan Amborawang Darat",
+                href: "/galeri",
+                category: "Galeri",
+                keywords: `${album.category ?? ""} ${album.location ?? ""}`,
+              });
+            });
+        }
+
+        setDynamicSearchItems(
+          items,
+        );
+
+        setSearchDataLoaded(true);
+      } catch (error) {
+        console.warn(
+          "Pencarian Firestore melewati batas waktu:",
+          error,
+        );
+
+        if (active) {
           setSearchDataLoaded(true);
         }
       } finally {
         if (active) {
-          setSearchLoading(false);
+          setSearchBackgroundLoading(
+            false,
+          );
         }
       }
     }
@@ -650,38 +738,56 @@ export default function PublicHeader({
     return () => {
       active = false;
     };
-  }, [searchOpen, searchDataLoaded, searchLoading]);
-
-  /* =======================================================
-     SEARCH RESULT
-  ======================================================= */
+  }, [
+    searchOpen,
+    searchDataLoaded,
+    searchBackgroundLoading,
+  ]);
 
   const searchResults = useMemo(() => {
-    const cleanQuery = queryText.trim();
+    const cleanQuery =
+      queryText.trim();
 
     if (cleanQuery.length < 2) {
       return [];
     }
 
-    const allItems = [...staticSearchItems, ...dynamicSearchItems];
-
-    return allItems
+    return [
+      ...staticSearchItems,
+      ...dynamicSearchItems,
+    ]
       .map((item) => ({
         ...item,
-        score: calculateScore(item, cleanQuery),
+        score: calculateScore(
+          item,
+          cleanQuery,
+        ),
       }))
-      .filter((item) => (item.score ?? 0) > 0)
-      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+      .filter(
+        (item) =>
+          (item.score ?? 0) > 0,
+      )
+      .sort(
+        (a, b) =>
+          (b.score ?? 0) -
+          (a.score ?? 0),
+      )
       .slice(0, 8);
-  }, [queryText, dynamicSearchItems]);
+  }, [
+    queryText,
+    dynamicSearchItems,
+  ]);
 
-  const informationActive = informationMenu.some((item) =>
-    isActivePath(pathname, item.href),
-  );
+  const informationActive =
+    informationMenu.some((item) =>
+      isActivePath(
+        pathname,
+        item.href,
+      ),
+    );
 
   function openSearch() {
     setMobileOpen(false);
-    setInformationOpen(false);
     setSearchOpen(true);
   }
 
@@ -690,29 +796,42 @@ export default function PublicHeader({
     setQueryText("");
   }
 
-  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSearchSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
-    if (searchResults.length > 0) {
-      window.location.href = searchResults[0].href;
+    if (
+      searchResults.length > 0
+    ) {
+      window.location.href =
+        searchResults[0].href;
     }
   }
 
   return (
     <>
       <header
-        className={`${styles.siteHeader} ${isScrolled ? styles.scrolled : ""
+        className={`${styles.siteHeader} ${isScrolled
+            ? styles.scrolled
+            : ""
           }`}
       >
-        <div className={styles.headerContainer}>
-          {/* BRAND */}
+        <div
+          className={
+            styles.headerContainer
+          }
+        >
           <Link
             href="/"
             className={styles.brand}
-            onClick={() => setMobileOpen(false)}
             aria-label={`Beranda ${settings.villageName}`}
           >
-            <span className={styles.logoFrame}>
+            <span
+              className={
+                styles.logoFrame
+              }
+            >
               <Image
                 src={AMBORAWANG_LOGO}
                 alt={`Logo Kelurahan ${settings.villageName}`}
@@ -723,213 +842,235 @@ export default function PublicHeader({
               />
             </span>
 
-            <span className={styles.brandText}>
-              <span className={styles.officialLabel}>Website Resmi</span>
+            <span
+              className={
+                styles.brandText
+              }
+            >
+              <span
+                className={
+                  styles.officialLabel
+                }
+              >
+                Website Resmi
+              </span>
 
-              <strong>{settings.villageName}</strong>
+              <strong>
+                {settings.villageName}
+              </strong>
 
-              <small>Kecamatan Samboja Barat</small>
+              <small>
+                Kecamatan Samboja Barat
+              </small>
             </span>
           </Link>
 
-          {/* DESKTOP NAVIGATION */}
           <nav
-            className={styles.desktopNav}
+            className={
+              styles.desktopNav
+            }
             aria-label="Navigasi utama"
           >
             {mainMenu.map((item) => {
-              const active = isActivePath(pathname, item.href);
+              const active =
+                isActivePath(
+                  pathname,
+                  item.href,
+                );
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`${styles.navLink} ${active ? styles.navLinkActive : ""
+                  className={`${styles.navLink} ${active
+                      ? styles.navLinkActive
+                      : ""
                     }`}
-                  aria-current={active ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
               );
             })}
 
-            <div className={styles.dropdown}>
+            <div
+              className={
+                styles.dropdown
+              }
+            >
               <button
                 type="button"
-                className={`${styles.navLink} ${styles.dropdownButton} ${informationActive ? styles.navLinkActive : ""
+                className={`${styles.navLink} ${styles.dropdownButton} ${informationActive
+                    ? styles.navLinkActive
+                    : ""
                   }`}
-                aria-haspopup="true"
               >
                 Informasi
                 <ChevronIcon />
               </button>
 
-              <div className={styles.dropdownMenu}>
-                <div className={styles.dropdownHeader}>
-                  <span>Informasi Publik</span>
+              <div
+                className={
+                  styles.dropdownMenu
+                }
+              >
+                <div
+                  className={
+                    styles.dropdownHeader
+                  }
+                >
+                  <span>
+                    Informasi Publik
+                  </span>
+
                   <small>
-                    Akses informasi Kelurahan Amborawang Darat
+                    Akses informasi
+                    Kelurahan
+                    Amborawang Darat
                   </small>
                 </div>
 
-                {informationMenu.map((item) => {
-                  const active = isActivePath(pathname, item.href);
-
-                  return (
+                {informationMenu.map(
+                  (item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`${styles.dropdownItem} ${active ? styles.dropdownItemActive : ""
-                        }`}
+                      className={
+                        styles.dropdownItem
+                      }
                     >
                       <span>
-                        <strong>{item.label}</strong>
-                        <small>{item.description}</small>
+                        <strong>
+                          {item.label}
+                        </strong>
+
+                        <small>
+                          {
+                            item.description
+                          }
+                        </small>
                       </span>
 
                       <ArrowIcon />
                     </Link>
-                  );
-                })}
+                  ),
+                )}
               </div>
             </div>
           </nav>
 
-          {/* ACTIONS */}
-          <div className={styles.headerActions}>
+          <div
+            className={
+              styles.headerActions
+            }
+          >
             <button
               type="button"
-              className={styles.searchButton}
+              className={
+                styles.searchButton
+              }
               onClick={openSearch}
               aria-label="Cari informasi"
-              title="Cari informasi"
             >
               <SearchIcon />
 
-              <span className={styles.searchButtonText}>Cari</span>
-
-              <kbd className={styles.searchShortcut}>⌘ K</kbd>
+              <span
+                className={
+                  styles.searchButtonText
+                }
+              >
+                Cari
+              </span>
             </button>
 
             <button
               type="button"
-              className={styles.mobileMenuButton}
-              onClick={() => setMobileOpen((current) => !current)}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-navigation"
-              aria-label={
+              className={
+                styles.mobileMenuButton
+              }
+              onClick={() =>
+                setMobileOpen(
+                  (value) => !value,
+                )
+              }
+              aria-expanded={
                 mobileOpen
-                  ? "Tutup menu navigasi"
-                  : "Buka menu navigasi"
               }
             >
-              {mobileOpen ? <CloseIcon /> : <MenuIcon />}
+              {mobileOpen ? (
+                <CloseIcon />
+              ) : (
+                <MenuIcon />
+              )}
             </button>
-          </div>
-        </div>
-
-        {/* MOBILE NAVIGATION */}
-        <div
-          id="mobile-navigation"
-          className={`${styles.mobileNavigation} ${mobileOpen ? styles.mobileNavigationOpen : ""
-            }`}
-        >
-          <div className={styles.mobileNavInner}>
-            <button
-              type="button"
-              className={styles.mobileSearchButton}
-              onClick={openSearch}
-            >
-              <SearchIcon />
-
-              <span>Cari informasi kelurahan...</span>
-            </button>
-
-            <div className={styles.mobileMenuList}>
-              {[...mainMenu, ...informationMenu].map((item) => {
-                const active = isActivePath(pathname, item.href);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`${styles.mobileNavLink} ${active ? styles.mobileNavLinkActive : ""
-                      }`}
-                    onClick={() => setMobileOpen(false)}
-                    aria-current={active ? "page" : undefined}
-                  >
-                    <span>{item.label}</span>
-                    <ArrowIcon />
-                  </Link>
-                );
-              })}
-            </div>
-
-            <div className={styles.mobileContact}>
-              <small>Butuh informasi?</small>
-
-              <strong>Kelurahan Amborawang Darat</strong>
-
-              <Link
-                href="/kontak"
-                onClick={() => setMobileOpen(false)}
-              >
-                Lihat informasi kontak
-              </Link>
-            </div>
           </div>
         </div>
       </header>
 
-      {/* ===================================================
-          GLOBAL SEARCH MODAL
-      ==================================================== */}
-
       {searchOpen && (
         <div
-          className={styles.searchOverlay}
-          role="presentation"
+          className={
+            styles.searchOverlay
+          }
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
               closeSearch();
             }
           }}
         >
           <div
-            className={styles.searchDialog}
+            className={
+              styles.searchDialog
+            }
             role="dialog"
             aria-modal="true"
-            aria-labelledby="global-search-title"
           >
-            <div className={styles.searchDialogHeader}>
+            <div
+              className={
+                styles.searchDialogHeader
+              }
+            >
               <div>
-                <span className={styles.searchEyebrow}>
+                <span
+                  className={
+                    styles.searchEyebrow
+                  }
+                >
                   Pencarian Global
                 </span>
 
-                <h2 id="global-search-title">
+                <h2>
                   Apa yang sedang Anda cari?
                 </h2>
 
                 <p>
-                  Temukan layanan, berita, dokumen, aparatur,
-                  galeri, dan informasi kelurahan.
+                  Temukan layanan,
+                  berita, dokumen,
+                  aparatur, galeri, dan
+                  informasi kelurahan.
                 </p>
               </div>
 
               <button
                 type="button"
-                className={styles.closeSearchButton}
+                className={
+                  styles.closeSearchButton
+                }
                 onClick={closeSearch}
-                aria-label="Tutup pencarian"
               >
                 <CloseIcon />
               </button>
             </div>
 
             <form
-              className={styles.searchForm}
-              onSubmit={handleSearchSubmit}
+              className={
+                styles.searchForm
+              }
+              onSubmit={
+                handleSearchSubmit
+              }
             >
               <SearchIcon />
 
@@ -938,181 +1079,246 @@ export default function PublicHeader({
                 type="search"
                 value={queryText}
                 onChange={(event) =>
-                  setQueryText(event.target.value)
+                  setQueryText(
+                    event.target.value,
+                  )
                 }
-                placeholder="Contoh: surat domisili, berita, dokumen..."
+                placeholder="Contoh: tim kkn, surat domisili, berita..."
                 autoComplete="off"
-                aria-label="Cari informasi"
               />
 
               {queryText && (
                 <button
                   type="button"
-                  className={styles.clearSearch}
-                  onClick={() => {
-                    setQueryText("");
-                    inputRef.current?.focus();
-                  }}
-                  aria-label="Hapus pencarian"
+                  className={
+                    styles.clearSearch
+                  }
+                  onClick={() =>
+                    setQueryText("")
+                  }
                 >
                   <CloseIcon />
                 </button>
               )}
             </form>
 
-            <div className={styles.searchContent}>
-              {/* INITIAL */}
-              {queryText.trim().length < 2 && (
-                <div className={styles.searchInitial}>
-                  <div className={styles.searchHint}>
-                    <SearchIcon />
+            <div
+              className={
+                styles.searchContent
+              }
+            >
+              {queryText.trim().length <
+                2 && (
+                  <div
+                    className={
+                      styles.searchInitial
+                    }
+                  >
+                    <div
+                      className={
+                        styles.searchHint
+                      }
+                    >
+                      <SearchIcon />
 
-                    <div>
-                      <strong>Cari seluruh informasi website</strong>
+                      <div>
+                        <strong>
+                          Cari seluruh
+                          informasi website
+                        </strong>
 
-                      <p>
-                        Ketik minimal 2 karakter untuk mulai
-                        melakukan pencarian.
-                      </p>
+                        <p>
+                          Ketik minimal 2
+                          karakter untuk
+                          mulai mencari.
+                        </p>
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  <div className={styles.quickSearch}>
-                    <span>Pintasan</span>
-
-                    <div className={styles.quickSearchLinks}>
-                      <button
-                        type="button"
-                        onClick={() => setQueryText("layanan")}
-                      >
-                        Layanan
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setQueryText("berita")}
-                      >
-                        Berita
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setQueryText("dokumen")}
-                      >
-                        Dokumen
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setQueryText("pemerintahan")
-                        }
-                      >
-                        Pemerintahan
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* LOADING */}
-              {queryText.trim().length >= 2 && searchLoading && (
-                <div className={styles.loadingState}>
-                  <span className={styles.spinner} />
-
-                  <div>
-                    <strong>Memuat informasi...</strong>
-                    <p>
-                      Menghubungkan pencarian dengan data
-                      kelurahan.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* RESULTS */}
-              {queryText.trim().length >= 2 &&
-                !searchLoading &&
-                searchResults.length > 0 && (
+              {queryText.trim().length >=
+                2 &&
+                searchResults.length >
+                0 && (
                   <>
-                    <div className={styles.resultSummary}>
+                    <div
+                      className={
+                        styles.resultSummary
+                      }
+                    >
                       <span>
-                        Hasil pencarian untuk
-                        <strong> “{queryText.trim()}”</strong>
+                        Hasil untuk
+                        <strong>
+                          {" "}
+                          “
+                          {queryText.trim()}
+                          ”
+                        </strong>
                       </span>
 
-                      <small>
-                        {searchResults.length} hasil paling relevan
-                      </small>
+                      {searchBackgroundLoading && (
+                        <small>
+                          Memuat data
+                          tambahan...
+                        </small>
+                      )}
                     </div>
 
-                    <div className={styles.searchResults}>
-                      {searchResults.map((result) => (
-                        <Link
-                          href={result.href}
-                          key={result.id}
-                          className={styles.searchResultItem}
-                          onClick={closeSearch}
-                        >
-                          <div
-                            className={styles.resultCategoryIcon}
-                            data-category={result.category}
+                    <div
+                      className={
+                        styles.searchResults
+                      }
+                    >
+                      {searchResults.map(
+                        (result) => (
+                          <Link
+                            href={
+                              result.href
+                            }
+                            key={
+                              result.id
+                            }
+                            className={
+                              styles.searchResultItem
+                            }
+                            onClick={
+                              closeSearch
+                            }
                           >
-                            {result.category.charAt(0)}
-                          </div>
-
-                          <div className={styles.resultBody}>
-                            <div className={styles.resultTop}>
-                              <span
-                                className={styles.resultCategory}
-                              >
-                                {result.category}
-                              </span>
-
-                              <ArrowIcon />
+                            <div
+                              className={
+                                styles.resultCategoryIcon
+                              }
+                            >
+                              {result.category.charAt(
+                                0,
+                              )}
                             </div>
 
-                            <strong>{result.title}</strong>
+                            <div
+                              className={
+                                styles.resultBody
+                              }
+                            >
+                              <div
+                                className={
+                                  styles.resultTop
+                                }
+                              >
+                                <span
+                                  className={
+                                    styles.resultCategory
+                                  }
+                                >
+                                  {
+                                    result.category
+                                  }
+                                </span>
 
-                            <p>{result.description}</p>
-                          </div>
-                        </Link>
-                      ))}
+                                <ArrowIcon />
+                              </div>
+
+                              <strong>
+                                {
+                                  result.title
+                                }
+                              </strong>
+
+                              <p>
+                                {
+                                  result.description
+                                }
+                              </p>
+                            </div>
+                          </Link>
+                        ),
+                      )}
                     </div>
                   </>
                 )}
 
-              {/* NO RESULT */}
-              {queryText.trim().length >= 2 &&
-                !searchLoading &&
-                searchResults.length === 0 && (
-                  <div className={styles.noResult}>
-                    <div className={styles.noResultIcon}>
+              {queryText.trim().length >=
+                2 &&
+                searchResults.length ===
+                0 &&
+                !searchBackgroundLoading && (
+                  <div
+                    className={
+                      styles.noResult
+                    }
+                  >
+                    <div
+                      className={
+                        styles.noResultIcon
+                      }
+                    >
                       <SearchIcon />
                     </div>
 
-                    <h3>Informasi belum ditemukan</h3>
+                    <h3>
+                      Informasi belum
+                      ditemukan
+                    </h3>
 
                     <p>
-                      Tidak ada hasil yang sesuai dengan
-                      <strong> “{queryText.trim()}”</strong>.
-                      Coba gunakan kata yang lebih singkat atau
-                      berbeda.
+                      Tidak ada hasil yang
+                      sesuai dengan
+                      <strong>
+                        {" "}
+                        “
+                        {queryText.trim()}
+                        ”
+                      </strong>
+                      .
                     </p>
+                  </div>
+                )}
 
-                    <Link href="/kontak" onClick={closeSearch}>
-                      Hubungi Kelurahan
-                    </Link>
+              {queryText.trim().length >=
+                2 &&
+                searchResults.length ===
+                0 &&
+                searchBackgroundLoading && (
+                  <div
+                    className={
+                      styles.loadingState
+                    }
+                  >
+                    <span
+                      className={
+                        styles.spinner
+                      }
+                    />
+
+                    <div>
+                      <strong>
+                        Mencari data
+                        tambahan...
+                      </strong>
+
+                      <p>
+                        Hasil halaman
+                        lokal tetap akan
+                        muncul langsung.
+                      </p>
+                    </div>
                   </div>
                 )}
             </div>
 
-            <div className={styles.searchFooter}>
+            <div
+              className={
+                styles.searchFooter
+              }
+            >
               <span>
-                Pencarian Website Resmi Kelurahan Amborawang Darat
+                Pencarian Website Resmi
+                Kelurahan Amborawang
+                Darat
               </span>
 
-              <span className={styles.escapeHint}>
+              <span>
                 ESC untuk menutup
               </span>
             </div>
