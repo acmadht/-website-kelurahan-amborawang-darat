@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+<rect width="900" height="900" fill="#eaf0f6"/>
+<circle cx="450" cy="330" r="130" fill="#c2d2e0"/>
+<path d="M200 820c20-210 135-315 250-315s230 105 250 315" fill="#c2d2e0"/>
+<text x="450" y="120" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#61778b">FOTO RESMI</text>
+<text x="450" y="865" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#7d8fa0">Belum diunggah</text>
+</svg>

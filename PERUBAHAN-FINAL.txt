@@ -1,0 +1,28 @@
+PERBAIKAN LANGSUNG PROJECT ASLI
+================================
+
+Ini bukan dashboard baru terpisah. Paket dibuat dari src project yang dikirim.
+
+DIBENAHI:
+- Admin Tim KKN dihapus total.
+- Menu Tim KKN di admin dihapus.
+- Halaman publik Tim KKN dibuat static/hard-coded + flip klik.
+- HomePage tidak lagi membaca data KKN dari Firestore.
+- Admin Beranda ditambah.
+- Admin Wilayah ditambah.
+- Admin Kontak & Jam Pelayanan ditambah.
+- Pemerintahan/Lembaga dilengkapi kategori LPM, TP PKK, Karang Taruna, Adat, Linmas, Bhabinkamtibmas, Babinsa, Staf.
+- Data RW tidak dipakai lagi di halaman Wilayah; fokus 13 RT.
+- Berita admin ditambah tanggal dan waktu publikasi.
+- Detail berita menampilkan tanggal, waktu, penulis, Bagikan, Salin Link, WhatsApp.
+- Dashboard admin dirapikan dan cakupannya diperjelas.
+- Pengaturan ditambah favicon.
+
+ADMIN BISA UBAH:
+Beranda, Hero, Profil, Pemerintahan/Lembaga, RT, Wilayah, Layanan, Berita, Pengumuman, Agenda, Galeri, Dokumen, Kontak, Pengaturan/SEO, pengguna, pesan.
+
+ADMIN TIDAK BISA UBAH:
+Tim KKN.
+
+CATATAN:
+Folder ini hanya berisi src karena file yang dikirim memang src.zip. Salin/replace folder src pada project utama lalu jalankan npm run build.

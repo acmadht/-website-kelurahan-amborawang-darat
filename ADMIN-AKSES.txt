@@ -1,0 +1,37 @@
+ADMIN FINAL - KKN DIKUNCI
+==========================
+
+ADMIN BOLEH MENGELOLA:
+- Profil
+- Pemerintahan
+- Layanan
+- Berita
+- Pengumuman & Agenda
+- Galeri
+- Dokumen
+- Wilayah
+- Kontak
+- Pengaturan Website
+
+ADMIN TIDAK BOLEH MENGELOLA:
+- Tim KKN
+- Nama anggota KKN
+- Foto anggota KKN
+- Divisi KKN
+- Struktur organisasi KKN
+- Dosen pembimbing
+- Deskripsi/flip card KKN
+- Data KKN lainnya
+
+IMPLEMENTASI:
+1. Jangan buat menu /admin/tim-kkn
+2. Jangan buat API CRUD untuk KKN
+3. Jangan simpan Tim KKN ke collection yang writable oleh admin
+4. Halaman /tim-kkn tetap hard-coded/static
+5. Jika data KKN perlu diubah, lakukan melalui source code/developer
+6. Route dinamis admin memakai whitelist modul. "tim-kkn" tidak termasuk.
+7. Untuk keamanan tambahan, backend/API juga harus memakai whitelist yang sama.
+
+CATATAN:
+UI CRUD generik dalam paket ini adalah scaffold. Agar data benar-benar tersimpan,
+sambungkan masing-masing modul ke Firestore/API proyek website Anda.

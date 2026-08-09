@@ -26,7 +26,7 @@ export default function GalleryPhotoManager() {
   async function loadAlbums() {
     if (!db) return;
     const snapshot = await getDocs(collection(db, "galleryAlbums"));
-    setAlbums(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as GalleryAlbum[]);
+    setAlbums((snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as GalleryAlbum[]).filter((album) => album.category !== "KKN"));
   }
 
   async function loadPhotos(selectedAlbumId: string) {

@@ -3,37 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
-import {
-  collection,
-  getDocs,
-} from "firebase/firestore";
-
-import styles from "./PublicHeader.module.css";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AMBORAWANG_LOGO } from "@/data/amborawang";
-import {
-  demoAlbums,
-  demoDocuments,
-  demoOfficials,
-  demoPosts,
-  demoServices,
-} from "@/data/demo";
-import { db } from "@/lib/firebase/client";
+import type { SiteSettings } from "@/types";
+import styles from "./PublicHeader.module.css";
 
-import type {
-  GalleryAlbum,
-  Official,
-  PostItem,
-  PublicDocument,
-  ServiceItem,
-  SiteSettings,
-} from "@/types";
+type SearchItem = {
+  title: string;
+  description: string;
+  category: string;
+  href: string;
+};
 
 const mainMenu = [
   { label: "Beranda", href: "/" },
@@ -43,748 +23,213 @@ const mainMenu = [
   { label: "Berita", href: "/berita" },
 ];
 
-const informationMenu = [
+const moreMenu = [
   {
     label: "Wilayah",
     href: "/wilayah",
-    description: "Informasi wilayah kelurahan",
+    description: "Data wilayah, batas administratif, dan RT",
   },
   {
     label: "Galeri",
     href: "/galeri",
-    description: "Dokumentasi kegiatan kelurahan",
+    description: "Dokumentasi kegiatan kelurahan dan masyarakat",
   },
   {
     label: "Dokumen",
     href: "/dokumen",
-    description: "Dokumen dan informasi publik",
+    description: "Arsip dan dokumen publik kelurahan",
   },
   {
     label: "Tim KKN",
     href: "/tim-kkn",
-    description: "Informasi kegiatan mahasiswa KKN",
+    description: "Profil Tim KKN Reguler Amborawang Darat",
   },
   {
     label: "Kontak",
     href: "/kontak",
-    description: "Hubungi Kelurahan Amborawang Darat",
+    description: "Alamat, jam pelayanan, WhatsApp, dan lokasi kantor",
   },
 ];
 
-type SearchCategory =
-  | "Halaman"
-  | "Berita"
-  | "Layanan"
-  | "Dokumen"
-  | "Pemerintahan"
-  | "Galeri";
-
-interface SearchResult {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  category: SearchCategory;
-  keywords?: string;
-  score?: number;
-}
-
-const staticSearchItems: SearchResult[] = [
+const staticSearchItems: SearchItem[] = [
   {
-    id: "home",
     title: "Beranda",
-    description:
-      "Website resmi Kelurahan Amborawang Darat.",
+    description: "Portal utama informasi Kelurahan Amborawang Darat.",
+    category: "Halaman",
     href: "/",
-    category: "Halaman",
-    keywords:
-      "beranda home kelurahan amborawang darat website resmi",
   },
   {
-    id: "profil",
     title: "Profil Kelurahan",
-    description:
-      "Profil, sejarah, visi, misi, dan informasi Kelurahan Amborawang Darat.",
+    description: "Sejarah, visi misi, potensi, dan identitas wilayah.",
+    category: "Profil",
     href: "/profil",
-    category: "Halaman",
-    keywords:
-      "profil sejarah visi misi kelurahan amborawang darat",
   },
   {
-    id: "pemerintahan",
-    title: "Pemerintahan Kelurahan",
-    description:
-      "Informasi aparatur dan struktur pemerintahan Kelurahan Amborawang Darat.",
+    title: "Pemerintahan",
+    description: "Lurah, pejabat struktural, staf, lembaga, dan Ketua RT.",
+    category: "Pemerintahan",
     href: "/pemerintahan",
-    category: "Halaman",
-    keywords:
-      "pemerintahan aparatur lurah struktur perangkat pegawai",
   },
   {
-    id: "wilayah",
-    title: "Wilayah Kelurahan",
-    description:
-      "Informasi wilayah dan data kewilayahan Amborawang Darat.",
+    title: "Wilayah Amborawang Darat",
+    description: "Luas wilayah, batas administratif, data RT, dan peta.",
+    category: "Wilayah",
     href: "/wilayah",
-    category: "Halaman",
-    keywords:
-      "wilayah rt rw penduduk kewilayahan amborawang darat",
   },
   {
-    id: "layanan",
-    title: "Layanan Masyarakat",
-    description:
-      "Informasi pelayanan administrasi dan persyaratan kelurahan.",
+    title: "Layanan Kelurahan",
+    description: "Informasi pelayanan administrasi masyarakat.",
+    category: "Layanan",
     href: "/layanan",
-    category: "Halaman",
-    keywords:
-      "layanan pelayanan surat administrasi persyaratan masyarakat",
   },
   {
-    id: "berita",
     title: "Berita Kelurahan",
-    description:
-      "Berita dan informasi terbaru Kelurahan Amborawang Darat.",
+    description: "Informasi dan kegiatan terbaru Kelurahan Amborawang Darat.",
+    category: "Berita",
     href: "/berita",
-    category: "Halaman",
-    keywords:
-      "berita informasi kegiatan terbaru pengumuman",
   },
   {
-    id: "galeri",
-    title: "Galeri Kegiatan",
-    description:
-      "Dokumentasi kegiatan Kelurahan Amborawang Darat.",
+    title: "Galeri",
+    description: "Dokumentasi kegiatan pemerintahan dan masyarakat.",
+    category: "Galeri",
     href: "/galeri",
-    category: "Halaman",
-    keywords: "galeri foto dokumentasi kegiatan",
   },
   {
-    id: "dokumen",
     title: "Dokumen Publik",
-    description:
-      "Dokumen dan informasi publik Kelurahan Amborawang Darat.",
+    description: "Dokumen, formulir, laporan, dan arsip publik.",
+    category: "Dokumen",
     href: "/dokumen",
-    category: "Halaman",
-    keywords:
-      "dokumen formulir download unduh informasi publik",
   },
   {
-    id: "kkn",
-    title: "Tim KKN Reguler Amborawang Darat",
-    description:
-      "Profil dan struktur Tim KKN Reguler Amborawang Darat 2026.",
+    title: "Tim KKN",
+    description: "Struktur dan profil Tim KKN Reguler Amborawang Darat.",
+    category: "KKN",
     href: "/tim-kkn",
-    category: "Halaman",
-    keywords:
-      "tim kkn kkn reguler kelompok 2 mahasiswa amborawang darat 2026",
   },
   {
-    id: "kontak",
     title: "Kontak Kelurahan",
-    description:
-      "Informasi kontak Kelurahan Amborawang Darat.",
+    description: "Alamat kantor, WhatsApp, telepon, jam pelayanan, dan peta.",
+    category: "Kontak",
     href: "/kontak",
-    category: "Halaman",
-    keywords:
-      "kontak alamat telepon whatsapp email kantor",
   },
 ];
 
-function normalizeText(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function calculateScore(
-  item: SearchResult,
-  rawQuery: string,
-) {
-  const query = normalizeText(rawQuery);
-  const title = normalizeText(item.title);
-  const description = normalizeText(
-    item.description,
-  );
-  const keywords = normalizeText(
-    item.keywords ?? "",
-  );
-
-  if (!query) return 0;
-
-  let score = 0;
-
-  if (title === query) score += 100;
-  if (title.startsWith(query)) score += 70;
-  if (title.includes(query)) score += 50;
-  if (keywords.includes(query)) score += 30;
-  if (description.includes(query)) score += 20;
-
-  query
-    .split(" ")
-    .filter(Boolean)
-    .forEach((word) => {
-      if (title.includes(word)) score += 10;
-      if (keywords.includes(word)) score += 5;
-      if (description.includes(word)) score += 3;
-    });
-
-  return score;
-}
-
-function isActivePath(
-  pathname: string,
-  href: string,
-) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
+function SearchIcon({ size = 19 }: { size?: number }) {
   return (
-    pathname === href ||
-    pathname.startsWith(`${href}/`)
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
     </svg>
   );
 }
 
-function MenuIcon() {
+function MenuIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M6 6 18 18M18 6 6 18" />
+    </svg>
+  ) : (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function ChevronDown() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width="23"
-      height="23"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <path d="M4 7h16" />
-      <path d="M4 12h16" />
-      <path d="M4 17h16" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function ArrowIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M5 12h14m-6-6 6 6-6 6" />
     </svg>
   );
 }
 
 function CloseIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width="22"
-      height="22"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <path d="M6 6l12 12" />
-      <path d="M18 6 6 18" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M6 6 18 18M18 6 6 18" />
     </svg>
   );
 }
 
-function ChevronIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="15"
-      height="15"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
+function isCurrent(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function ArrowIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
-    </svg>
-  );
-}
-
-async function promiseWithTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs = 3000,
-): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      window.setTimeout(() => {
-        reject(
-          new Error("Search request timeout"),
-        );
-      }, timeoutMs);
-    }),
-  ]);
-}
-
-export default function PublicHeader({
-  settings,
-}: {
-  settings: SiteSettings;
-}) {
+export default function PublicHeader({ settings }: { settings: SiteSettings }) {
   const pathname = usePathname();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [mobileOpen, setMobileOpen] =
-    useState(false);
-
-  const [searchOpen, setSearchOpen] =
-    useState(false);
-
-  const [isScrolled, setIsScrolled] =
-    useState(false);
-
-  const [queryText, setQueryText] =
-    useState("");
-
-  const [
-    dynamicSearchItems,
-    setDynamicSearchItems,
-  ] = useState<SearchResult[]>([]);
-
-  const [
-    searchDataLoaded,
-    setSearchDataLoaded,
-  ] = useState(false);
-
-  const [
-    searchBackgroundLoading,
-    setSearchBackgroundLoading,
-  ] = useState(false);
-
-  const inputRef =
-    useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    function handleScroll() {
-      setIsScrolled(
-        window.scrollY > 12,
-      );
-    }
-
-    handleScroll();
-
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true },
-    );
-
-    return () => {
-      window.removeEventListener(
-        "scroll",
-        handleScroll,
-      );
-    };
-  }, []);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     setMobileOpen(false);
     setSearchOpen(false);
-    setQueryText("");
   }, [pathname]);
 
   useEffect(() => {
-    if (!searchOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    document.body.style.overflow =
-      "hidden";
+  useEffect(() => {
+    if (!searchOpen) return;
 
-    const timeout =
-      window.setTimeout(() => {
-        inputRef.current?.focus();
-      }, 60);
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 80);
 
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (event.key === "Escape") {
-        setSearchOpen(false);
-      }
-    }
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setSearchOpen(false);
+    };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
 
     return () => {
-      window.clearTimeout(timeout);
-
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
-
-      document.body.style.overflow =
-        "";
+      window.clearTimeout(timer);
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
   }, [searchOpen]);
 
   useEffect(() => {
-    if (
-      !searchOpen ||
-      searchDataLoaded ||
-      searchBackgroundLoading
-    ) {
-      return;
-    }
+    const onShortcut = (event: globalThis.KeyboardEvent) => {
+      const isShortcut =
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
 
-    let active = true;
-
-    async function loadSearchData() {
-      setSearchBackgroundLoading(true);
-
-      try {
-        if (!db) {
-          if (active) {
-            setSearchDataLoaded(true);
-          }
-
-          return;
-        }
-
-        const results =
-          await promiseWithTimeout(
-            Promise.allSettled([
-              getDocs(
-                collection(db, "posts"),
-              ),
-              getDocs(
-                collection(
-                  db,
-                  "services",
-                ),
-              ),
-              getDocs(
-                collection(
-                  db,
-                  "documents",
-                ),
-              ),
-              getDocs(
-                collection(
-                  db,
-                  "officials",
-                ),
-              ),
-              getDocs(
-                collection(
-                  db,
-                  "galleryAlbums",
-                ),
-              ),
-            ]),
-            3500,
-          );
-
-        if (!active) {
-          return;
-        }
-
-        const items: SearchResult[] =
-          [];
-
-        const [
-          postsResult,
-          servicesResult,
-          documentsResult,
-          officialsResult,
-          albumsResult,
-        ] = results;
-
-        if (
-          postsResult.status ===
-          "fulfilled"
-        ) {
-          const posts =
-            postsResult.value.docs.map(
-              (docItem) => ({
-                id: docItem.id,
-                ...docItem.data(),
-              }),
-            ) as PostItem[];
-
-          posts
-            .filter(
-              (post) =>
-                post.status ===
-                "published",
-            )
-            .forEach((post) => {
-              items.push({
-                id: `post-${post.id ?? post.slug}`,
-                title: post.title,
-                description:
-                  post.summary ||
-                  post.content
-                    ?.replace(
-                      /<[^>]+>/g,
-                      "",
-                    )
-                    .slice(0, 160) ||
-                  "Berita Kelurahan Amborawang Darat",
-                href: `/berita/${post.slug}`,
-                category: "Berita",
-                keywords: `${post.category ?? ""} ${post.content ?? ""}`,
-              });
-            });
-        }
-
-        if (
-          servicesResult.status ===
-          "fulfilled"
-        ) {
-          const services =
-            servicesResult.value.docs.map(
-              (docItem) => ({
-                id: docItem.id,
-                ...docItem.data(),
-              }),
-            ) as ServiceItem[];
-
-          services
-            .filter(
-              (service) =>
-                service.isActive,
-            )
-            .forEach((service) => {
-              items.push({
-                id: `service-${service.id ?? service.slug}`,
-                title: service.name,
-                description:
-                  service.summary ||
-                  "Informasi pelayanan Kelurahan Amborawang Darat",
-                href: "/layanan",
-                category: "Layanan",
-                keywords: [
-                  service.category,
-                  ...(service.requirements ??
-                    []),
-                  ...(service.procedures ??
-                    []),
-                  service.duration,
-                  service.cost,
-                ]
-                  .filter(Boolean)
-                  .join(" "),
-              });
-            });
-        }
-
-        if (
-          documentsResult.status ===
-          "fulfilled"
-        ) {
-          const documents =
-            documentsResult.value.docs.map(
-              (docItem) => ({
-                id: docItem.id,
-                ...docItem.data(),
-              }),
-            ) as PublicDocument[];
-
-          documents
-            .filter(
-              (document) =>
-                document.isActive,
-            )
-            .forEach((document) => {
-              items.push({
-                id: `document-${document.id ?? document.title}`,
-                title:
-                  document.title,
-                description:
-                  document.description ||
-                  "Dokumen publik Kelurahan Amborawang Darat",
-                href: "/dokumen",
-                category: "Dokumen",
-                keywords: `${document.category ?? ""} ${document.year ?? ""}`,
-              });
-            });
-        }
-
-        if (
-          officialsResult.status ===
-          "fulfilled"
-        ) {
-          const officials =
-            officialsResult.value.docs.map(
-              (docItem) => ({
-                id: docItem.id,
-                ...docItem.data(),
-              }),
-            ) as Official[];
-
-          officials
-            .filter(
-              (official) =>
-                official.isActive,
-            )
-            .forEach((official) => {
-              items.push({
-                id: `official-${official.id ?? official.name}`,
-                title:
-                  official.name,
-                description:
-                  official.title,
-                href: "/pemerintahan",
-                category:
-                  "Pemerintahan",
-                keywords: `${official.title ?? ""} ${official.category ?? ""}`,
-              });
-            });
-        }
-
-        if (
-          albumsResult.status ===
-          "fulfilled"
-        ) {
-          const albums =
-            albumsResult.value.docs.map(
-              (docItem) => ({
-                id: docItem.id,
-                ...docItem.data(),
-              }),
-            ) as GalleryAlbum[];
-
-          albums
-            .filter(
-              (album) =>
-                album.status ===
-                "published",
-            )
-            .forEach((album) => {
-              items.push({
-                id: `album-${album.id ?? album.slug}`,
-                title: album.title,
-                description:
-                  album.description ||
-                  "Dokumentasi kegiatan Kelurahan Amborawang Darat",
-                href: "/galeri",
-                category: "Galeri",
-                keywords: `${album.category ?? ""} ${album.location ?? ""}`,
-              });
-            });
-        }
-
-        setDynamicSearchItems(
-          items,
-        );
-
-        setSearchDataLoaded(true);
-      } catch (error) {
-        console.warn(
-          "Pencarian Firestore melewati batas waktu:",
-          error,
-        );
-
-        if (active) {
-          setSearchDataLoaded(true);
-        }
-      } finally {
-        if (active) {
-          setSearchBackgroundLoading(
-            false,
-          );
-        }
+      if (isShortcut) {
+        event.preventDefault();
+        setSearchOpen(true);
       }
-    }
-
-    loadSearchData();
-
-    return () => {
-      active = false;
     };
-  }, [
-    searchOpen,
-    searchDataLoaded,
-    searchBackgroundLoading,
-  ]);
 
-  const searchResults = useMemo(() => {
-    const cleanQuery =
-      queryText.trim();
+    window.addEventListener("keydown", onShortcut);
+    return () => window.removeEventListener("keydown", onShortcut);
+  }, []);
 
-    if (cleanQuery.length < 2) {
-      return [];
-    }
+  const results = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
 
-    return [
-      ...staticSearchItems,
-      ...dynamicSearchItems,
-    ]
-      .map((item) => ({
-        ...item,
-        score: calculateScore(
-          item,
-          cleanQuery,
-        ),
-      }))
-      .filter(
-        (item) =>
-          (item.score ?? 0) > 0,
-      )
-      .sort(
-        (a, b) =>
-          (b.score ?? 0) -
-          (a.score ?? 0),
-      )
-      .slice(0, 8);
-  }, [
-    queryText,
-    dynamicSearchItems,
-  ]);
+    if (!normalized) return [];
 
-  const informationActive =
-    informationMenu.some((item) =>
-      isActivePath(
-        pathname,
-        item.href,
-      ),
+    return staticSearchItems.filter((item) =>
+      `${item.title} ${item.description} ${item.category}`
+        .toLowerCase()
+        .includes(normalized),
     );
+  }, [query]);
 
   function openSearch() {
     setMobileOpen(false);
@@ -793,536 +238,304 @@ export default function PublicHeader({
 
   function closeSearch() {
     setSearchOpen(false);
-    setQueryText("");
+    setQuery("");
   }
 
-  function handleSearchSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  function submitSearch(event: FormEvent) {
     event.preventDefault();
-
-    if (
-      searchResults.length > 0
-    ) {
-      window.location.href =
-        searchResults[0].href;
-    }
   }
+
+  function handleOverlayKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") closeSearch();
+  }
+
+  const moreActive = moreMenu.some((item) => isCurrent(pathname, item.href));
+  const whatsapp = (settings.whatsapp || "").replace(/\D/g, "").replace(/^0/, "62");
+  const logo = settings.logoUrl || AMBORAWANG_LOGO;
 
   return (
     <>
-      <header
-        className={`${styles.siteHeader} ${isScrolled
-            ? styles.scrolled
-            : ""
-          }`}
-      >
-        <div
-          className={
-            styles.headerContainer
-          }
-        >
+      <header className={`${styles.siteHeader} ${scrolled ? styles.scrolled : ""}`}>
+        <div className={styles.headerContainer}>
           <Link
             href="/"
             className={styles.brand}
             aria-label={`Beranda ${settings.villageName}`}
           >
-            <span
-              className={
-                styles.logoFrame
-              }
-            >
+            <span className={styles.logoFrame}>
               <Image
-                src={AMBORAWANG_LOGO}
+                src={logo}
                 alt={`Logo Kelurahan ${settings.villageName}`}
-                width={58}
-                height={58}
-                priority
+                width={48}
+                height={48}
                 className={styles.logo}
+                priority
+                unoptimized
               />
             </span>
 
-            <span
-              className={
-                styles.brandText
-              }
-            >
-              <span
-                className={
-                  styles.officialLabel
-                }
-              >
-                Website Resmi
-              </span>
-
-              <strong>
-                {settings.villageName}
-              </strong>
-
-              <small>
-                Kecamatan Samboja Barat
-              </small>
+            <span className={styles.brandText}>
+              <span className={styles.officialLabel}>Website Resmi</span>
+              <strong>{settings.villageName}</strong>
+              <small>Kecamatan Samboja Barat</small>
             </span>
           </Link>
 
-          <nav
-            className={
-              styles.desktopNav
-            }
-            aria-label="Navigasi utama"
-          >
-            {mainMenu.map((item) => {
-              const active =
-                isActivePath(
-                  pathname,
-                  item.href,
-                );
+          <nav className={styles.desktopNav} aria-label="Navigasi utama">
+            {mainMenu.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navLink} ${
+                  isCurrent(pathname, item.href) ? styles.navLinkActive : ""
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`${styles.navLink} ${active
-                      ? styles.navLinkActive
-                      : ""
-                    }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-
-            <div
-              className={
-                styles.dropdown
-              }
-            >
+            <div className={styles.dropdown}>
               <button
                 type="button"
-                className={`${styles.navLink} ${styles.dropdownButton} ${informationActive
-                    ? styles.navLinkActive
-                    : ""
-                  }`}
+                className={`${styles.navLink} ${styles.dropdownButton} ${
+                  moreActive ? styles.navLinkActive : ""
+                }`}
+                aria-haspopup="true"
               >
                 Informasi
-                <ChevronIcon />
+                <ChevronDown />
               </button>
 
-              <div
-                className={
-                  styles.dropdownMenu
-                }
-              >
-                <div
-                  className={
-                    styles.dropdownHeader
-                  }
-                >
-                  <span>
-                    Informasi Publik
-                  </span>
-
-                  <small>
-                    Akses informasi
-                    Kelurahan
-                    Amborawang Darat
-                  </small>
+              <div className={styles.dropdownMenu}>
+                <div className={styles.dropdownHeader}>
+                  <span>Informasi Publik</span>
+                  <small>Akses data dan informasi lainnya</small>
                 </div>
 
-                {informationMenu.map(
-                  (item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={
-                        styles.dropdownItem
-                      }
-                    >
-                      <span>
-                        <strong>
-                          {item.label}
-                        </strong>
-
-                        <small>
-                          {
-                            item.description
-                          }
-                        </small>
-                      </span>
-
-                      <ArrowIcon />
-                    </Link>
-                  ),
-                )}
+                {moreMenu.map((item) => (
+                  <Link key={item.href} href={item.href} className={styles.dropdownItem}>
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.description}</small>
+                    </span>
+                    <ArrowIcon />
+                  </Link>
+                ))}
               </div>
             </div>
           </nav>
 
-          <div
-            className={
-              styles.headerActions
-            }
-          >
+          <div className={styles.headerActions}>
             <button
               type="button"
-              className={
-                styles.searchButton
-              }
+              className={styles.searchButton}
               onClick={openSearch}
-              aria-label="Cari informasi"
+              aria-label="Buka pencarian website"
             >
               <SearchIcon />
-
-              <span
-                className={
-                  styles.searchButtonText
-                }
-              >
-                Cari
-              </span>
+              <span className={styles.searchButtonText}>Cari</span>
+              <kbd className={styles.searchShortcut}>Ctrl K</kbd>
             </button>
 
             <button
               type="button"
-              className={
-                styles.mobileMenuButton
-              }
-              onClick={() =>
-                setMobileOpen(
-                  (value) => !value,
-                )
-              }
-              aria-expanded={
-                mobileOpen
-              }
+              className={styles.mobileMenuButton}
+              onClick={() => setMobileOpen((value) => !value)}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-public-navigation"
+              aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
             >
-              {mobileOpen ? (
-                <CloseIcon />
-              ) : (
-                <MenuIcon />
-              )}
+              <MenuIcon open={mobileOpen} />
             </button>
+          </div>
+        </div>
+
+        <div
+          id="mobile-public-navigation"
+          className={`${styles.mobileNavigation} ${
+            mobileOpen ? styles.mobileNavigationOpen : ""
+          }`}
+        >
+          <div className={styles.mobileNavInner}>
+            <button
+              type="button"
+              className={styles.mobileSearchButton}
+              onClick={openSearch}
+            >
+              <SearchIcon />
+              Cari informasi di website
+            </button>
+
+            <nav className={styles.mobileMenuList} aria-label="Navigasi mobile">
+              {[...mainMenu, ...moreMenu].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${styles.mobileNavLink} ${
+                    isCurrent(pathname, item.href)
+                      ? styles.mobileNavLinkActive
+                      : ""
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <ArrowIcon />
+                </Link>
+              ))}
+            </nav>
+
+            <div className={styles.mobileContact}>
+              <small>Kontak Kelurahan</small>
+              <strong>{settings.phone || settings.whatsapp || "Amborawang Darat"}</strong>
+              {whatsapp ? (
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Hubungi melalui WhatsApp
+                </a>
+              ) : (
+                <Link href="/kontak">Lihat halaman kontak</Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       {searchOpen && (
         <div
-          className={
-            styles.searchOverlay
-          }
+          className={styles.searchOverlay}
+          role="presentation"
           onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              closeSearch();
-            }
+            if (event.target === event.currentTarget) closeSearch();
           }}
+          onKeyDown={handleOverlayKeyDown}
         >
-          <div
-            className={
-              styles.searchDialog
-            }
+          <section
+            className={styles.searchDialog}
             role="dialog"
             aria-modal="true"
+            aria-labelledby="search-title"
           >
-            <div
-              className={
-                styles.searchDialogHeader
-              }
-            >
+            <div className={styles.searchDialogHeader}>
               <div>
-                <span
-                  className={
-                    styles.searchEyebrow
-                  }
-                >
-                  Pencarian Global
-                </span>
-
-                <h2>
-                  Apa yang sedang Anda cari?
-                </h2>
-
+                <span className={styles.searchEyebrow}>Pencarian Website</span>
+                <h2 id="search-title">Cari informasi kelurahan</h2>
                 <p>
-                  Temukan layanan,
-                  berita, dokumen,
-                  aparatur, galeri, dan
-                  informasi kelurahan.
+                  Telusuri halaman layanan, pemerintahan, berita, wilayah,
+                  dokumen, dan informasi publik.
                 </p>
               </div>
 
               <button
                 type="button"
-                className={
-                  styles.closeSearchButton
-                }
+                className={styles.closeSearchButton}
                 onClick={closeSearch}
+                aria-label="Tutup pencarian"
               >
                 <CloseIcon />
               </button>
             </div>
 
-            <form
-              className={
-                styles.searchForm
-              }
-              onSubmit={
-                handleSearchSubmit
-              }
-            >
+            <form className={styles.searchForm} onSubmit={submitSearch}>
               <SearchIcon />
-
               <input
                 ref={inputRef}
-                type="search"
-                value={queryText}
-                onChange={(event) =>
-                  setQueryText(
-                    event.target.value,
-                  )
-                }
-                placeholder="Contoh: tim kkn, surat domisili, berita..."
-                autoComplete="off"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Contoh: layanan, RT, dokumen, KKN..."
+                aria-label="Kata kunci pencarian"
               />
-
-              {queryText && (
+              {query && (
                 <button
                   type="button"
-                  className={
-                    styles.clearSearch
-                  }
-                  onClick={() =>
-                    setQueryText("")
-                  }
+                  className={styles.clearSearch}
+                  onClick={() => setQuery("")}
+                  aria-label="Hapus kata kunci"
                 >
                   <CloseIcon />
                 </button>
               )}
             </form>
 
-            <div
-              className={
-                styles.searchContent
-              }
-            >
-              {queryText.trim().length <
-                2 && (
-                  <div
-                    className={
-                      styles.searchInitial
-                    }
-                  >
-                    <div
-                      className={
-                        styles.searchHint
-                      }
-                    >
-                      <SearchIcon />
-
-                      <div>
-                        <strong>
-                          Cari seluruh
-                          informasi website
-                        </strong>
-
-                        <p>
-                          Ketik minimal 2
-                          karakter untuk
-                          mulai mencari.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              {queryText.trim().length >=
-                2 &&
-                searchResults.length >
-                0 && (
-                  <>
-                    <div
-                      className={
-                        styles.resultSummary
-                      }
-                    >
-                      <span>
-                        Hasil untuk
-                        <strong>
-                          {" "}
-                          “
-                          {queryText.trim()}
-                          ”
-                        </strong>
-                      </span>
-
-                      {searchBackgroundLoading && (
-                        <small>
-                          Memuat data
-                          tambahan...
-                        </small>
-                      )}
-                    </div>
-
-                    <div
-                      className={
-                        styles.searchResults
-                      }
-                    >
-                      {searchResults.map(
-                        (result) => (
-                          <Link
-                            href={
-                              result.href
-                            }
-                            key={
-                              result.id
-                            }
-                            className={
-                              styles.searchResultItem
-                            }
-                            onClick={
-                              closeSearch
-                            }
-                          >
-                            <div
-                              className={
-                                styles.resultCategoryIcon
-                              }
-                            >
-                              {result.category.charAt(
-                                0,
-                              )}
-                            </div>
-
-                            <div
-                              className={
-                                styles.resultBody
-                              }
-                            >
-                              <div
-                                className={
-                                  styles.resultTop
-                                }
-                              >
-                                <span
-                                  className={
-                                    styles.resultCategory
-                                  }
-                                >
-                                  {
-                                    result.category
-                                  }
-                                </span>
-
-                                <ArrowIcon />
-                              </div>
-
-                              <strong>
-                                {
-                                  result.title
-                                }
-                              </strong>
-
-                              <p>
-                                {
-                                  result.description
-                                }
-                              </p>
-                            </div>
-                          </Link>
-                        ),
-                      )}
-                    </div>
-                  </>
-                )}
-
-              {queryText.trim().length >=
-                2 &&
-                searchResults.length ===
-                0 &&
-                !searchBackgroundLoading && (
-                  <div
-                    className={
-                      styles.noResult
-                    }
-                  >
-                    <div
-                      className={
-                        styles.noResultIcon
-                      }
-                    >
-                      <SearchIcon />
-                    </div>
-
-                    <h3>
-                      Informasi belum
-                      ditemukan
-                    </h3>
-
-                    <p>
-                      Tidak ada hasil yang
-                      sesuai dengan
-                      <strong>
-                        {" "}
-                        “
-                        {queryText.trim()}
-                        ”
-                      </strong>
-                      .
-                    </p>
-                  </div>
-                )}
-
-              {queryText.trim().length >=
-                2 &&
-                searchResults.length ===
-                0 &&
-                searchBackgroundLoading && (
-                  <div
-                    className={
-                      styles.loadingState
-                    }
-                  >
-                    <span
-                      className={
-                        styles.spinner
-                      }
-                    />
-
+            <div className={styles.searchContent}>
+              {!query.trim() ? (
+                <div className={styles.searchInitial}>
+                  <div className={styles.searchHint}>
+                    <SearchIcon size={22} />
                     <div>
-                      <strong>
-                        Mencari data
-                        tambahan...
-                      </strong>
-
+                      <strong>Mulai ketik kata kunci</strong>
                       <p>
-                        Hasil halaman
-                        lokal tetap akan
-                        muncul langsung.
+                        Pencarian cepat akan menampilkan halaman yang paling relevan.
                       </p>
                     </div>
                   </div>
-                )}
+
+                  <div className={styles.quickSearch}>
+                    <span>Pencarian cepat</span>
+                    <div className={styles.quickSearchLinks}>
+                      {["Layanan", "Pemerintahan", "Wilayah", "Dokumen", "Kontak"].map(
+                        (keyword) => (
+                          <button
+                            key={keyword}
+                            type="button"
+                            onClick={() => setQuery(keyword)}
+                          >
+                            {keyword}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : results.length ? (
+                <>
+                  <div className={styles.resultSummary}>
+                    <span>
+                      {results.length} hasil untuk &quot;{query.trim()}&quot;
+                    </span>
+                  </div>
+
+                  <div className={styles.searchResults}>
+                    {results.map((item) => (
+                      <Link
+                        key={`${item.category}-${item.href}`}
+                        href={item.href}
+                        className={styles.searchResultItem}
+                        onClick={closeSearch}
+                      >
+                        <span className={styles.resultCategoryIcon}>
+                          {item.category.slice(0, 2).toUpperCase()}
+                        </span>
+
+                        <span className={styles.resultBody}>
+                          <span className={styles.resultTop}>
+                            <span className={styles.resultCategory}>{item.category}</span>
+                            <ArrowIcon />
+                          </span>
+                          <strong>{item.title}</strong>
+                          <p>{item.description}</p>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className={styles.noResult}>
+                  <span className={styles.noResultIcon}>
+                    <SearchIcon size={22} />
+                  </span>
+                  <h3>Informasi tidak ditemukan</h3>
+                  <p>Coba gunakan kata kunci yang lebih singkat atau berbeda.</p>
+                </div>
+              )}
             </div>
 
-            <div
-              className={
-                styles.searchFooter
-              }
-            >
-              <span>
-                Pencarian Website Resmi
-                Kelurahan Amborawang
-                Darat
-              </span>
-
-              <span>
-                ESC untuk menutup
-              </span>
+            <div className={styles.searchFooter}>
+              <span>ESC untuk menutup</span>
+              <span>Kelurahan Amborawang Darat</span>
             </div>
-          </div>
+          </section>
         </div>
       )}
     </>

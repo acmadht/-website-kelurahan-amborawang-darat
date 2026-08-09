@@ -1,754 +1,531 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  AMBORAWANG_OFFICE_IMAGE,
-  applyAmborawangPublicSettings,
-} from "@/data/amborawang";
-import {
-  amborawangProfileFallback,
-  developmentPriorities,
-  profileBoundaries,
-  profileFacts,
-  profilePotentials,
-  profileTimeline,
-  resolveAmborawangProfile,
-  type ProfileContent,
-} from "@/data/amborawangProfile";
-import { demoSettings } from "@/data/demo";
-import { useDocumentData } from "@/hooks/useFirestoreData";
-import type { SiteSettings } from "@/types";
-import PageHero from "./PageHero";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ProfilePage.module.css";
 
-type IconName =
-  | "area"
-  | "people"
-  | "home"
-  | "route"
-  | "history"
-  | "vision"
-  | "mission"
-  | "map"
-  | "shield"
-  | "plant"
-  | "store"
-  | "education"
-  | "connect"
-  | "building"
-  | "check"
-  | "arrow"
-  | "expand";
+const stats = [
+  { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
+  { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
+  { value: "13 RT", label: "Wilayah RT", note: "Laporan lokal, Mei 2026" },
+  { value: "5,3 km", label: "Ke ibu kota kecamatan", note: "BPS, data 2023" },
+];
 
-function Icon({
-  name,
-  size = 22,
-}: {
-  name: IconName;
-  size?: number;
-}) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
+const timeline = [
+  {
+    year: "Sebelum 2020",
+    title: "Bagian dari Kecamatan Samboja",
+    text: "Amborawang Darat menjalankan pemerintahan kelurahan dalam wilayah Kecamatan Samboja.",
+  },
+  {
+    year: "2020",
+    title: "Pembentukan Kecamatan Samboja Barat",
+    text: "Perda Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020 memasukkan Amborawang Darat ke wilayah kecamatan baru.",
+  },
+  {
+    year: "2023",
+    title: "Pemerintahan kecamatan mulai efektif",
+    text: "Kecamatan Samboja Barat mulai berjalan efektif pada 15 Februari 2023 dan memperkuat koordinasi pelayanan kewilayahan.",
+  },
+  {
+    year: "Sekarang",
+    title: "Penguatan pelayanan digital",
+    text: "Informasi publik, layanan, berita, dan data wilayah dikembangkan agar lebih mudah diakses masyarakat.",
+  },
+];
 
-  const paths: Record<IconName, React.ReactNode> = {
-    area: (
-      <>
-        <path d="M4 19V8l8-4 8 4v11" />
-        <path d="M8 19v-6h8v6" />
-        <path d="M3 19h18" />
-      </>
-    ),
+const missions = [
+  "Meningkatkan pelayanan publik yang cepat, jelas, ramah, dan mudah diakses.",
+  "Memperkuat keterbukaan informasi serta pengelolaan data kelurahan yang akurat.",
+  "Mendorong partisipasi masyarakat dalam perencanaan, pembangunan, dan pengawasan lingkungan.",
+  "Mendukung pengembangan UMKM, pertanian, pendidikan, dan kegiatan produktif masyarakat.",
+  "Menjaga kebersihan, ketertiban, keamanan, serta keberlanjutan lingkungan kelurahan.",
+];
 
-    people: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <path d="M3.5 19c.5-4 2.5-6 5.5-6s5 2 5.5 6" />
-        <path d="M15 6.5a2.5 2.5 0 0 1 0 5" />
-        <path d="M16 13c2.6.5 4 2.5 4.5 5" />
-      </>
-    ),
+const boundaries = [
+  ["Utara", "Kelurahan Margomulyo"],
+  ["Timur", "Kelurahan Argosari dan Kelurahan Amborawang Laut"],
+  ["Selatan", "Kelurahan Salok Api Laut dan Kelurahan Salok Api Darat"],
+  ["Barat", "Desa Tani Bhakti"],
+];
 
-    home: (
-      <>
-        <path d="m3 11 9-7 9 7" />
-        <path d="M5 10v10h14V10" />
-        <path d="M9 20v-6h6v6" />
-      </>
-    ),
+const potentials = [
+  {
+    title: "Pertanian dan Hortikultura",
+    text: "Lahan dan aktivitas budidaya dapat dikembangkan melalui peningkatan produktivitas, pengolahan hasil, dan pemasaran.",
+  },
+  {
+    title: "UMKM dan Ekonomi Lokal",
+    text: "Usaha rumah tangga, perdagangan, kuliner, dan jasa menjadi ruang penguatan pendapatan masyarakat.",
+  },
+  {
+    title: "Pendidikan dan SDM",
+    text: "Keberadaan satuan pendidikan mendukung peningkatan keterampilan, literasi, dan kapasitas generasi muda.",
+  },
+  {
+    title: "Konektivitas Wilayah",
+    text: "Posisi pada koridor Samboja Barat membuka peluang pengembangan layanan, logistik lokal, dan kegiatan produktif.",
+  },
+];
 
-    route: (
-      <>
-        <circle cx="6" cy="18" r="2" />
-        <circle cx="18" cy="6" r="2" />
-        <path d="M7.5 16.5 16.5 7.5" />
-        <path d="M8 6h4l2 2" />
-      </>
-    ),
+const facilities = [
+  "Kantor Kelurahan Amborawang Darat dan layanan administrasi masyarakat",
+  "SD Negeri 005 Samboja",
+  "SMP Negeri 2 Samboja",
+  "MI Al Fatah Samboja dan satuan pendidikan keagamaan",
+  "Layanan kesehatan dalam wilayah kerja Puskesmas Sungai Merdeka",
+  "Tempat ibadah dan fasilitas sosial kemasyarakatan",
+  "Jalan Balikpapan–Handil II dan jaringan jalan lingkungan",
+  "Sarana perdagangan serta ruang usaha masyarakat",
+];
 
-    history: (
-      <>
-        <path d="M3 12a9 9 0 1 0 3-6.7" />
-        <path d="M3 4v5h5" />
-        <path d="M12 7v5l3 2" />
-      </>
-    ),
+const priorities = [
+  "Pelayanan publik berbasis data",
+  "Jalan, drainase, dan penerangan",
+  "Penguatan UMKM dan usaha warga",
+  "Kebersihan dan pengelolaan sampah",
+  "Pendidikan serta kegiatan pemuda",
+  "Pembaruan data wilayah berkala",
+];
 
-    vision: (
-      <>
-        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
-        <circle cx="12" cy="12" r="2.5" />
-      </>
-    ),
-
-    mission: (
-      <>
-        <path d="M9 6h11" />
-        <path d="M9 12h11" />
-        <path d="M9 18h11" />
-        <path d="m3.5 6 1.2 1.2L7 4.8" />
-        <path d="m3.5 12 1.2 1.2L7 10.8" />
-        <path d="m3.5 18 1.2 1.2L7 16.8" />
-      </>
-    ),
-
-    map: (
-      <>
-        <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z" />
-        <path d="M9 3v15" />
-        <path d="M15 6v15" />
-      </>
-    ),
-
-    shield: (
-      <>
-        <path d="M12 3 5 6v5c0 4.8 2.8 8 7 10 4.2-2 7-5.2 7-10V6Z" />
-        <path d="m9 12 2 2 4-4" />
-      </>
-    ),
-
-    plant: (
-      <>
-        <path d="M12 21V10" />
-        <path d="M12 13c-4 0-7-2.4-7-6 4 0 7 2.4 7 6Z" />
-        <path d="M12 10c0-4 2.4-7 6-7 0 4-2.4 7-6 7Z" />
-      </>
-    ),
-
-    store: (
-      <>
-        <path d="M4 10v10h16V10" />
-        <path d="M3 10h18l-2-6H5Z" />
-        <path d="M8 20v-6h8v6" />
-        <path d="M5 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
-      </>
-    ),
-
-    education: (
-      <>
-        <path d="m3 9 9-5 9 5-9 5Z" />
-        <path d="M7 12v4c3 2 7 2 10 0v-4" />
-        <path d="M21 9v6" />
-      </>
-    ),
-
-    connect: (
-      <>
-        <circle cx="5" cy="12" r="2.5" />
-        <circle cx="19" cy="6" r="2.5" />
-        <circle cx="19" cy="18" r="2.5" />
-        <path d="m7.5 11 9-4" />
-        <path d="m7.5 13 9 4" />
-      </>
-    ),
-
-    building: (
-      <>
-        <path d="M4 21V5l8-3 8 3v16" />
-        <path d="M8 8h2" />
-        <path d="M14 8h2" />
-        <path d="M8 12h2" />
-        <path d="M14 12h2" />
-        <path d="M9 21v-5h6v5" />
-        <path d="M2 21h20" />
-      </>
-    ),
-
-    check: <path d="m5 12 4 4L19 6" />,
-
-    arrow: (
-      <>
-        <path d="M5 12h14" />
-        <path d="m14 7 5 5-5 5" />
-      </>
-    ),
-
-    expand: (
-      <>
-        <path d="M15 3h6v6" />
-        <path d="m21 3-7 7" />
-        <path d="M9 21H3v-6" />
-        <path d="m3 21 7-7" />
-      </>
-    ),
-  };
-
-  return <svg {...common}>{paths[name]}</svg>;
+function ArrowIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
 }
 
-function splitParagraphs(value: string) {
-  return value
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+function PinIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
 }
 
 export default function ProfilePage() {
-  const { data: storedProfile } = useDocumentData<ProfileContent>(
-    "pages",
-    "profil",
-    amborawangProfileFallback,
-  );
-
-  const { data: rawSettings } = useDocumentData<SiteSettings>(
-    "siteSettings",
-    "main",
-    demoSettings,
-  );
-
-  const settings = applyAmborawangPublicSettings(rawSettings);
-  const data = resolveAmborawangProfile(storedProfile);
-
-  const [officeImage, setOfficeImage] = useState(data.imageUrl);
-
-  useEffect(() => {
-    setOfficeImage(data.imageUrl);
-  }, [data.imageUrl]);
-
-  const animationEnabled = settings.animationEnabled !== false;
-
   return (
     <PublicShell>
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-
-      <PageHero
-        eyebrow="Profil Kelurahan"
-        title={`Mengenal ${settings.villageName}`}
-        description="Sejarah, arah pelayanan, kondisi wilayah, batas administratif, potensi, dan fasilitas umum dalam satu halaman yang lebih informatif."
-      />
-
-      {/* =====================================================
-          SEJARAH
-      ===================================================== */}
-
-      <section className={styles.introSection}>
-        <div className={`container ${styles.introGrid}`}>
-          <Reveal enabled={animationEnabled}>
-            <figure className={styles.officeFigure}>
-              <img
-                src={officeImage}
-                alt="Kantor Kelurahan Amborawang Darat"
-                onError={() =>
-                  setOfficeImage(AMBORAWANG_OFFICE_IMAGE)
-                }
-              />
-
-              <div className={styles.officeShade} />
-
-              <figcaption className={styles.officeCaption}>
-                <span className={styles.captionIcon}>
-                  <Icon name="building" />
-                </span>
-
-                <span>
-                  <strong>
-                    Kantor Kelurahan Amborawang Darat
-                  </strong>
-
-                  <small>
-                    Dokumentasi bangunan kantor, 19 September
-                    2015
-                  </small>
-                </span>
-              </figcaption>
-
-              <span className={styles.photoCredit}>
-                Foto: Arief R. Sandan (Ezagren)
-              </span>
-            </figure>
-          </Reveal>
-
-          <Reveal enabled={animationEnabled} delay={90}>
-            <div className={styles.historyPanel}>
-              <span className="eyebrow">
-                Sejarah Kelurahan
-              </span>
-
-              <h2>
-                Dari wilayah Samboja menuju pelayanan Samboja
-                Barat
-              </h2>
-
-              <div className={styles.historyCopy}>
-                {splitParagraphs(data.history).map(
-                  (paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ),
-                )}
-              </div>
-
-              <div className={styles.legalNote}>
-                <span>
-                  <Icon name="shield" />
-                </span>
-
+      <main className={styles.page}>
+        {/* HERO */}
+        <section className={styles.hero}>
+          <div className={styles.heroPattern} aria-hidden="true" />
+          <div className={`container ${styles.heroInner}`}>
+            <Reveal enabled>
+              <div className={styles.heroCopy}>
+                <span className={styles.eyebrowLight}>Profil Kelurahan</span>
+                <h1>Mengenal Amborawang Darat</h1>
                 <p>
-                  Amborawang Darat menjadi bagian Kecamatan
-                  Samboja Barat berdasarkan Perda Kabupaten
-                  Kutai Kartanegara Nomor 6 Tahun 2020.
+                  Sejarah, arah pelayanan, kondisi wilayah, batas administratif,
+                  potensi, dan fasilitas umum dalam satu halaman yang lebih informatif.
                 </p>
               </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* =====================================================
-          DATA SINGKAT
-      ===================================================== */}
-
-      <section
-        className={styles.factSection}
-        aria-label="Profil Amborawang Darat dalam angka"
-      >
-        <div className={`container ${styles.factGrid}`}>
-          {profileFacts.map((fact, index) => (
-            <Reveal
-              key={fact.label}
-              enabled={animationEnabled}
-              delay={index * 65}
-            >
-              <article className={styles.factCard}>
-                <span className={styles.factIcon}>
-                  <Icon name={fact.icon} />
-                </span>
-
-                <div>
-                  <strong>{fact.value}</strong>
-                  <span>{fact.label}</span>
-                  <small>{fact.note}</small>
-                </div>
-              </article>
             </Reveal>
-          ))}
-        </div>
-      </section>
 
-      {/* =====================================================
-          TIMELINE
-      ===================================================== */}
+            <Reveal enabled delay={70}>
+              <div className={styles.heroPhotoCard}>
+                <div className={styles.heroPhoto}>
+                  <img
+                    src="/images/kantor-kelurahan-amborawang-darat.jpg"
+                    alt="Kantor Kelurahan Amborawang Darat"
+                  />
+                </div>
+                <div className={styles.heroPhotoMeta}>
+                  <span>Kantor Kelurahan Amborawang Darat</span>
+                  <small>Dokumentasi bangunan kantor, 19 September 2015</small>
+                  <small>Foto: Arief R. Sandan (Ezagren)</small>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
 
-      <section className={styles.timelineSection}>
-        <div
-          className={`container ${styles.timelineLayout}`}
-        >
-          <Reveal enabled={animationEnabled}>
-            <div className={styles.sectionIntro}>
-              <span className="eyebrow">
-                Jejak Perkembangan
-              </span>
+        {/* QUICK PROFILE BAND */}
+        <section className={styles.quickBand}>
+          <div className="container">
+            <div className={styles.quickBandGrid}>
+              <Reveal enabled>
+                <div className={styles.quickBandIntro}>
+                  <span>Ringkasan Profil</span>
+                  <strong>Amborawang Darat</strong>
+                  <p>Kelurahan di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara.</p>
+                </div>
+              </Reveal>
 
-              <h2>
-                Perubahan administratif dan penguatan pelayanan
-              </h2>
+              <Reveal enabled delay={40}>
+                <div className={styles.quickBandItem}>
+                  <span>Wilayah</span>
+                  <strong>19,47 km²</strong>
+                </div>
+              </Reveal>
 
-              <p>
-                Bagian ini menampilkan tonggak yang dapat
-                diverifikasi tanpa menambahkan cerita asal-usul
-                yang belum memiliki dokumen resmi.
-              </p>
+              <Reveal enabled delay={80}>
+                <div className={styles.quickBandItem}>
+                  <span>Penduduk</span>
+                  <strong>2.921 jiwa</strong>
+                </div>
+              </Reveal>
 
-              <span className={styles.largeIcon}>
-                <Icon name="history" size={48} />
-              </span>
+              <Reveal enabled delay={120}>
+                <div className={styles.quickBandItem}>
+                  <span>Administrasi</span>
+                  <strong>13 RT</strong>
+                </div>
+              </Reveal>
             </div>
-          </Reveal>
+          </div>
+        </section>
 
-          <div className={styles.timeline}>
-            {profileTimeline.map((item, index) => (
-              <Reveal
-                key={item.year}
-                enabled={animationEnabled}
-                delay={index * 75}
-              >
-                <article className={styles.timelineItem}>
-                  <span className={styles.timelineYear}>
-                    {item.year}
-                  </span>
+        {/* SEJARAH */}
+        <section className={styles.historyIntro}>
+          <div className={`container ${styles.twoCol}`}>
+            <Reveal enabled>
+              <div className={styles.sectionLabelBlock}>
+                <span className={styles.sectionIndex}>01</span>
+                <span className={styles.eyebrow}>Sejarah Kelurahan</span>
+              </div>
+            </Reveal>
 
-                  <div>
+            <Reveal enabled delay={60}>
+              <div className={styles.article}>
+                <h2>Dari wilayah Samboja menuju pelayanan Samboja Barat</h2>
+
+                <p>
+                  Amborawang Darat telah menjadi salah satu kelurahan dalam wilayah administratif Kecamatan Samboja, Kabupaten Kutai Kartanegara. Perkembangan permukiman, aktivitas masyarakat, pendidikan, pertanian, perdagangan, dan pelayanan pemerintahan membentuk karakter wilayah ini dari waktu ke waktu.
+                </p>
+
+                <p>
+                  Melalui Peraturan Daerah Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020, Amborawang Darat ditetapkan sebagai salah satu kelurahan dalam Kecamatan Samboja Barat. Kecamatan baru tersebut mulai menjalankan pemerintahan secara efektif pada 15 Februari 2023. Perubahan administratif ini mendekatkan koordinasi pembangunan dan pelayanan publik kepada masyarakat.
+                </p>
+
+                <p>
+                  Saat ini, Kelurahan Amborawang Darat terus memperkuat pelayanan administrasi, keterbukaan informasi, partisipasi warga, pengembangan potensi ekonomi lokal, dan pengelolaan lingkungan yang berkelanjutan.
+                </p>
+
+                <div className={styles.factCallout}>
+                  Amborawang Darat menjadi bagian Kecamatan Samboja Barat berdasarkan Perda Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020.
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* STATS */}
+        <section className={styles.statsSection}>
+          <div className="container">
+            <div className={styles.statsGrid}>
+              {stats.map((item, index) => (
+                <Reveal key={item.label} enabled delay={index * 45}>
+                  <div className={styles.statItem}>
+                    <strong>{item.value}</strong>
+                    <span>{item.label}</span>
+                    <small>{item.note}</small>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TIMELINE */}
+        <section className={styles.timelineSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeading}>
+                <span className={styles.eyebrowLight}>Jejak Perkembangan</span>
+                <h2>Perubahan administratif dan penguatan pelayanan</h2>
+                <p>
+                  Bagian ini menampilkan tonggak yang dapat diverifikasi tanpa menambahkan cerita asal-usul yang belum memiliki dokumen resmi.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className={styles.timeline}>
+              {timeline.map((item, index) => (
+                <Reveal key={item.year} enabled delay={index * 55}>
+                  <div className={styles.timelineItem}>
+                    <div className={styles.timelineMarker}>
+                      <span>{item.year}</span>
+                    </div>
+                    <div className={styles.timelineContent}>
+                      <h3>{item.title}</h3>
+                      <p>{item.text}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* VISI MISI */}
+        <section className={styles.visionSection}>
+          <div className="container">
+            <div className={styles.visionGrid}>
+              <Reveal enabled>
+                <div className={styles.visionCard}>
+                  <span className={styles.eyebrowLight}>Visi Pelayanan</span>
+                  <blockquote>
+                    Terwujudnya Kelurahan Amborawang Darat yang tertib, responsif, transparan, berdaya, dan berkelanjutan dalam memberikan pelayanan kepada masyarakat.
+                  </blockquote>
+                  <p>
+                    Rumusan profil digital ini tetap dapat disesuaikan melalui dashboard apabila dokumen visi kelurahan yang ditetapkan tersedia.
+                  </p>
+                </div>
+              </Reveal>
+
+              <div className={styles.missionArea}>
+                <Reveal enabled>
+                  <div className={styles.missionHeading}>
+                    <span className={styles.eyebrow}>Misi</span>
+                    <h2>Arah kerja yang dekat dengan kebutuhan warga</h2>
+                  </div>
+                </Reveal>
+
+                <div className={styles.missionList}>
+                  {missions.map((item, index) => (
+                    <Reveal key={item} enabled delay={index * 40}>
+                      <div className={styles.missionItem}>
+                        <span>0{index + 1}</span>
+                        <p>{item}</p>
+                      </div>
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* WILAYAH */}
+        <section className={styles.regionSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeadingDark}>
+                <span className={styles.eyebrowLight}>Kondisi Wilayah</span>
+                <h2>Geografi dan batas administratif</h2>
+                <p>
+                  Kelurahan Amborawang Darat berada di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Luas wilayahnya sekitar 19,47 km² atau 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan sekitar 5,3 km. Wilayah ini berada pada kawasan beriklim tropis basah dan terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className={styles.regionFacts}>
+              <Reveal enabled>
+                <div className={styles.regionFact}>
+                  <span>04,68%</span>
+                  <small>Proporsi luas terhadap Kecamatan Samboja Barat</small>
+                </div>
+              </Reveal>
+              <Reveal enabled delay={40}>
+                <div className={styles.regionFact}>
+                  <span>5,3 km</span>
+                  <small>Jarak menuju ibu kota kecamatan</small>
+                </div>
+              </Reveal>
+              <Reveal enabled delay={80}>
+                <div className={styles.regionFact}>
+                  <span>Tropis</span>
+                  <small>Karakter iklim wilayah</small>
+                </div>
+              </Reveal>
+            </div>
+
+            <div className={styles.regionGrid}>
+              <Reveal enabled>
+                <div className={styles.mapCard}>
+                  <div className={styles.mapTop}>
+                    <div>
+                      <span>Peta Wilayah</span>
+                      <strong>Amborawang Darat</strong>
+                    </div>
+                    <a
+                      href="/images/peta-amborawang-darat.png"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Lihat Peta Penuh
+                      <ArrowIcon size={16} />
+                    </a>
+                  </div>
+
+                  <div className={styles.mapImageWrap}>
+                    <img
+                      src="/images/peta-amborawang-darat.png"
+                      alt="Peta wilayah Kelurahan Amborawang Darat"
+                    />
+                  </div>
+                </div>
+              </Reveal>
+
+              <div className={styles.boundaryList}>
+                {boundaries.map(([dir, place], index) => (
+                  <Reveal key={dir} enabled delay={index * 45}>
+                    <div className={styles.boundaryItem}>
+                      <span>{dir}</span>
+                      <strong>{place}</strong>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+
+            <Reveal enabled>
+              <p className={styles.regionNote}>
+                Batas administratif Kelurahan Amborawang Darat ditetapkan melalui Peraturan Bupati Kutai Kartanegara Nomor 43 Tahun 2019. Wilayah yang berbatasan langsung meliputi Kelurahan Margomulyo, Kelurahan Argosari, Kelurahan Amborawang Laut, Kelurahan Salok Api Laut, Kelurahan Salok Api Darat, dan Desa Tani Bhakti.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* POTENSI */}
+        <section className={styles.potentialSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeading}>
+                <span className={styles.eyebrow}>Potensi Kelurahan</span>
+                <h2>Peluang yang dapat dikembangkan bersama</h2>
+                <p>
+                  Potensi wilayah mencakup pertanian dan hortikultura, usaha mikro dan perdagangan lokal, pendidikan, kegiatan sosial kemasyarakatan, serta posisi strategis pada koridor pengembangan Samboja Barat. Pengembangan potensi diarahkan pada peningkatan nilai tambah usaha warga, penguatan kapasitas sumber daya manusia, perbaikan infrastruktur dasar, dan pengelolaan lingkungan.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className={styles.potentialGrid}>
+              {potentials.map((item, index) => (
+                <Reveal key={item.title} enabled delay={index * 50}>
+                  <article className={styles.potentialCard}>
+                    <span className={styles.cardNumber}>0{index + 1}</span>
                     <h3>{item.title}</h3>
                     <p>{item.text}</p>
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          VISI MISI
-      ===================================================== */}
-
-      <section className={styles.visionSection}>
-        <div className={`container ${styles.visionGrid}`}>
-          <Reveal enabled={animationEnabled}>
-            <article className={styles.visionCard}>
-              <span className={styles.darkIcon}>
-                <Icon name="vision" size={28} />
-              </span>
-
-              <span className={styles.darkKicker}>
-                Visi Pelayanan
-              </span>
-
-              <blockquote>{data.vision}</blockquote>
-
-              <small>
-                Rumusan profil digital ini tetap dapat
-                disesuaikan melalui dashboard apabila dokumen
-                visi kelurahan yang ditetapkan tersedia.
-              </small>
-            </article>
-          </Reveal>
-
-          <Reveal enabled={animationEnabled} delay={100}>
-            <article className={styles.missionCard}>
-              <div className={styles.missionHeading}>
-                <span className={styles.lightIcon}>
-                  <Icon name="mission" size={25} />
-                </span>
-
-                <div>
-                  <span>Misi</span>
-
-                  <h2>
-                    Arah kerja yang dekat dengan kebutuhan warga
-                  </h2>
-                </div>
-              </div>
-
-              <ol className={styles.missionList}>
-                {data.missions.map((mission, index) => (
-                  <li key={mission}>
-                    <span>
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-
-                    <p>{mission}</p>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* =====================================================
-          GEOGRAFI + PETA ASLI
-      ===================================================== */}
-
-      <section className={styles.geographySection}>
-        <div className="container">
-          <Reveal enabled={animationEnabled}>
-            <div className={styles.centerHeading}>
-              <span className="eyebrow">
-                Kondisi Wilayah
-              </span>
-
-              <h2>
-                Geografi dan batas administratif
-              </h2>
-
-              <p>{data.geography}</p>
+                  </article>
+                </Reveal>
+              ))}
             </div>
-          </Reveal>
+          </div>
+        </section>
 
-          <div className={styles.geographyGrid}>
-            {/* PETA BARU */}
-
-            <Reveal enabled={animationEnabled}>
-              <article className={styles.mapCard}>
-                <a
-                  href="/images/peta-amborawang-darat.png"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.mapImageLink}
-                  aria-label="Buka peta Kelurahan Amborawang Darat ukuran penuh"
-                >
-                  <img
-                    src="/images/peta-amborawang-darat.png"
-                    alt="Peta wilayah Kelurahan Amborawang Darat, Kecamatan Samboja Barat"
-                    className={styles.mapImage}
-                    loading="lazy"
-                  />
-
-                  <div
-                    className={styles.mapShade}
-                    aria-hidden="true"
-                  />
-
-                  <span className={styles.mapBadge}>
-                    <Icon name="map" size={18} />
-                    Peta Wilayah
-                  </span>
-
-                  <span className={styles.mapExpandButton}>
-                    <span>Lihat Peta Penuh</span>
-                    <Icon name="expand" size={17} />
-                  </span>
-                </a>
-              </article>
+        {/* FASILITAS */}
+        <section className={styles.facilitySection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.facilityHeading}>
+                <div>
+                  <span className={styles.eyebrow}>Fasilitas Umum</span>
+                  <h2>Sarana yang mendukung aktivitas masyarakat</h2>
+                </div>
+                <p>
+                  Daftar dapat diperbarui melalui dashboard ketika terdapat fasilitas baru atau perubahan nama layanan.
+                </p>
+              </div>
             </Reveal>
 
-            {/* BATAS WILAYAH */}
-
-            <div className={styles.boundaryGrid}>
-              {profileBoundaries.map(
-                (boundary, index) => (
-                  <Reveal
-                    key={boundary.direction}
-                    enabled={animationEnabled}
-                    delay={index * 65}
-                  >
-                    <article
-                      className={styles.boundaryCard}
-                    >
-                      <span>{boundary.direction}</span>
-                      <strong>{boundary.places}</strong>
-                    </article>
-                  </Reveal>
-                ),
-              )}
-
-              <Reveal
-                enabled={animationEnabled}
-                delay={260}
-                className={styles.boundaryLegalWrap}
-              >
-                <div className={styles.boundaryLegal}>
-                  <Icon name="shield" />
-
-                  <p>{data.boundaries}</p>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          POTENSI
-      ===================================================== */}
-
-      <section className={styles.potentialSection}>
-        <div className="container">
-          <Reveal enabled={animationEnabled}>
-            <div className={styles.splitHeading}>
+            <div className={styles.facilityLead}>
               <div>
-                <span className="eyebrow">
-                  Potensi Kelurahan
-                </span>
-
-                <h2>
-                  Peluang yang dapat dikembangkan bersama
-                </h2>
+                <span>08</span>
+                <strong>Kelompok fasilitas utama</strong>
               </div>
-
-              <p>{data.potential}</p>
-            </div>
-          </Reveal>
-
-          <div className={styles.potentialGrid}>
-            {profilePotentials.map((item, index) => (
-              <Reveal
-                key={item.title}
-                enabled={animationEnabled}
-                delay={index * 70}
-              >
-                <article className={styles.potentialCard}>
-                  <span>
-                    <Icon
-                      name={item.icon}
-                      size={27}
-                    />
-                  </span>
-
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          FASILITAS
-      ===================================================== */}
-
-      <section className={styles.facilitySection}>
-        <div className="container">
-          <Reveal enabled={animationEnabled}>
-            <div className={styles.centerHeading}>
-              <span className="eyebrow">
-                Fasilitas Umum
-              </span>
-
-              <h2>
-                Sarana yang mendukung aktivitas masyarakat
-              </h2>
-
               <p>
-                Daftar dapat diperbarui melalui dashboard ketika
-                terdapat fasilitas baru atau perubahan nama
-                layanan.
+                Pelayanan pemerintahan, pendidikan, kesehatan, keagamaan,
+                konektivitas, dan kegiatan ekonomi masyarakat.
               </p>
             </div>
-          </Reveal>
 
-          <div className={styles.facilityGrid}>
-            {data.facilities.map((facility, index) => (
-              <Reveal
-                key={facility}
-                enabled={animationEnabled}
-                delay={(index % 4) * 55}
-              >
-                <article className={styles.facilityCard}>
-                  <span
-                    className={styles.facilityNumber}
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-
-                  <span
-                    className={styles.facilityCheck}
-                  >
-                    <Icon name="check" />
-                  </span>
-
-                  <p>{facility}</p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          PRIORITAS
-      ===================================================== */}
-
-      <section className={styles.prioritySection}>
-        <div
-          className={`container ${styles.priorityPanel}`}
-        >
-          <Reveal enabled={animationEnabled}>
-            <div className={styles.priorityIntro}>
-              <span className={styles.priorityKicker}>
-                Tambahan Profil
-              </span>
-
-              <h2>
-                Prioritas pengembangan wilayah
-              </h2>
-
-              <p>
-                Bagian ini membuat halaman profil lebih relevan
-                dengan kebutuhan perencanaan dan menunjukkan
-                fokus perbaikan secara ringkas.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className={styles.priorityList}>
-            {developmentPriorities.map(
-              (item, index) => (
-                <Reveal
-                  key={item}
-                  enabled={animationEnabled}
-                  delay={index * 45}
-                >
-                  <div
-                    className={styles.priorityItem}
-                  >
-                    <span>
-                      <Icon name="check" />
-                    </span>
-
+            <div className={styles.facilityList}>
+              {facilities.map((item, index) => (
+                <Reveal key={item} enabled delay={index * 35}>
+                  <div className={styles.facilityItem}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
                     <strong>{item}</strong>
                   </div>
                 </Reveal>
-              ),
-            )}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* =====================================================
-          CTA
-      ===================================================== */}
+        {/* PRIORITAS */}
+        <section className={styles.prioritySection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeadingDark}>
+                <span className={styles.eyebrowLight}>Tambahan Profil</span>
+                <h2>Prioritas pengembangan wilayah</h2>
+                <p>
+                  Bagian ini membuat halaman profil lebih relevan dengan kebutuhan perencanaan dan menunjukkan fokus perbaikan secara ringkas.
+                </p>
+              </div>
+            </Reveal>
 
-      <section className={styles.ctaSection}>
-        <div className={`container ${styles.ctaPanel}`}>
-          <div>
-            <span>
-              Data wilayah perlu diperbarui secara berkala
-            </span>
-
-            <h2>
-              Menemukan data atau fasilitas yang belum
-              tercantum?
-            </h2>
-
-            <p>
-              Sampaikan koreksi kepada kelurahan agar profil
-              publik tetap akurat.
-            </p>
+            <div className={styles.priorityGrid}>
+              {priorities.map((item, index) => (
+                <Reveal key={item} enabled delay={index * 40}>
+                  <div className={styles.priorityItem}>
+                    <span>0{index + 1}</span>
+                    <strong>{item}</strong>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <div className={styles.ctaActions}>
-            <Link
-              href="/kontak"
-              className="btn btn-primary"
-            >
-              Hubungi Kelurahan
-              <Icon name="arrow" />
-            </Link>
+        {/* UPDATE DATA */}
+        <section className={styles.updateSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.updatePanel}>
+                <div className={styles.updateIcon}>
+                  <PinIcon />
+                </div>
 
-            <Link
-              href="/wilayah"
-              className="btn btn-outline"
-            >
-              Lihat Data Wilayah
-            </Link>
+                <div className={styles.updateCopy}>
+                  <span>Data wilayah perlu diperbarui secara berkala</span>
+                  <h2>Menemukan data atau fasilitas yang belum tercantum?</h2>
+                  <p>
+                    Sampaikan koreksi kepada kelurahan agar profil publik tetap akurat.
+                  </p>
+                </div>
+
+                <div className={styles.updateActions}>
+                  <Link href="/kontak" className={styles.primaryButton}>
+                    Hubungi Kelurahan
+                    <ArrowIcon />
+                  </Link>
+
+                  <Link href="/wilayah" className={styles.secondaryButton}>
+                    Lihat Data Wilayah
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </PublicShell>
   );
 }

@@ -94,6 +94,8 @@ export interface PostItem {
   coverImageUrl: string;
   category: string;
   authorName?: string;
+  publishedDate?: string;
+  publishedTime?: string;
   status: "draft" | "published" | "archived";
   isFeatured: boolean;
   publishedAt?: unknown;

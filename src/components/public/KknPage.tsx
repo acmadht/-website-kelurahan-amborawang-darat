@@ -1,671 +1,470 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import PageHero from "./PageHero";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./KknPage.module.css";
 
-type MemberGroup = "advisor" | "leader" | "division";
+type Member = {
+  name: string;
+  role: string;
+  division: string;
+  image: string;
+  accent?: string;
+};
 
-type DivisionName =
-    | "Pembimbing"
-    | "Ketua"
-    | "Sekretaris"
-    | "Bendahara"
-    | "Media"
-    | "Humas"
-    | "Logistik";
-
-interface MemberItem {
-    id: string;
-    name: string;
-    role: string;
-    division: DivisionName;
-    image: string;
-    group: MemberGroup;
-    description: string;
-}
-
-const kknMembers: MemberItem[] = [
-    {
-        id: "dosen-pembimbing",
-        name: "Dr. Nur Kholik Afandi, S.Ag., M.Pd",
-        role: "Dosen Pembimbing",
-        division: "Pembimbing",
-        image: "/images/kkn/01-dosen-pembimbing.jpg",
-        group: "advisor",
-        description:
-            "Pembimbing utama Kelompok 2 KKN Reguler Amborawang Darat Tahun 2026.",
-    },
-    {
-        id: "ketua",
-        name: "Achmad Aldi Saputra",
-        role: "Ketua",
-        division: "Ketua",
-        image: "/images/kkn/02-ketua.jpg",
-        group: "leader",
-        description:
-            "Mengkoordinasikan pelaksanaan program kerja, arah gerak tim, dan komunikasi umum kelompok.",
-    },
-    {
-        id: "sekretaris",
-        name: "Norvina Alvionika",
-        role: "Sekretaris",
-        division: "Sekretaris",
-        image: "/images/kkn/03-sekretaris.jpg",
-        group: "leader",
-        description:
-            "Mengelola administrasi, dokumentasi surat, notulen, dan pengarsipan kegiatan tim.",
-    },
-    {
-        id: "bendahara",
-        name: "Junita Noor Azzara",
-        role: "Bendahara",
-        division: "Bendahara",
-        image: "/images/kkn/04-bendahara.jpg",
-        group: "leader",
-        description:
-            "Mengelola pencatatan keuangan, pengeluaran kegiatan, dan akuntabilitas dana tim.",
-    },
-    {
-        id: "media-1",
-        name: "Syarifah Rabiatul Adhawiyah",
-        role: "Anggota",
-        division: "Media",
-        image: "/images/kkn/05-media-syarifah.jpg",
-        group: "division",
-        description:
-            "Bertanggung jawab pada publikasi, visual konten, dokumentasi, dan media informasi kegiatan KKN.",
-    },
-    {
-        id: "media-2",
-        name: "Devi Sulistyowati",
-        role: "Anggota",
-        division: "Media",
-        image: "/images/kkn/06-media-devi.jpg",
-        group: "division",
-        description:
-            "Mendukung publikasi kegiatan, pembuatan materi komunikasi, serta penyebaran informasi tim.",
-    },
-    {
-        id: "media-3",
-        name: "Ikhtiara Nada Maheswari",
-        role: "Anggota",
-        division: "Media",
-        image: "/images/kkn/07-media-ikhtiara.jpg",
-        group: "division",
-        description:
-            "Berperan dalam dokumentasi kegiatan lapangan dan pengembangan materi visual tim KKN.",
-    },
-    {
-        id: "humas",
-        name: "Muhammad Hylmi Ramadhan Ardani",
-        role: "Anggota",
-        division: "Humas",
-        image: "/images/kkn/08-humas-hylmi.jpg",
-        group: "division",
-        description:
-            "Mengelola hubungan komunikasi dengan masyarakat, mitra, dan pihak terkait selama program berlangsung.",
-    },
-    {
-        id: "logistik-1",
-        name: "Elisyah Febrianti",
-        role: "Anggota",
-        division: "Logistik",
-        image: "/images/kkn/09-logistik-elisyah.jpg",
-        group: "division",
-        description:
-            "Mendukung kebutuhan perlengkapan, penyiapan alat, dan distribusi sarana kegiatan tim.",
-    },
-    {
-        id: "logistik-2",
-        name: "Abdul Khakim",
-        role: "Anggota",
-        division: "Logistik",
-        image: "/images/kkn/10-logistik-abdul.jpg",
-        group: "division",
-        description:
-            "Menangani pengelolaan perlengkapan dan memastikan kesiapan kebutuhan teknis kegiatan.",
-    },
-    {
-        id: "logistik-3",
-        name: "Muhamad Helmi Yanur",
-        role: "Anggota",
-        division: "Logistik",
-        image: "/images/kkn/11-logistik-helmi.jpg",
-        group: "division",
-        description:
-            "Mendukung koordinasi lapangan, pengelolaan perlengkapan, dan kebutuhan operasional kegiatan.",
-    },
+const coreTeam: Member[] = [
+  {
+    name: "Achmad Aldi Saputra",
+    role: "Ketua",
+    division: "Pimpinan Tim",
+    image: "/images/kkn/02-ketua.jpg",
+  },
+  {
+    name: "Norvina Alvionika",
+    role: "Sekretaris",
+    division: "Administrasi",
+    image: "/images/kkn/03-sekretaris.jpg",
+  },
+  {
+    name: "Junita Noor Azzara",
+    role: "Bendahara",
+    division: "Keuangan",
+    image: "/images/kkn/04-bendahara.jpg",
+  },
 ];
 
-function Icon({
-    name,
-    size = 20,
-}: {
-    name:
-    | "users"
-    | "sparkles"
-    | "arrow"
-    | "flip"
-    | "camera"
-    | "message"
-    | "box"
-    | "wallet"
-    | "shield"
-    | "star";
-    size?: number;
-}) {
-    const common = {
-        width: size,
-        height: size,
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.8,
-        strokeLinecap: "round" as const,
-        strokeLinejoin: "round" as const,
-        "aria-hidden": true,
-    };
+const divisions: { title: string; members: Member[] }[] = [
+  {
+    title: "Media",
+    members: [
+      {
+        name: "Syarifah Rabiatul Adhawiyah",
+        role: "Anggota Media",
+        division: "Media",
+        image: "/images/kkn/05-media-syarifah.jpg",
+      },
+      {
+        name: "Devi Sulistyowati",
+        role: "Anggota Media",
+        division: "Media",
+        image: "/images/kkn/06-media-devi.jpg",
+      },
+      {
+        name: "Ikhtiara Nada Maheswari",
+        role: "Anggota Media",
+        division: "Media",
+        image: "/images/kkn/07-media-ikhtiara.jpg",
+      },
+    ],
+  },
+  {
+    title: "Humas",
+    members: [
+      {
+        name: "Muhammad Hylmi Ramadhan Ardani",
+        role: "Anggota Humas",
+        division: "Humas",
+        image: "/images/kkn/08-humas-hylmi.jpg",
+      },
+    ],
+  },
+  {
+    title: "Logistik",
+    members: [
+      {
+        name: "Elisyah Febrianti",
+        role: "Anggota Logistik",
+        division: "Logistik",
+        image: "/images/kkn/09-logistik-elisyah.jpg",
+      },
+      {
+        name: "Abdul Khakim",
+        role: "Anggota Logistik",
+        division: "Logistik",
+        image: "/images/kkn/10-logistik-abdul.jpg",
+      },
+      {
+        name: "Muhamad Helmi Yanur",
+        role: "Anggota Logistik",
+        division: "Logistik",
+        image: "/images/kkn/11-logistik-helmi.jpg",
+      },
+    ],
+  },
+];
 
-    const icons = {
-        users: (
-            <>
-                <circle cx="9" cy="8" r="3" />
-                <path d="M3.5 19c.5-4 2.5-6 5.5-6s5 2 5.5 6" />
-                <path d="M15 6.5a2.5 2.5 0 0 1 0 5" />
-                <path d="M16 13c2.6.5 4 2.5 4.5 5" />
-            </>
-        ),
-
-        sparkles: (
-            <>
-                <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z" />
-                <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" />
-            </>
-        ),
-
-        arrow: (
-            <>
-                <path d="M5 12h14" />
-                <path d="m13 6 6 6-6 6" />
-            </>
-        ),
-
-        flip: (
-            <>
-                <path d="M8 7H4V3" />
-                <path d="M20 17v4h-4" />
-                <path d="M4 7c2-2.8 4.7-4 8-4 4.4 0 7.4 1.8 9 5" />
-                <path d="M20 17c-2 2.8-4.7 4-8 4-4.4 0-7.4-1.8-9-5" />
-            </>
-        ),
-
-        camera: (
-            <>
-                <path d="M4 8h3l1.5-2h7L17 8h3v10H4Z" />
-                <circle cx="12" cy="13" r="3.5" />
-            </>
-        ),
-
-        message: <path d="M5 5h14v10H9l-4 4V5Z" />,
-
-        box: (
-            <>
-                <path d="m12 3 8 4.5v9L12 21 4 16.5v-9L12 3Z" />
-                <path d="M12 12 4 7.5" />
-                <path d="M12 12l8-4.5" />
-                <path d="M12 12v9" />
-            </>
-        ),
-
-        wallet: (
-            <>
-                <path d="M4 7h14a2 2 0 0 1 2 2v8H6a2 2 0 0 1-2-2V7Z" />
-                <path d="M4 7V6a2 2 0 0 1 2-2h11" />
-                <path d="M16 12h4" />
-            </>
-        ),
-
-        shield: (
-            <>
-                <path d="M12 3 5 6v5c0 4.8 2.8 8 7 10 4.2-2 7-5.2 7-10V6Z" />
-                <path d="m9 12 2 2 4-4" />
-            </>
-        ),
-
-        star: (
-            <path d="m12 3 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.8L6.8 19l1-5.8-4.2-4.1 5.8-.8Z" />
-        ),
-    };
-
-    return <svg {...common}>{icons[name]}</svg>;
+function ArrowIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
 }
 
-function getDivisionIcon(division: DivisionName) {
-    switch (division) {
-        case "Media":
-            return <Icon name="camera" />;
-
-        case "Humas":
-            return <Icon name="message" />;
-
-        case "Logistik":
-            return <Icon name="box" />;
-
-        case "Bendahara":
-            return <Icon name="wallet" />;
-
-        case "Pembimbing":
-            return <Icon name="shield" />;
-
-        case "Ketua":
-            return <Icon name="star" />;
-
-        default:
-            return <Icon name="users" />;
-    }
+function TeamIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
 }
 
-function MemberCard({
-    member,
-    flipped,
-    onToggle,
-    featured = false,
-}: {
-    member: MemberItem;
-    flipped: boolean;
-    onToggle: (id: string) => void;
-    featured?: boolean;
-}) {
-    return (
-        <button
-            type="button"
-            className={`${styles.memberCard} ${flipped ? styles.memberCardFlipped : ""
-                } ${featured ? styles.featuredMemberCard : ""}`}
-            onClick={() => onToggle(member.id)}
-            aria-pressed={flipped}
-            aria-label={`Lihat detail ${member.name}`}
-        >
-            <div className={styles.memberCardInner}>
-                {/* FRONT */}
-                <div className={`${styles.memberFace} ${styles.memberFront}`}>
-                    <div className={styles.photoWrap}>
-                        {/* BACKGROUND BLUR */}
-                        <img
-                            src={member.image}
-                            alt=""
-                            aria-hidden="true"
-                            className={styles.photoBackground}
-                        />
+function Photo({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className={styles.photoFrame}>
+      <img className={styles.photoBackdrop} src={src} alt="" aria-hidden="true" />
+      <img
+        className={styles.photoMain}
+        src={src}
+        alt={alt}
+        onError={(event) => {
+          event.currentTarget.onerror = null;
+          event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
+        }}
+      />
+    </div>
+  );
+}
 
-                        {/* FOTO UTAMA TIDAK DIPOTONG */}
-                        <img
-                            src={member.image}
-                            alt={`Foto ${member.name}`}
-                            className={styles.memberPhoto}
-                            loading="lazy"
-                        />
+function MemberCard({ member }: { member: Member }) {
+  const [flipped, setFlipped] = useState(false);
 
-                        <div className={styles.photoGradient} aria-hidden="true" />
+  const detailText =
+    member.division === "Media"
+      ? "Bertanggung jawab mendukung dokumentasi, publikasi, dan kebutuhan media kegiatan KKN."
+      : member.division === "Humas"
+        ? "Mendukung komunikasi, koordinasi, serta hubungan tim KKN dengan masyarakat dan pihak kelurahan."
+        : member.division === "Logistik"
+          ? "Mendukung kesiapan perlengkapan dan kebutuhan teknis selama pelaksanaan program KKN."
+          : member.division === "Administrasi"
+            ? "Mendukung pencatatan, administrasi, dan penyusunan kebutuhan dokumentasi kegiatan tim."
+            : member.division === "Keuangan"
+              ? "Mengelola pencatatan dan kebutuhan keuangan kegiatan KKN secara tertib."
+              : "Mengoordinasikan pelaksanaan program serta memastikan kegiatan tim berjalan terarah.";
 
-                        <span className={styles.cardRoleBadge}>
-                            {member.division}
-                        </span>
+  return (
+    <button
+      type="button"
+      className={`${styles.flipCard} ${flipped ? styles.flipped : ""}`}
+      onClick={() => setFlipped((value) => !value)}
+      aria-pressed={flipped}
+      aria-label={`${flipped ? "Tampilkan bagian depan" : "Lihat detail"} ${member.name}`}
+    >
+      <span className={styles.flipHint}>
+        {flipped ? "Klik untuk kembali" : "Klik untuk lihat detail"}
+      </span>
 
-                        {featured && (
-                            <span className={styles.premiumBadge}>
-                                <Icon name="star" size={14} />
-                                Pembimbing
-                            </span>
-                        )}
-                    </div>
+      <span className={styles.flipInner}>
+        <span className={`${styles.flipFace} ${styles.flipFront}`}>
+          <span className={styles.memberPhotoWrap}>
+            <Photo src={member.image} alt={`Foto ${member.name}`} />
+          </span>
 
-                    <div className={styles.memberInfo}>
-                        <div className={styles.memberTopMeta}>
-                            <span className={styles.memberDivisionIcon}>
-                                {getDivisionIcon(member.division)}
-                            </span>
+          <span className={styles.memberBody}>
+            <span>{member.division}</span>
+            <h3>{member.name}</h3>
+            <strong>{member.role}</strong>
+          </span>
+        </span>
 
-                            <small>{member.role}</small>
-                        </div>
+        <span className={`${styles.flipFace} ${styles.flipBack}`}>
+          <span className={styles.backNumber}>
+            {member.division.substring(0, 2).toUpperCase()}
+          </span>
 
-                        <h3>{member.name}</h3>
+          <span className={styles.backContent}>
+            <small>{member.division}</small>
+            <h3>{member.name}</h3>
+            <strong>{member.role}</strong>
+            <p>{detailText}</p>
+          </span>
 
-                        <p>
-                            Kelompok 2 KKN Reguler
-                            <span> • </span>
-                            Amborawang Darat
-                        </p>
-
-                        <span className={styles.flipHint}>
-                            <Icon name="flip" size={16} />
-                            Klik untuk lihat profil
-                        </span>
-                    </div>
-                </div>
-
-                {/* BACK */}
-                <div className={`${styles.memberFace} ${styles.memberBack}`}>
-                    <div className={styles.backPattern} />
-
-                    <div className={styles.memberBackHeader}>
-                        <span className={styles.memberBackIcon}>
-                            {getDivisionIcon(member.division)}
-                        </span>
-
-                        <span className={styles.memberBackBadge}>
-                            {member.division}
-                        </span>
-                    </div>
-
-                    <div className={styles.memberBackBody}>
-                        <span className={styles.backEyebrow}>
-                            Profil Anggota
-                        </span>
-
-                        <h3>{member.name}</h3>
-
-                        <strong>{member.role}</strong>
-
-                        <p>{member.description}</p>
-
-                        <ul className={styles.memberMetaList}>
-                            <li>
-                                <span>Program</span>
-                                <strong>KKN Reguler 2026</strong>
-                            </li>
-
-                            <li>
-                                <span>Kelompok</span>
-                                <strong>Kelompok 2</strong>
-                            </li>
-
-                            <li>
-                                <span>Lokasi</span>
-                                <strong>Amborawang Darat</strong>
-                            </li>
-
-                            <li>
-                                <span>Divisi</span>
-                                <strong>{member.division}</strong>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <span className={styles.flipHintBack}>
-                        <Icon name="flip" size={16} />
-                        Klik untuk kembali
-                    </span>
-                </div>
-            </div>
-        </button>
-    );
+          <span className={styles.backAction}>Klik untuk kembali</span>
+        </span>
+      </span>
+    </button>
+  );
 }
 
 export default function KknPage() {
-    const [flippedCards, setFlippedCards] = useState<string[]>([]);
+  return (
+    <PublicShell>
+      <main className={styles.page}>
+        {/* HERO */}
+        <section className={styles.hero}>
+          <div className={styles.heroPattern} aria-hidden="true" />
 
-    function toggleCard(id: string) {
-        setFlippedCards((current) =>
-            current.includes(id)
-                ? current.filter((item) => item !== id)
-                : [...current, id],
-        );
-    }
-
-    const advisor = useMemo(
-        () =>
-            kknMembers.find(
-                (member) => member.group === "advisor",
-            ),
-        [],
-    );
-
-    const leaders = useMemo(
-        () =>
-            kknMembers.filter(
-                (member) => member.group === "leader",
-            ),
-        [],
-    );
-
-    const mediaMembers = useMemo(
-        () =>
-            kknMembers.filter(
-                (member) => member.division === "Media",
-            ),
-        [],
-    );
-
-    const humasMembers = useMemo(
-        () =>
-            kknMembers.filter(
-                (member) => member.division === "Humas",
-            ),
-        [],
-    );
-
-    const logisticMembers = useMemo(
-        () =>
-            kknMembers.filter(
-                (member) => member.division === "Logistik",
-            ),
-        [],
-    );
-
-    return (
-        <PublicShell>
-            <PageHero
-                eyebrow="Tim KKN 2026"
-                title="Tim KKN Reguler Amborawang Darat"
-                description="Kenali dosen pembimbing, pengurus inti, dan anggota Kelompok 2 KKN Reguler Amborawang Darat melalui profil interaktif."
-            />
-
-            <section className={styles.kknSection}>
-                <div className="container">
-                    {/* PEMBIMBING */}
-                    {advisor && (
-                        <section className={styles.advisorSection}>
-                            <Reveal enabled>
-                                <div className={styles.sectionHeadingCenter}>
-                                    <span className={styles.sectionLabel}>
-                                        Dosen Pembimbing
-                                    </span>
-
-                                    <h2>Pembimbing Utama</h2>
-
-                                    <p>
-                                        Pendamping akademik yang memberikan arahan dan supervisi
-                                        selama pelaksanaan KKN.
-                                    </p>
-                                </div>
-                            </Reveal>
-
-                            <Reveal enabled delay={60}>
-                                <div className={styles.advisorWrap}>
-                                    <MemberCard
-                                        member={advisor}
-                                        flipped={flippedCards.includes(advisor.id)}
-                                        onToggle={toggleCard}
-                                        featured
-                                    />
-                                </div>
-                            </Reveal>
-                        </section>
-                    )}
-
-                    {/* PENGURUS INTI */}
-                    <section className={styles.blockSection}>
-                        <Reveal enabled>
-                            <div className={styles.sectionHeading}>
-                                <div>
-                                    <span className={styles.sectionLabel}>
-                                        Pengurus Inti
-                                    </span>
-
-                                    <h2>Koordinator Kelompok</h2>
-                                </div>
-
-                                <p>
-                                    Struktur inti yang mengelola koordinasi, administrasi, dan
-                                    tata kelola kegiatan kelompok.
-                                </p>
-                            </div>
-                        </Reveal>
-
-                        <div className={styles.leaderGrid}>
-                            {leaders.map((member, index) => (
-                                <Reveal
-                                    enabled
-                                    delay={index * 70}
-                                    key={member.id}
-                                >
-                                    <MemberCard
-                                        member={member}
-                                        flipped={flippedCards.includes(member.id)}
-                                        onToggle={toggleCard}
-                                    />
-                                </Reveal>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* DIVISI */}
-                    <section className={styles.blockSection}>
-                        <Reveal enabled>
-                            <div className={styles.sectionHeading}>
-                                <div>
-                                    <span className={styles.sectionLabel}>
-                                        Divisi Pelaksana
-                                    </span>
-
-                                    <h2>Tim Pendukung Program Kerja</h2>
-                                </div>
-
-                                <p>
-                                    Setiap divisi memiliki peran khusus dalam mendukung
-                                    komunikasi, publikasi, dan operasional kegiatan lapangan.
-                                </p>
-                            </div>
-                        </Reveal>
-
-                        <div className={styles.divisionStack}>
-                            {/* MEDIA */}
-                            <section className={styles.divisionPanel}>
-                                <div className={styles.divisionHeader}>
-                                    <div className={styles.divisionTitleWrap}>
-                                        <span className={styles.divisionIcon}>
-                                            <Icon name="camera" />
-                                        </span>
-
-                                        <div>
-                                            <span>Divisi</span>
-                                            <h3>Media</h3>
-                                        </div>
-                                    </div>
-
-                                    <p>
-                                        Mengelola publikasi, dokumentasi, dan materi visual
-                                        kegiatan.
-                                    </p>
-                                </div>
-
-                                <div className={styles.divisionGridThree}>
-                                    {mediaMembers.map((member, index) => (
-                                        <Reveal
-                                            enabled
-                                            delay={index * 60}
-                                            key={member.id}
-                                        >
-                                            <MemberCard
-                                                member={member}
-                                                flipped={flippedCards.includes(member.id)}
-                                                onToggle={toggleCard}
-                                            />
-                                        </Reveal>
-                                    ))}
-                                </div>
-                            </section>
-
-                            {/* HUMAS */}
-                            <section className={styles.divisionPanel}>
-                                <div className={styles.divisionHeader}>
-                                    <div className={styles.divisionTitleWrap}>
-                                        <span className={styles.divisionIcon}>
-                                            <Icon name="message" />
-                                        </span>
-
-                                        <div>
-                                            <span>Divisi</span>
-                                            <h3>Humas</h3>
-                                        </div>
-                                    </div>
-
-                                    <p>
-                                        Menjalin komunikasi dengan masyarakat serta pihak yang
-                                        terlibat dalam kegiatan.
-                                    </p>
-                                </div>
-
-                                <div className={styles.divisionGridSingle}>
-                                    {humasMembers.map((member) => (
-                                        <Reveal
-                                            enabled
-                                            key={member.id}
-                                        >
-                                            <MemberCard
-                                                member={member}
-                                                flipped={flippedCards.includes(member.id)}
-                                                onToggle={toggleCard}
-                                            />
-                                        </Reveal>
-                                    ))}
-                                </div>
-                            </section>
-
-                            {/* LOGISTIK */}
-                            <section className={styles.divisionPanel}>
-                                <div className={styles.divisionHeader}>
-                                    <div className={styles.divisionTitleWrap}>
-                                        <span className={styles.divisionIcon}>
-                                            <Icon name="box" />
-                                        </span>
-
-                                        <div>
-                                            <span>Divisi</span>
-                                            <h3>Logistik</h3>
-                                        </div>
-                                    </div>
-
-                                    <p>
-                                        Menyiapkan kebutuhan teknis, perlengkapan, dan operasional
-                                        kegiatan.
-                                    </p>
-                                </div>
-
-                                <div className={styles.divisionGridThree}>
-                                    {logisticMembers.map((member, index) => (
-                                        <Reveal
-                                            enabled
-                                            delay={index * 60}
-                                            key={member.id}
-                                        >
-                                            <MemberCard
-                                                member={member}
-                                                flipped={flippedCards.includes(member.id)}
-                                                onToggle={toggleCard}
-                                            />
-                                        </Reveal>
-                                    ))}
-                                </div>
-                            </section>
-                        </div>
-                    </section>
+          <div className={`container ${styles.heroGrid}`}>
+            <Reveal enabled>
+              <div className={styles.heroCopy}>
+                <div className={styles.heroBadge}>
+                  <TeamIcon />
+                  <span>Tim KKN Reguler</span>
                 </div>
-            </section>
-        </PublicShell>
-    );
+
+                <h1>
+                  Tim KKN
+                  <strong>Amborawang Darat</strong>
+                </h1>
+
+                <p>
+                  Kolaborasi mahasiswa, dosen pembimbing, dan pemerintah
+                  kelurahan dalam mendukung program pengabdian dan pengembangan
+                  informasi publik di Amborawang Darat.
+                </p>
+
+                <div className={styles.heroStats}>
+                  <div>
+                    <strong>10</strong>
+                    <span>Mahasiswa</span>
+                  </div>
+                  <div>
+                    <strong>01</strong>
+                    <span>Dosen Pembimbing</span>
+                  </div>
+                  <div>
+                    <strong>03</strong>
+                    <span>Divisi</span>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal enabled delay={70}>
+              <div className={styles.heroVisual}>
+                <div className={styles.heroVisualTop}>
+                  <span>Struktur Tim</span>
+                  <strong>KKN Amborawang Darat</strong>
+                </div>
+
+                <div className={styles.heroFlow}>
+                  <div>
+                    <span>01</span>
+                    <strong>Dosen Pembimbing</strong>
+                  </div>
+                  <i />
+                  <div>
+                    <span>02</span>
+                    <strong>Ketua</strong>
+                  </div>
+                  <i />
+                  <div>
+                    <span>03</span>
+                    <strong>Divisi</strong>
+                  </div>
+                </div>
+
+                <a href="#struktur" className={styles.heroLink}>
+                  Lihat Struktur Tim
+                  <ArrowIcon size={16} />
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* NAV */}
+        <section className={styles.navSection}>
+          <div className="container">
+            <nav className={styles.sectionNav}>
+              <a href="#pembimbing">Pembimbing</a>
+              <a href="#inti">Tim Inti</a>
+              <a href="#divisi">Divisi</a>
+              <a href="#struktur">Struktur</a>
+            </nav>
+          </div>
+        </section>
+
+        {/* ADVISOR */}
+        <section id="pembimbing" className={styles.advisorSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeading}>
+                <span>01</span>
+                <div>
+                  <small>Dosen Pembimbing</small>
+                  <h2>Pendamping akademik tim</h2>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal enabled delay={50}>
+              <article className={styles.advisorCard}>
+                <div className={styles.advisorPhoto}>
+                  <Photo
+                    src="/images/kkn/01-dosen-pembimbing.jpg"
+                    alt="Foto Dr. Nur Kholik Afandi, S.Ag., M.Pd"
+                  />
+                </div>
+
+                <div className={styles.advisorBody}>
+                  <span>Dosen Pembimbing Lapangan</span>
+                  <h3>Dr. Nur Kholik Afandi, S.Ag., M.Pd</h3>
+                  <p>
+                    Mendampingi pelaksanaan program KKN, memberikan arahan
+                    akademik, serta memastikan kegiatan pengabdian berjalan
+                    terarah dan sesuai tujuan program.
+                  </p>
+
+                  <div className={styles.advisorMeta}>
+                    <div>
+                      <small>Peran</small>
+                      <strong>Pembimbing Lapangan</strong>
+                    </div>
+                    <div>
+                      <small>Lokasi</small>
+                      <strong>Amborawang Darat</strong>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* CORE TEAM */}
+        <section id="inti" className={styles.coreSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.sectionHeadingDark}>
+                <span>02</span>
+                <div>
+                  <small>Tim Inti</small>
+                  <h2>Koordinasi utama kegiatan</h2>
+                </div>
+              </div>
+            </Reveal>
+
+            <div className={styles.coreGrid}>
+              {coreTeam.map((member, index) => (
+                <Reveal key={member.name} enabled delay={index * 45}>
+                  <MemberCard member={member} />
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* DIVISIONS */}
+        <section id="divisi" className={styles.divisionSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.divisionHeading}>
+                <div>
+                  <span>03</span>
+                  <small>Divisi KKN</small>
+                  <h2>Tim pelaksana program</h2>
+                </div>
+
+                <p>
+                  Setiap divisi memiliki peran berbeda untuk memastikan
+                  dokumentasi, komunikasi, dan kebutuhan teknis kegiatan berjalan
+                  dengan baik.
+                </p>
+              </div>
+            </Reveal>
+
+            {divisions.map((division, divisionIndex) => (
+              <section key={division.title} className={styles.divisionBlock}>
+                <div className={styles.divisionLabel}>
+                  <span>0{divisionIndex + 1}</span>
+                  <strong>{division.title}</strong>
+                </div>
+
+                <div className={styles.divisionGrid}>
+                  {division.members.map((member, index) => (
+                    <Reveal key={member.name} enabled delay={index * 40}>
+                      <MemberCard member={member} />
+                    </Reveal>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </section>
+
+        {/* STRUCTURE */}
+        <section id="struktur" className={styles.structureSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.structureHeading}>
+                <span>04</span>
+                <small>Struktur Organisasi</small>
+                <h2>Susunan Tim KKN</h2>
+                <p>
+                  Struktur organisasi menampilkan jalur koordinasi tim secara
+                  keseluruhan.
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal enabled delay={50}>
+              <div className={styles.structureCard}>
+                <div className={styles.structureImage}>
+                  <img
+                    src="/images/kkn/struktur-organisasi-kkn.png"
+                    alt="Struktur organisasi Tim KKN Amborawang Darat"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
+                    }}
+                  />
+                </div>
+
+                <div className={styles.structureFooter}>
+                  <div>
+                    <span>Struktur Tim</span>
+                    <strong>KKN Amborawang Darat</strong>
+                  </div>
+
+                  <a
+                    href="/images/kkn/struktur-organisasi-kkn.png"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Lihat Ukuran Penuh
+                    <ArrowIcon size={16} />
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className={styles.ctaSection}>
+          <div className="container">
+            <Reveal enabled>
+              <div className={styles.cta}>
+                <div>
+                  <span>Program KKN</span>
+                  <h2>Kolaborasi untuk Amborawang Darat.</h2>
+                  <p>
+                    Dokumentasi program dan kegiatan KKN dapat dilihat melalui
+                    halaman berita dan galeri.
+                  </p>
+                </div>
+
+                <div className={styles.ctaActions}>
+                  <Link href="/berita" className={styles.ctaPrimary}>
+                    Lihat Berita
+                    <ArrowIcon />
+                  </Link>
+
+                  <Link href="/galeri" className={styles.ctaSecondary}>
+                    Lihat Galeri
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      </main>
+    </PublicShell>
+  );
 }
