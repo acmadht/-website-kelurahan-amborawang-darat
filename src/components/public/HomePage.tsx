@@ -151,7 +151,7 @@ export default function HomePage() {
 
         <section className="section section-white">
           <div className="container">
-            <div className="kkn-panel"><div className="kkn-grid"><div><span className="eyebrow" style={{ color: "#7dc4ff" }}>Tim Pengembang</span><h2 className="section-title light">Website dikembangkan bersama kelompok KKN</h2><p className="section-copy light">{kkn.description}</p><p><strong>{kkn.groupName}</strong><br />{kkn.universityName} • {kkn.year}</p><div className="hero-actions"><Link className="btn btn-secondary" href="/tim-kkn">Lihat Tim KKN</Link><Link className="btn btn-primary" href="/galeri">Galeri KKN →</Link></div></div><img src={kkn.groupPhotoUrl || "/images/kkn-team.svg"} alt={`Tim ${kkn.groupName}`} /></div></div>
+            <div className="kkn-panel"><div className="kkn-grid"><div><span className="eyebrow" style={{ color: "#7dc4ff" }}>Kelompok KKN</span><h2 className="section-title light">Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</h2><p className="section-copy light">{kkn.description}</p><p><strong>{kkn.groupName}</strong><br />{kkn.universityName} • {kkn.year}</p><div className="hero-actions"><Link className="btn btn-secondary" href="/tim-kkn">Lihat Tim KKN</Link><Link className="btn btn-primary" href="/galeri">Galeri KKN →</Link></div></div><img src={kkn.groupPhotoUrl || "/images/kkn-team.svg"} alt={`Tim ${kkn.groupName}`} /></div></div>
           </div>
         </section>
 

@@ -20,7 +20,7 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
             <div><div className="footer-title">Pemerintahan</div><div className="footer-list"><Link href="/pemerintahan">Aparatur</Link><Link href="/wilayah">Data RT</Link><Link href="/dokumen">Dokumen publik</Link><Link href="/tim-kkn">Tim KKN</Link></div></div>
             <div><div className="footer-title">Kontak</div><div className="footer-list">{contacts.map((item) => <span key={item}>{item}</span>)}<Link href="/admin/login">Login admin</Link></div></div>
           </div>
-          <div className="footer-bottom"><span>© {new Date().getFullYear()} {settings.footerText}</span><span>Dikembangkan bersama kelompok KKN</span></div>
+          <div className="footer-bottom"><span>© {new Date().getFullYear()} {settings.footerText}</span><span>Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</span></div>
         </div>
       </footer>
       {settings.whatsappEnabled && whatsapp ? <a className="whatsapp-float" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" aria-label="Hubungi Kelurahan Amborawang Darat melalui WhatsApp">WA</a> : null}
