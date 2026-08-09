@@ -1,2 +1,5 @@
 import KknPage from "@/components/public/KknPage";
-export default function Page(){return <KknPage/>;}
+
+export default function TimKknPage() {
+  return <KknPage />;
+}

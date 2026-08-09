@@ -9,12 +9,30 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   title: {
-    default: "Website Resmi Kelurahan Amborawang Darat",
+    default: "Kelurahan Amborawang Darat | Website Resmi Pemerintah Kelurahan",
     template: "%s | Kelurahan Amborawang Darat",
   },
 
   description:
-    "Portal resmi Kelurahan Amborawang Darat yang menyediakan informasi pemerintahan, pelayanan publik, berita, pengumuman, dan kegiatan masyarakat.",
+    "Website resmi Kelurahan Amborawang Darat, Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Menyediakan informasi pemerintahan, pelayanan masyarakat, berita, pengumuman, galeri, profil kelurahan, dan informasi publik.",
+
+  applicationName: "Website Resmi Kelurahan Amborawang Darat",
+  authors: [{ name: "Pemerintah Kelurahan Amborawang Darat" }],
+  creator: "Pemerintah Kelurahan Amborawang Darat",
+  publisher: "Pemerintah Kelurahan Amborawang Darat",
+  keywords: [
+    "Kelurahan Amborawang Darat",
+    "Website Kelurahan Amborawang Darat",
+    "Pemerintah Kelurahan Amborawang Darat",
+    "Amborawang Darat Samboja Barat",
+    "Kelurahan Amborawang Darat Kutai Kartanegara",
+    "Amborawang Darat Kalimantan Timur",
+    "Samboja Barat",
+    "Kutai Kartanegara",
+    "Kalimantan Timur",
+    "Pelayanan Kelurahan"
+  ],
+  category: "Pemerintahan",
 
   verification: {
     google: "q5ReWo_LtIesXBuf1nT7-ETCqNrgxzzg_XSFq6m7er4",
@@ -41,9 +59,25 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: BASE_URL,
     siteName: "Kelurahan Amborawang Darat",
-    title: "Website Resmi Kelurahan Amborawang Darat",
+    title: "Kelurahan Amborawang Darat | Website Resmi Pemerintah Kelurahan",
     description:
-      "Portal informasi dan pelayanan masyarakat Kelurahan Amborawang Darat.",
+      "Website resmi Kelurahan Amborawang Darat, Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Menyediakan informasi pemerintahan, pelayanan masyarakat, berita, pengumuman, galeri, profil kelurahan, dan informasi publik.",
+    images: [
+      {
+        url: "/images/kantor-kelurahan-amborawang-darat.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Kantor Kelurahan Amborawang Darat",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Kelurahan Amborawang Darat | Website Resmi Pemerintah Kelurahan",
+    description:
+      "Website resmi Kelurahan Amborawang Darat, Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Menyediakan informasi pemerintahan, pelayanan masyarakat, berita, pengumuman, galeri, profil kelurahan, dan informasi publik.",
+    images: ["/images/kantor-kelurahan-amborawang-darat.jpg"],
   },
 };
 

@@ -77,7 +77,7 @@ export default function HomePage() {
           <div className="container welcome-grid">
             <Reveal enabled={settings.animationEnabled}>
               <div className="photo-frame">
-                <img src={leader.photoUrl || "/images/official-lurah.svg"} alt={`Foto ${leader.name}`} />
+                <img src={leader.photoUrl || "/images/official-lurah.svg"} alt={`Foto Resmi ${leader.name} - ${leader.title} Kelurahan Amborawang Darat`} />
                 <div className="photo-label"><strong>{leader.name}</strong><span>{leader.title} Kelurahan Amborawang Darat</span></div>
               </div>
             </Reveal>
@@ -119,7 +119,7 @@ export default function HomePage() {
           <div className="container">
             <SectionHeading eyebrow="Pemerintahan" title="Aparatur Kelurahan Amborawang Darat" description="Data aparatur disesuaikan dengan daftar ASN Kecamatan Samboja Barat tahun 2026." />
             <div className="grid grid-4">
-              {activeOfficials.map((item, index) => <Reveal key={item.id ?? item.name} delay={index * 80} enabled={settings.animationEnabled}><article className="card card-hover official-card"><img src={item.photoUrl || "/images/official-lurah.svg"} alt={`Foto ${item.name}`} /><div className="official-info"><span className="badge">{item.category}</span><h3>{item.name}</h3><p>{item.title}</p></div></article></Reveal>)}
+              {activeOfficials.map((item, index) => <Reveal key={item.id ?? item.name} delay={index * 80} enabled={settings.animationEnabled}><article className="card card-hover official-card"><img src={item.photoUrl || "/images/official-lurah.svg"} alt={`Foto Resmi ${item.name} - ${item.title} Kelurahan Amborawang Darat`} /><div className="official-info"><span className="badge">{item.category}</span><h3>{item.name}</h3><p>{item.title}</p></div></article></Reveal>)}
             </div>
             <p className="official-photo-note">Foto resmi aparatur dapat diganti melalui dashboard admin setelah memperoleh dokumentasi dari pihak kelurahan.</p>
             <div style={{ marginTop: 24 }}><Link className="btn btn-primary" href="/pemerintahan">Lihat Struktur Lengkap →</Link></div>
@@ -130,7 +130,7 @@ export default function HomePage() {
           <div className="container">
             <SectionHeading eyebrow="Informasi Terbaru" title="Berita kelurahan" description="Kegiatan, pelayanan, pembangunan, dan informasi masyarakat terkini." />
             <div className="grid grid-3">
-              {publishedPosts.map((item, index) => <Reveal key={item.id ?? item.slug} delay={index * 70} enabled={settings.animationEnabled}><article className="card card-hover news-card"><img src={item.coverImageUrl || "/images/news-1.svg"} alt={item.title} /><div className="news-body"><span className="badge">{item.category}</span><h3>{item.title}</h3><p>{item.summary}</p><Link className="text-link" href={`/berita/${item.slug}`}>Baca berita →</Link></div></article></Reveal>)}
+              {publishedPosts.map((item, index) => <Reveal key={item.id ?? item.slug} delay={index * 70} enabled={settings.animationEnabled}><article className="card card-hover news-card"><img src={item.coverImageUrl || "/images/news-1.svg"} alt={`Gambar liputan: ${item.title}`} /><div className="news-body"><span className="badge">{item.category}</span><h3>{item.title}</h3><p>{item.summary}</p><Link className="text-link" href={`/berita/${item.slug}`}>Baca berita →</Link></div></article></Reveal>)}
             </div>
           </div>
         </section>
@@ -145,13 +145,13 @@ export default function HomePage() {
         <section className="section">
           <div className="container">
             <SectionHeading eyebrow="Dokumentasi" title="Galeri kegiatan" description="Foto kegiatan kelurahan, RT, masyarakat, dan kelompok KKN." />
-            <div className="gallery-grid">{featuredAlbums.map((album) => <Link href="/galeri" className="gallery-card" key={album.id ?? album.slug}><img src={album.coverImageUrl || "/images/gallery-1.svg"} alt={album.title} /><div className="gallery-overlay"><span className="badge">{album.category}</span><h3>{album.title}</h3><p>{album.photoCount} foto</p></div></Link>)}</div>
+            <div className="gallery-grid">{featuredAlbums.map((album) => <Link href="/galeri" className="gallery-card" key={album.id ?? album.slug}><img src={album.coverImageUrl || "/images/gallery-1.svg"} alt={`Sampul album: ${album.title}`} /><div className="gallery-overlay"><span className="badge">{album.category}</span><h3>{album.title}</h3><p>{album.photoCount} foto</p></div></Link>)}</div>
           </div>
         </section>
 
         <section className="section section-white">
           <div className="container">
-            <div className="kkn-panel"><div className="kkn-grid"><div><span className="eyebrow" style={{ color: "#7dc4ff" }}>Kelompok KKN</span><h2 className="section-title light">Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</h2><p className="section-copy light">{kkn.description}</p><p><strong>{kkn.groupName}</strong><br />{kkn.universityName} • {kkn.year}</p><div className="hero-actions"><Link className="btn btn-secondary" href="/tim-kkn">Lihat Tim KKN</Link><Link className="btn btn-primary" href="/galeri">Galeri KKN →</Link></div></div><img src={kkn.groupPhotoUrl || "/images/kkn-team.svg"} alt={`Tim ${kkn.groupName}`} /></div></div>
+            <div className="kkn-panel"><div className="kkn-grid"><div><span className="eyebrow" style={{ color: "#7dc4ff" }}>Kelompok KKN</span><h2 className="section-title light">Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</h2><p className="section-copy light">{kkn.description}</p><p><strong>{kkn.groupName}</strong><br />{kkn.universityName} • {kkn.year}</p><div className="hero-actions"><Link className="btn btn-secondary" href="/tim-kkn">Lihat Tim KKN</Link><Link className="btn btn-primary" href="/galeri">Galeri KKN →</Link></div></div><img src={kkn.groupPhotoUrl || "/images/kkn-team.svg"} alt={`Foto Bersama Tim KKN Kelompok ${kkn.groupName}`} /></div></div>
           </div>
         </section>
 

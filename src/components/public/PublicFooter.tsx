@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { SiteSettings } from "@/types";
 import { normalizeWhatsapp } from "@/lib/utils";
 
@@ -12,7 +13,18 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
         <div className="container">
           <div className="footer-grid">
             <div>
-              <div className="brand footer-brand"><span className="brand-logo-frame"><img src={settings.logoUrl} alt={`Logo ${settings.villageName}`} /></span><div><strong>{settings.villageName}</strong><span>{settings.tagline}</span></div></div>
+              <div className="brand footer-brand">
+                <span className="brand-logo-frame">
+                  <Image
+                    src={settings.logoUrl || "/images/logo-amborawang-darat.png"}
+                    alt={`Logo Resmi Kelurahan ${settings.villageName}`}
+                    width={48}
+                    height={48}
+                    unoptimized
+                  />
+                </span>
+                <div><strong>{settings.villageName}</strong><span>{settings.tagline}</span></div>
+              </div>
               <p style={{ color: "rgba(255,255,255,.65)", maxWidth: 420 }}>{settings.address}</p>
               <small className="footer-attribution">Foto kantor: Arief R. Sandan (Ezagren), Wikimedia Commons.</small>
             </div>
