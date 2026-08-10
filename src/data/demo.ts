@@ -35,6 +35,7 @@ export const demoSettings: SiteSettings = {
   footerText: "Pemerintah Kelurahan Amborawang Darat",
   seoTitle: "Website Resmi Kelurahan Amborawang Darat",
   seoDescription: "Informasi layanan publik, pemerintahan, berita, agenda, dan kegiatan Kelurahan Amborawang Darat, Kecamatan Samboja Barat.",
+  googleSiteVerification: "q5ReWo_LtIesXBuf1nT7-ETCqNrgxzzg_XSFq6m7er4",
   animationEnabled: true,
   heroAutoplay: true,
   heroInterval: 7000,

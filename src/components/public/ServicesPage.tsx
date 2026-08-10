@@ -100,16 +100,16 @@ function parseServiceHours(value: string) {
   return rows;
 }
 
-export default function ServicesPage() {
+export default function ServicesPage({ initialSettings = demoSettings, initialServices = [] }: { initialSettings?: SiteSettings; initialServices?: ServiceItem[] }) {
   const { data: rawSettings } = useDocumentData<SiteSettings>(
     "siteSettings",
     "main",
-    demoSettings,
+    initialSettings,
   );
   const settings = applyAmborawangPublicSettings(rawSettings);
   const { data: rawServices } = useCollectionData<ServiceItem>(
     "services",
-    [],
+    initialServices,
   );
 
   const displayServices = rawServices.filter((item) => item.isActive !== false);

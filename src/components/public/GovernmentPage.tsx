@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { Official, RegionLeader } from "@/types";
+import type { Official, RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./GovernmentPage.module.css";
@@ -185,10 +185,10 @@ const structureUnitDefinitions = [
   },
 ];
 
-export default function GovernmentPage() {
-  const { data: rawOfficials } = useCollectionData<Official>("officials", []);
-  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
-  const { settings } = usePublicSettings();
+export default function GovernmentPage({ initialOfficials = [], initialRts = [], initialSettings }: { initialOfficials?: Official[]; initialRts?: RegionLeader[]; initialSettings?: SiteSettings }) {
+  const { data: rawOfficials } = useCollectionData<Official>("officials", initialOfficials);
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
+  const { settings } = usePublicSettings(initialSettings);
 
   const activeOfficials = useMemo(
     () => rawOfficials.filter((item) => item.isActive !== false),

@@ -8,7 +8,7 @@ import {
   resolveAmborawangProfile,
   type ProfileContent,
 } from "@/data/amborawangProfile";
-import type { RegionLeader } from "@/types";
+import type { RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ProfilePage.module.css";
@@ -51,14 +51,14 @@ function PinIcon() {
   );
 }
 
-export default function ProfilePage() {
-  const { settings } = usePublicSettings();
+export default function ProfilePage({ initialProfile = amborawangProfileFallback, initialRts = [], initialSettings }: { initialProfile?: ProfileContent; initialRts?: RegionLeader[]; initialSettings?: SiteSettings }) {
+  const { settings } = usePublicSettings(initialSettings);
   const { data } = useDocumentData<ProfileContent>(
     "pages",
     "profil",
-    amborawangProfileFallback,
+    initialProfile,
   );
-  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
   const profile = resolveAmborawangProfile(data);
   const activeRtCount = rawRts.filter((item) => {
     if (item.isActive === false) return false;

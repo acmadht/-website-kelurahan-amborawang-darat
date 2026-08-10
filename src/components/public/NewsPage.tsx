@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { PostItem } from "@/types";
+import type { PostItem, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import { displayPostDate, mergePublicPosts } from "./newsData";
@@ -60,9 +60,9 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function NewsPage() {
-  const { data: remotePosts } = useCollectionData<PostItem>("posts", []);
-  const { settings } = usePublicSettings();
+export default function NewsPage({ initialPosts = [], initialSettings }: { initialPosts?: PostItem[]; initialSettings?: SiteSettings }) {
+  const { data: remotePosts } = useCollectionData<PostItem>("posts", initialPosts);
+  const { settings } = usePublicSettings(initialSettings);
   const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
   const categories = useMemo(
     () => ["Semua", ...Array.from(new Set(posts.map((item) => item.category).filter(Boolean)))],

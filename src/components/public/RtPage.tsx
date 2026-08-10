@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { RegionLeader } from "@/types";
+import type { RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./RtPage.module.css";
@@ -236,12 +236,12 @@ function StatBox({
   );
 }
 
-export default function RtPage() {
+export default function RtPage({ initialRts = [], initialSettings }: { initialRts?: RegionLeader[]; initialSettings?: SiteSettings }) {
   const { data: rawRts, loading } = useCollectionData<RegionLeader>(
     "rts",
-    [],
+    initialRts,
   );
-  const { settings } = usePublicSettings();
+  const { settings } = usePublicSettings(initialSettings);
   const [selectedRt, setSelectedRt] = useState<RegionLeader | null>(null);
 
   const rts = useMemo(

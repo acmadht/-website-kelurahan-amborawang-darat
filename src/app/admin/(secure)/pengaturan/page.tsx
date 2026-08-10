@@ -24,6 +24,7 @@ export default function Page() {
         { key: "footerText", label: "Teks Footer", type: "text", full: true },
         { key: "seoTitle", label: "Judul SEO", type: "text", full: true },
         { key: "seoDescription", label: "Deskripsi SEO", type: "textarea", full: true },
+        { key: "googleSiteVerification", label: "Kode Verifikasi Google Search Console", type: "text", full: true },
         { key: "animationEnabled", label: "Animasi Aktif", type: "checkbox" },
         { key: "heroAutoplay", label: "Slider Otomatis", type: "checkbox" },
         { key: "heroInterval", label: "Interval Slider (ms)", type: "number" },

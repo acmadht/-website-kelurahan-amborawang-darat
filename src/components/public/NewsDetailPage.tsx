@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { PostItem } from "@/types";
+import type { PostItem, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import { displayPostDate, mergePublicPosts, postParagraphs } from "./newsData";
@@ -52,10 +52,10 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function NewsDetailPage({ slug }: { slug: string }) {
+export default function NewsDetailPage({ slug, initialArticle, initialSettings }: { slug: string; initialArticle?: PostItem; initialSettings?: SiteSettings }) {
   const [copied, setCopied] = useState(false);
-  const { settings } = usePublicSettings();
-  const { data: remotePosts, loading } = useCollectionData<PostItem>("posts", []);
+  const { settings } = usePublicSettings(initialSettings);
+  const { data: remotePosts, loading } = useCollectionData<PostItem>("posts", initialArticle ? [initialArticle] : []);
   const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
   const article = posts.find((item) => item.slug === slug);
 

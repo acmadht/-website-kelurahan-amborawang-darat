@@ -37,18 +37,18 @@ function CompassIcon() {
   );
 }
 
-export default function RegionPage() {
+export default function RegionPage({ initialSettings = demoSettings, initialRegion = regionContentFallback, initialRts = [] }: { initialSettings?: SiteSettings; initialRegion?: RegionContent; initialRts?: RegionLeader[] }) {
   const { data: rawSettings } = useDocumentData<SiteSettings>(
     "siteSettings",
     "main",
-    demoSettings,
+    initialSettings,
   );
   const { data: region } = useDocumentData<RegionContent>(
     "pages",
     "wilayah",
-    regionContentFallback,
+    initialRegion,
   );
-  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
 
   const settings = applyAmborawangPublicSettings(rawSettings);
   const animationEnabled = settings.animationEnabled !== false;

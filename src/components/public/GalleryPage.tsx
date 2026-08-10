@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { GalleryAlbum, GalleryPhoto } from "@/types";
+import type { GalleryAlbum, GalleryPhoto, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./GalleryPage.module.css";
@@ -71,10 +71,10 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function GalleryPage() {
-  const { data: albums } = useCollectionData<GalleryAlbum>("galleryAlbums", []);
-  const { data: photos } = useCollectionData<GalleryPhoto>("galleryPhotos", []);
-  const { settings } = usePublicSettings();
+export default function GalleryPage({ initialAlbums = [], initialPhotos = [], initialSettings }: { initialAlbums?: GalleryAlbum[]; initialPhotos?: GalleryPhoto[]; initialSettings?: SiteSettings }) {
+  const { data: albums } = useCollectionData<GalleryAlbum>("galleryAlbums", initialAlbums);
+  const { data: photos } = useCollectionData<GalleryPhoto>("galleryPhotos", initialPhotos);
+  const { settings } = usePublicSettings(initialSettings);
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [selected, setSelected] = useState<GalleryItem | null>(null);
 

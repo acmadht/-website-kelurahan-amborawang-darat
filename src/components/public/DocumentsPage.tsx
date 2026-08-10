@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import type { PublicDocument } from "@/types";
+import type { PublicDocument, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./DocumentsPage.module.css";
@@ -37,9 +37,9 @@ function EyeIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" /><circle cx="12" cy="12" r="2.5" /></svg>;
 }
 
-export default function DocumentsPage() {
-  const { data: remoteDocuments } = useCollectionData<PublicDocument>("documents", []);
-  const { settings } = usePublicSettings();
+export default function DocumentsPage({ initialDocuments = [], initialSettings }: { initialDocuments?: PublicDocument[]; initialSettings?: SiteSettings }) {
+  const { data: remoteDocuments } = useCollectionData<PublicDocument>("documents", initialDocuments);
+  const { settings } = usePublicSettings(initialSettings);
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [query, setQuery] = useState("");
 

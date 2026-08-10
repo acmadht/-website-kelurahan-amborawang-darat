@@ -113,27 +113,45 @@ function buildMapsSearchUrl(address: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
-export default function HomePage() {
+export default function HomePage({
+  initialSettings = demoSettings,
+  initialHome = homeContentFallback,
+  initialSlides = [],
+  initialServices = [],
+  initialPosts = [],
+  initialAnnouncements = [],
+  initialAgendas = [],
+  initialRts = [],
+}: {
+  initialSettings?: SiteSettings;
+  initialHome?: HomeContent;
+  initialSlides?: HeroSlide[];
+  initialServices?: ServiceItem[];
+  initialPosts?: PostItem[];
+  initialAnnouncements?: Announcement[];
+  initialAgendas?: AgendaItem[];
+  initialRts?: RegionLeader[];
+}) {
   const { data: rawSettings } = useDocumentData<SiteSettings>(
     "siteSettings",
     "main",
-    demoSettings,
+    initialSettings,
   );
   const settings = applyAmborawangPublicSettings(rawSettings);
   const { data: home } = useDocumentData<HomeContent>(
     "pages",
     "home",
-    homeContentFallback,
+    initialHome,
   );
-  const { data: rawSlides } = useCollectionData<HeroSlide>("heroSlides", []);
-  const { data: rawServices } = useCollectionData<ServiceItem>("services", []);
-  const { data: rawPosts } = useCollectionData<PostItem>("posts", []);
+  const { data: rawSlides } = useCollectionData<HeroSlide>("heroSlides", initialSlides);
+  const { data: rawServices } = useCollectionData<ServiceItem>("services", initialServices);
+  const { data: rawPosts } = useCollectionData<PostItem>("posts", initialPosts);
   const { data: rawAnnouncements } = useCollectionData<Announcement>(
     "announcements",
-    [],
+    initialAnnouncements,
   );
-  const { data: rawAgendas } = useCollectionData<AgendaItem>("agendas", []);
-  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
+  const { data: rawAgendas } = useCollectionData<AgendaItem>("agendas", initialAgendas);
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
 
   const activeRtCount = useMemo(
     () =>

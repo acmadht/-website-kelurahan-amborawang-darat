@@ -22,6 +22,7 @@ export interface SiteSettings {
   footerText: string;
   seoTitle: string;
   seoDescription: string;
+  googleSiteVerification?: string;
   animationEnabled: boolean;
   heroAutoplay: boolean;
   heroInterval: number;

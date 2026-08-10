@@ -24,8 +24,8 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
   fallback: T[],
   filters: Filter[] = [],
 ) {
-  const [data, setData] = useState<T[]>(isFirebaseConfigured ? [] : fallback);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
+  const [data, setData] = useState<T[]>(fallback);
+  const [loading, setLoading] = useState(isFirebaseConfigured && fallback.length === 0);
   const [usingDemo, setUsingDemo] = useState(!isFirebaseConfigured);
 
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);

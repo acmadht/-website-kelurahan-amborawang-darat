@@ -75,11 +75,11 @@ function parseServiceHours(value: string) {
   return rows;
 }
 
-export default function ContactPage() {
+export default function ContactPage({ initialSettings = demoSettings }: { initialSettings?: SiteSettings }) {
   const { data: rawSettings } = useDocumentData<SiteSettings>(
     "siteSettings",
     "main",
-    demoSettings,
+    initialSettings,
   );
   const settings = applyAmborawangPublicSettings(rawSettings);
   const whatsapp = normalizeWhatsapp(settings.whatsapp);
