@@ -181,118 +181,401 @@
 
 .commandPanel {
   position: relative;
+  min-height: 330px;
   overflow: hidden;
-  padding: 25px;
+  padding: 26px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.045));
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 22px;
-  box-shadow: 0 26px 62px rgba(0,0,0,.17);
-  backdrop-filter: blur(10px);
+    linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.04));
+  border: 1px solid rgba(151,215,255,.18);
+  border-radius: 26px;
+  box-shadow:
+    0 28px 70px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(14px);
+  isolation: isolate;
+}
+
+.commandPanel::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.8), transparent 92%);
+  opacity: .55;
 }
 
 .commandPanel::after {
   position: absolute;
-  top: -75px;
-  right: -70px;
-  width: 180px;
-  height: 180px;
+  top: -100px;
+  right: -80px;
+  z-index: -1;
+  width: 240px;
+  height: 240px;
   content: "";
-  background: rgba(125,204,255,.055);
+  background: radial-gradient(circle, rgba(105,196,255,.16), rgba(105,196,255,0) 68%);
   border-radius: 50%;
+  animation: commandFloat 7s ease-in-out infinite;
+}
+
+.commandGlow {
+  position: absolute;
+  bottom: -100px;
+  left: -60px;
+  z-index: -1;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(41,128,255,.14), transparent 70%);
+  border-radius: 50%;
+  animation: commandFloat 9s ease-in-out infinite reverse;
+}
+
+.commandOrbit {
+  position: absolute;
+  top: -115px;
+  right: -95px;
+  z-index: -1;
+  width: 290px;
+  height: 290px;
+  pointer-events: none;
+  border: 1px solid rgba(139,211,255,.12);
+  border-radius: 50%;
+}
+
+.commandOrbit::before,
+.commandOrbit::after {
+  position: absolute;
+  content: "";
+  border: 1px solid rgba(139,211,255,.08);
+  border-radius: 50%;
+}
+
+.commandOrbit::before {
+  inset: 32px;
+}
+
+.commandOrbit::after {
+  inset: 66px;
 }
 
 .commandTop {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: auto minmax(0,1fr);
-  gap: 12px;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  gap: 14px;
   align-items: center;
 }
 
 .commandIcon {
-  width: 46px;
-  height: 46px;
+  position: relative;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  color: #82ceff;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 13px;
+  color: #8bd5ff;
+  background:
+    linear-gradient(145deg, rgba(135,209,255,.16), rgba(255,255,255,.05));
+  border: 1px solid rgba(159,219,255,.2);
+  border-radius: 15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-.commandTop span,
-.commandTop strong {
+.commandIcon > svg {
+  position: relative;
+  z-index: 2;
+}
+
+.commandIconPulse {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(132,210,255,.28);
+  border-radius: 11px;
+  animation: commandPulse 2.4s ease-in-out infinite;
+}
+
+.commandTitleWrap {
+  min-width: 0;
+}
+
+.commandTitleWrap span,
+.commandTitleWrap strong {
   display: block;
 }
 
-.commandTop span {
-  color: #82ceff;
-  font-size: .58rem;
-  font-weight: 850;
+.commandTitleWrap span {
+  color: #8bd5ff;
+  font-size: .59rem;
+  font-weight: 900;
+  letter-spacing: .055em;
   text-transform: uppercase;
 }
 
-.commandTop strong {
-  margin-top: 3px;
+.commandTitleWrap strong {
+  margin-top: 4px;
   color: #fff;
-  font-size: .82rem;
-  line-height: 1.4;
+  font-size: .86rem;
+  line-height: 1.42;
 }
 
-.commandFlow {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
-  gap: 8px;
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255,255,255,.09);
-}
-
-.commandFlow > i {
-  display: none;
-}
-
-.commandFlow > div {
-  min-width: 0;
-  padding: 11px 6px;
-  text-align: center;
-  background: rgba(255,255,255,.045);
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 10px;
-}
-
-.commandFlow span,
-.commandFlow strong {
-  display: block;
-}
-
-.commandFlow span {
-  color: #7dccff;
-  font-size: .55rem;
-  font-weight: 900;
-}
-
-.commandFlow strong {
-  margin-top: 3px;
-  color: #fff;
-  font-size: .68rem;
-}
-
-.commandLink {
-  position: relative;
-  z-index: 2;
+.commandStatus {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin-top: 18px;
+  padding: 7px 10px;
+  color: rgba(231,246,255,.82);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(160,219,255,.13);
+  border-radius: 999px;
+  font-size: .58rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.commandStatus i {
+  width: 7px;
+  height: 7px;
+  background: #76d7ad;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(118,215,173,.42);
+  animation: commandLive 1.8s ease-out infinite;
+}
+
+.commandRoute {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 12px;
+  margin-top: 27px;
+  padding: 11px 2px 8px;
+}
+
+.commandRouteLine {
+  position: absolute;
+  top: 34px;
+  right: 10%;
+  left: 10%;
+  z-index: 0;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(136,207,255,.16);
+  border-radius: 999px;
+}
+
+.commandRouteLine::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(126,207,255,.42), transparent);
+}
+
+.commandRouteLine > span {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 18px;
+  height: 6px;
+  background: #8bd8ff;
+  border-radius: 999px;
+  box-shadow: 0 0 15px rgba(139,216,255,.85);
+  animation: commandLineRun 3.2s linear infinite;
+}
+
+.commandStep {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  padding: 0 4px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: commandRise .65s ease forwards;
+}
+
+.commandNode {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+  color: #9cddff;
+  background:
+    linear-gradient(145deg, rgba(125,204,255,.2), rgba(255,255,255,.07));
+  border: 1px solid rgba(151,218,255,.22);
+  border-radius: 15px;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  transition:
+    transform .24s ease,
+    border-color .24s ease,
+    background-color .24s ease;
+}
+
+.commandNode::after {
+  position: absolute;
+  inset: -5px;
+  content: "";
+  border: 1px solid rgba(139,214,255,.08);
+  border-radius: 18px;
+  opacity: 0;
+  transform: scale(.9);
+  transition: .24s ease;
+}
+
+.commandStep:hover .commandNode {
+  transform: translateY(-4px) scale(1.035);
+  background: linear-gradient(145deg, rgba(125,204,255,.26), rgba(255,255,255,.09));
+  border-color: rgba(151,218,255,.38);
+}
+
+.commandStep:hover .commandNode::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.commandNode span {
+  font-size: .61rem;
+  font-weight: 950;
+  letter-spacing: .02em;
+}
+
+.commandStep strong,
+.commandStep small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.commandStep strong {
   color: #fff;
-  font-size: .71rem;
+  font-size: .72rem;
+  line-height: 1.35;
+}
+
+.commandStep small {
+  margin-top: 3px;
+  color: rgba(226,241,255,.46);
+  font-size: .54rem;
+  line-height: 1.35;
+}
+
+.commandFooter {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 19px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(255,255,255,.09);
+}
+
+.commandLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 13px;
+  color: #fff;
+  background: rgba(255,255,255,.065);
+  border: 1px solid rgba(156,218,255,.14);
+  border-radius: 11px;
+  font-size: .69rem;
   font-weight: 850;
   text-decoration: none;
+  transition:
+    transform .22s ease,
+    background-color .22s ease,
+    border-color .22s ease;
+}
+
+.commandLink svg {
+  transition: transform .22s ease;
+}
+
+.commandLink:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.1);
+  border-color: rgba(156,218,255,.26);
+}
+
+.commandLink:hover svg {
+  transform: translateX(3px);
+}
+
+.commandMiniInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(231,242,255,.48);
+  font-size: .56rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.commandMiniInfo > span {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  background: #7dccff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(125,204,255,.62);
+}
+
+@keyframes commandPulse {
+  0%, 100% {
+    opacity: .48;
+    transform: scale(.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.07);
+  }
+}
+
+@keyframes commandLive {
+  0% {
+    box-shadow: 0 0 0 0 rgba(118,215,173,.42);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(118,215,173,0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(118,215,173,0);
+  }
+}
+
+@keyframes commandLineRun {
+  0% {
+    transform: translateX(-24px);
+  }
+  100% {
+    transform: translateX(430px);
+  }
+}
+
+@keyframes commandFloat {
+  0%, 100% {
+    transform: translate3d(0,0,0);
+  }
+  50% {
+    transform: translate3d(-10px,12px,0);
+  }
+}
+
+@keyframes commandRise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================================================
@@ -1216,8 +1499,31 @@
     max-width: none;
   }
 
-  .commandFlow {
+  .commandTop {
+    grid-template-columns: auto minmax(0,1fr);
+  }
+
+  .commandStatus {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .commandRoute {
     grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 16px 10px;
+  }
+
+  .commandRouteLine {
+    display: none;
+  }
+
+  .commandFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .commandMiniInfo {
+    text-align: left;
   }
 
   .executiveSection {
@@ -1312,12 +1618,45 @@
     font-size: 2.65rem;
   }
 
+  .commandPanel {
+    min-height: 0;
+    padding: 21px 17px;
+    border-radius: 21px;
+  }
+
+  .commandRoute {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .leaderText {
     padding: 22px 18px;
   }
 
   .leaderMeta {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commandPanel::after,
+  .commandGlow,
+  .commandIconPulse,
+  .commandStatus i,
+  .commandRouteLine > span,
+  .commandStep {
+    animation: none !important;
+  }
+
+  .commandStep {
+    opacity: 1;
+    transform: none;
+  }
+
+  .commandLink,
+  .commandLink svg,
+  .commandNode,
+  .commandNode::after {
+    transition: none !important;
   }
 }
 

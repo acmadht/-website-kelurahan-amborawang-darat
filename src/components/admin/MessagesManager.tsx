@@ -1,4 +1,136 @@
 "use client";
-import { useEffect,useState } from "react"; import { collection,deleteDoc,doc,getDocs,updateDoc } from "firebase/firestore"; import { db } from "@/lib/firebase/client";
-type Msg={id:string;name?:string;contact?:string;message?:string;status?:string};
-export default function MessagesManager(){const [items,setItems]=useState<Msg[]>([]);async function load(){if(!db)return;const snap=await getDocs(collection(db,"messages"));setItems(snap.docs.map(x=>({id:x.id,...x.data()} as Msg)))}useEffect(()=>{load()},[]);async function mark(item:Msg){if(!db)return;await updateDoc(doc(db,"messages",item.id),{status:"selesai"});await load()}async function remove(item:Msg){if(!db||!confirm("Hapus pesan ini?"))return;await deleteDoc(doc(db,"messages",item.id));await load()}return <><div className="admin-title"><h1>Pesan Masuk</h1><p>Pesan yang dikirim masyarakat melalui formulir kontak.</p></div><section className="admin-panel"><div className="table-wrap"><table className="admin-table"><thead><tr><th>Nama</th><th>Kontak</th><th>Pesan</th><th>Status</th><th>Aksi</th></tr></thead><tbody>{items.map(item=><tr key={item.id}><td>{item.name}</td><td>{item.contact}</td><td>{item.message}</td><td>{item.status||"baru"}</td><td><div className="flex gap-8"><button className="btn btn-outline btn-small" onClick={()=>mark(item)}>Selesai</button><button className="btn btn-danger btn-small" onClick={()=>remove(item)}>Hapus</button></div></td></tr>)}</tbody></table></div></section></>}
+
+import { useEffect, useState } from "react";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/client";
+
+type MessageItem = {
+  id: string;
+  name?: string;
+  contact?: string;
+  subject?: string;
+  message?: string;
+  status?: string;
+  source?: string;
+  createdAt?: unknown;
+};
+
+function formatCreatedAt(value: unknown) {
+  if (!value) return "-";
+  try {
+    if (typeof value === "object" && value && "toDate" in value && typeof (value as { toDate?: unknown }).toDate === "function") {
+      return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format((value as { toDate: () => Date }).toDate());
+    }
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime()) ? "-" : new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(date);
+  } catch {
+    return "-";
+  }
+}
+
+export default function MessagesManager() {
+  const [items, setItems] = useState<MessageItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    if (!db) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(
+      collection(db, "messages"),
+      (snapshot) => {
+        const rows = snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as MessageItem[];
+        rows.sort((a, b) => formatCreatedAt(b.createdAt).localeCompare(formatCreatedAt(a.createdAt)));
+        setItems(rows);
+        setLoading(false);
+      },
+      (error) => {
+        setStatus(error.message || "Gagal memuat pesan.");
+        setLoading(false);
+      },
+    );
+
+    return unsubscribe;
+  }, []);
+
+  async function mark(item: MessageItem, nextStatus: "dibaca" | "selesai") {
+    if (!db) return;
+    await updateDoc(doc(db, "messages", item.id), { status: nextStatus, updatedAt: serverTimestamp() });
+  }
+
+  async function remove(item: MessageItem) {
+    if (!db || !confirm("Hapus pesan ini?")) return;
+    await deleteDoc(doc(db, "messages", item.id));
+  }
+
+  return (
+    <>
+      <div className="admin-title">
+        <h1>Pesan Masuk</h1>
+        <p>Pesan dari formulir kontak website tampil otomatis di sini.</p>
+      </div>
+
+      {status ? <div className="error-box">{status}</div> : null}
+
+      <section className="admin-panel">
+        <div className="admin-toolbar">
+          <div>
+            <strong>{items.length} pesan</strong>
+            <div className="muted">Form publik dan dashboard membaca koleksi Firestore yang sama.</div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="empty-state">Memuat pesan...</div>
+        ) : items.length === 0 ? (
+          <div className="empty-state">Belum ada pesan dari masyarakat.</div>
+        ) : (
+          <div className="table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Nama</th>
+                  <th>Kontak</th>
+                  <th>Subjek</th>
+                  <th>Pesan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id}>
+                    <td>{formatCreatedAt(item.createdAt)}</td>
+                    <td>{item.name || "-"}</td>
+                    <td>{item.contact || "-"}</td>
+                    <td>{item.subject || "Pesan masyarakat"}</td>
+                    <td>{item.message || "-"}</td>
+                    <td>{item.status || "baru"}</td>
+                    <td>
+                      <div className="flex gap-8">
+                        <button className="btn btn-outline btn-small" onClick={() => void mark(item, "dibaca")}>Dibaca</button>
+                        <button className="btn btn-outline btn-small" onClick={() => void mark(item, "selesai")}>Selesai</button>
+                        <button className="btn btn-danger btn-small" onClick={() => void remove(item)}>Hapus</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}

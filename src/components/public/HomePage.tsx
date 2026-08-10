@@ -1,6 +1,27 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import {
+  demoAgendas,
+  demoAnnouncements,
+  demoHeroSlides,
+  demoPosts,
+  demoServices,
+  demoSettings,
+} from "@/data/demo";
+import { homeContentFallback, type HomeContent } from "@/data/siteContent";
+import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
+import { formatDate } from "@/lib/utils";
+import type {
+  AgendaItem,
+  Announcement,
+  HeroSlide,
+  PostItem,
+  ServiceItem,
+  SiteSettings,
+} from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./HomePage.module.css";
@@ -29,65 +50,10 @@ const quickLinks = [
   },
   {
     number: "04",
-    label: "Dokumen",
-    title: "Dokumen Publik",
-    description: "Akses formulir dan dokumen informasi publik.",
-    href: "/dokumen",
-  },
-];
-
-const services = [
-  {
-    number: "01",
-    title: "Surat Pengantar",
-    description:
-      "Lihat persyaratan dan alur pengurusan surat pengantar melalui kelurahan.",
-    href: "/layanan",
-  },
-  {
-    number: "02",
-    title: "Administrasi Kependudukan",
-    description:
-      "Informasi administrasi kependudukan serta dokumen pendukung yang diperlukan.",
-    href: "/layanan",
-  },
-  {
-    number: "03",
-    title: "Dokumen & Formulir",
-    description:
-      "Temukan dokumen publik dan formulir yang tersedia untuk masyarakat.",
-    href: "/dokumen",
-  },
-  {
-    number: "04",
-    title: "Kontak Kelurahan",
-    description:
-      "Hubungi kantor kelurahan untuk pertanyaan dan informasi pelayanan.",
-    href: "/kontak",
-  },
-];
-
-const infoCards = [
-  {
-    category: "Berita",
-    title: "Berita dan kegiatan terbaru kelurahan",
-    description:
-      "Ikuti pembaruan resmi kegiatan, informasi, dan pengumuman Kelurahan Amborawang Darat.",
-    href: "/berita",
-  },
-  {
-    category: "Pelayanan",
-    title: "Persyaratan layanan lebih mudah ditemukan",
-    description:
-      "Periksa informasi pelayanan sebelum datang ke kantor kelurahan agar proses lebih efisien.",
-    href: "/layanan",
-  },
-  {
-    category: "Informasi Publik",
-    title: "Dokumen publik dalam satu halaman",
-    description:
-      "Akses dokumen dan informasi publik yang tersedia untuk masyarakat secara lebih mudah.",
-    href: "/dokumen",
+    label: "Data RT",
+    title: "Data 13 RT",
+    description: "Ketua RT, warga, kepala keluarga, fasilitas, dan wilayah.",
+    href: "/data-rt",
   },
 ];
 
@@ -148,47 +114,168 @@ function ShieldIcon() {
   );
 }
 
+function buildMapsSearchUrl(address: string) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 export default function HomePage() {
+  const { data: rawSettings } = useDocumentData<SiteSettings>(
+    "siteSettings",
+    "main",
+    demoSettings,
+  );
+  const settings = applyAmborawangPublicSettings(rawSettings);
+  const { data: home } = useDocumentData<HomeContent>(
+    "pages",
+    "home",
+    homeContentFallback,
+  );
+  const { data: rawSlides } = useCollectionData<HeroSlide>(
+    "heroSlides",
+    demoHeroSlides,
+  );
+  const { data: rawServices } = useCollectionData<ServiceItem>(
+    "services",
+    demoServices,
+  );
+  const { data: rawPosts } = useCollectionData<PostItem>("posts", demoPosts);
+  const { data: rawAnnouncements } = useCollectionData<Announcement>(
+    "announcements",
+    demoAnnouncements,
+  );
+  const { data: rawAgendas } = useCollectionData<AgendaItem>(
+    "agendas",
+    demoAgendas,
+  );
+
+  const slides = useMemo(() => {
+    const active = rawSlides.filter((item) => item.isActive !== false);
+    return active.length ? active : demoHeroSlides;
+  }, [rawSlides]);
+
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  useEffect(() => {
+    if (slideIndex >= slides.length) setSlideIndex(0);
+  }, [slideIndex, slides.length]);
+
+  useEffect(() => {
+    if (!settings.heroAutoplay || slides.length < 2) return;
+
+    const timer = window.setInterval(() => {
+      setSlideIndex((current) => (current + 1) % slides.length);
+    }, Math.max(4000, Number(settings.heroInterval) || 7000));
+
+    return () => window.clearInterval(timer);
+  }, [settings.heroAutoplay, settings.heroInterval, slides.length]);
+
+  const activeSlide = slides[slideIndex] ?? demoHeroSlides[0];
+
+  const featuredServices = useMemo(() => {
+    const active = rawServices.filter((item) => item.isActive !== false);
+    const featured = active.filter((item) => item.isFeatured !== false);
+    const source = featured.length ? featured : active;
+    return (source.length ? source : demoServices).slice(0, 4);
+  }, [rawServices]);
+
+  const publishedPosts = useMemo(() => {
+    const items = rawPosts.filter((item) => item.status === "published");
+    return items.length ? items : demoPosts.filter((item) => item.status === "published");
+  }, [rawPosts]);
+
+  const latestPost = publishedPosts[0];
+  const importantAnnouncement =
+    rawAnnouncements.find((item) => item.isActive && item.priority === "penting") ??
+    rawAnnouncements.find((item) => item.isActive) ??
+    demoAnnouncements[0];
+  const nextAgenda =
+    rawAgendas.find(
+      (item) => item.status === "akan-datang" || item.status === "berlangsung",
+    ) ?? demoAgendas[0];
+
+  const infoCards = [
+    latestPost
+      ? {
+          category: latestPost.category || "Berita",
+          title: latestPost.title,
+          description: latestPost.summary,
+          href: `/berita/${latestPost.slug}`,
+        }
+      : {
+          category: "Berita",
+          title: "Berita dan kegiatan terbaru kelurahan",
+          description: "Ikuti pembaruan resmi Kelurahan Amborawang Darat.",
+          href: "/berita",
+        },
+    {
+      category: importantAnnouncement?.priority === "penting" ? "Pengumuman Penting" : "Pengumuman",
+      title: importantAnnouncement?.title || "Informasi pelayanan kelurahan",
+      description:
+        importantAnnouncement?.summary ||
+        "Periksa informasi terbaru sebelum datang ke kantor kelurahan.",
+      href: "/kontak",
+    },
+    {
+      category: "Agenda",
+      title: nextAgenda?.title || "Agenda kegiatan kelurahan",
+      description: nextAgenda
+        ? `${formatDate(nextAgenda.date)} • ${nextAgenda.time || "Waktu menyesuaikan"} • ${nextAgenda.location || "Kelurahan Amborawang Darat"}`
+        : "Informasi agenda dan kegiatan masyarakat.",
+      href: "/berita",
+    },
+  ];
+
+  const mapsLink = buildMapsSearchUrl(settings.address);
+
   return (
     <PublicShell>
       <main className={styles.page}>
         {/* HERO */}
         <section className={styles.hero}>
+          {activeSlide.imageUrl ? (
+            <img
+              className={styles.heroBackgroundImage}
+              src={activeSlide.imageUrl}
+              alt=""
+              aria-hidden="true"
+            />
+          ) : null}
+          <div className={styles.heroBackgroundShade} aria-hidden="true" />
           <div className={styles.heroGlowOne} aria-hidden="true" />
           <div className={styles.heroGlowTwo} aria-hidden="true" />
           <div className={styles.heroMesh} aria-hidden="true" />
 
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroStatus}>
                   <span className={styles.statusDot} />
-                  Portal Informasi Resmi Kelurahan
+                  {home.portalStatus}
                 </div>
 
-                <span className={styles.heroEyebrow}>
-                  Website Resmi Kelurahan
-                </span>
+                <span className={styles.heroEyebrow}>{home.heroEyebrow}</span>
 
-                <h1>
-                  <span>Amborawang</span>
-                  <strong>Darat</strong>
-                </h1>
+                <h1 className={styles.heroDynamicTitle}>{activeSlide.title}</h1>
 
-                <p>
-                  Portal resmi untuk layanan masyarakat, berita, dokumen publik,
-                  informasi wilayah, dan pemerintahan Kelurahan Amborawang Darat.
-                </p>
+                <p>{activeSlide.subtitle}</p>
 
                 <div className={styles.heroActions}>
-                  <Link href="/layanan" className={styles.primaryButton}>
-                    Lihat Layanan
+                  <Link
+                    href={activeSlide.primaryButtonUrl || "/layanan"}
+                    className={styles.primaryButton}
+                  >
+                    {activeSlide.primaryButtonText || "Lihat Layanan"}
                     <ArrowIcon />
                   </Link>
 
-                  <Link href="/profil" className={styles.secondaryButton}>
-                    Profil Kelurahan
-                  </Link>
+                  {activeSlide.secondaryButtonText ? (
+                    <Link
+                      href={activeSlide.secondaryButtonUrl || "/profil"}
+                      className={styles.secondaryButton}
+                    >
+                      {activeSlide.secondaryButtonText}
+                    </Link>
+                  ) : null}
                 </div>
 
                 <div className={styles.heroMeta}>
@@ -198,10 +285,24 @@ export default function HomePage() {
                   </span>
                   <span>Kabupaten Kutai Kartanegara</span>
                 </div>
+
+                {slides.length > 1 ? (
+                  <div className={styles.heroDots} aria-label="Pilih banner">
+                    {slides.map((slide, index) => (
+                      <button
+                        key={slide.id ?? `${slide.title}-${index}`}
+                        type="button"
+                        className={index === slideIndex ? styles.heroDotActive : ""}
+                        onClick={() => setSlideIndex(index)}
+                        aria-label={`Tampilkan banner ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </Reveal>
 
-            <Reveal enabled delay={80}>
+            <Reveal enabled={settings.animationEnabled} delay={80}>
               <div className={styles.mapPanel}>
                 <div className={styles.mapHeader}>
                   <div className={styles.mapHeaderIcon}>
@@ -210,7 +311,7 @@ export default function HomePage() {
 
                   <div className={styles.mapHeaderCopy}>
                     <span>Lokasi Wilayah</span>
-                    <strong>Kelurahan Amborawang Darat</strong>
+                    <strong>Kelurahan {settings.villageName}</strong>
                   </div>
 
                   <span className={styles.mapLive}>
@@ -222,8 +323,8 @@ export default function HomePage() {
                 <div className={styles.googleMapWrap}>
                   <iframe
                     className={styles.googleMap}
-                    src="https://www.google.com/maps?q=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur&z=14&output=embed"
-                    title="Google Maps Kelurahan Amborawang Darat"
+                    src={settings.mapsEmbedUrl}
+                    title={`Google Maps Kelurahan ${settings.villageName}`}
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     allowFullScreen
@@ -233,11 +334,11 @@ export default function HomePage() {
                 <div className={styles.mapFooter}>
                   <div>
                     <span>Samboja Barat</span>
-                    <strong>Amborawang Darat, Kutai Kartanegara</strong>
+                    <strong>{settings.address}</strong>
                   </div>
 
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur"
+                    href={mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.mapButton}
@@ -256,7 +357,11 @@ export default function HomePage() {
           <div className="container">
             <div className={styles.quickGrid}>
               {quickLinks.map((item, index) => (
-                <Reveal key={item.title} enabled delay={index * 45}>
+                <Reveal
+                  key={item.title}
+                  enabled={settings.animationEnabled}
+                  delay={index * 45}
+                >
                   <Link href={item.href} className={styles.quickCard}>
                     <div className={styles.quickTop}>
                       <span>{item.number}</span>
@@ -273,25 +378,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* PROFILE */}
+        {/* PROFILE / SAMBUTAN */}
         <section className={styles.aboutSection}>
           <div className={`container ${styles.aboutGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.aboutVisual}>
                 <div className={styles.aboutVisualIcon}>
                   <ShieldIcon />
                 </div>
 
-                <span className={styles.aboutKicker}>AMBORAWANG DARAT</span>
+                <span className={styles.aboutKicker}>{settings.villageName.toUpperCase()}</span>
 
-                <h2>
-                  Informasi publik yang ringkas, jelas, dan mudah diakses.
-                </h2>
+                <h2>{home.welcomeTitle}</h2>
 
-                <p>
-                  Beranda dirancang sebagai pintu utama menuju layanan dan
-                  informasi masyarakat tanpa menampilkan konten berulang.
-                </p>
+                <p>{home.welcomeSecondText}</p>
 
                 <div className={styles.aboutMiniPanel}>
                   <span>Portal Resmi</span>
@@ -300,17 +400,13 @@ export default function HomePage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.aboutContent}>
-                <span className={styles.eyebrow}>Profil Singkat</span>
+                <span className={styles.eyebrow}>{home.welcomeEyebrow}</span>
 
-                <h2>Mengenal Kelurahan Amborawang Darat</h2>
+                <h2>{home.welcomeTitle}</h2>
 
-                <p>
-                  Informasi sejarah, visi, misi, potensi, dan data wilayah
-                  tersedia pada halaman profil. Beranda hanya menampilkan
-                  ringkasan penting agar navigasi tetap cepat dan nyaman.
-                </p>
+                <p>{home.welcomeText}</p>
 
                 <div className={styles.aboutList}>
                   <div>
@@ -339,11 +435,11 @@ export default function HomePage() {
         {/* SERVICES */}
         <section className={styles.serviceSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <span className={styles.eyebrow}>Layanan Utama</span>
-                  <h2>Pelayanan penting untuk masyarakat</h2>
+                  <span className={styles.eyebrow}>{home.servicesEyebrow}</span>
+                  <h2>{home.servicesTitle}</h2>
                 </div>
 
                 <div className={styles.headingSide}>
@@ -356,19 +452,26 @@ export default function HomePage() {
             </Reveal>
 
             <div className={styles.serviceGrid}>
-              {services.map((service, index) => (
-                <Reveal key={service.title} enabled delay={index * 55}>
-                  <Link href={service.href} className={styles.serviceCard}>
+              {featuredServices.map((service, index) => (
+                <Reveal
+                  key={service.id ?? service.name}
+                  enabled={settings.animationEnabled}
+                  delay={index * 55}
+                >
+                  <Link
+                    href={`/layanan#${service.slug || "daftar-layanan"}`}
+                    className={styles.serviceCard}
+                  >
                     <div className={styles.serviceTop}>
-                      <span>{service.number}</span>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
                       <ArrowIcon />
                     </div>
 
                     <div className={styles.serviceGlow} aria-hidden="true" />
 
                     <div className={styles.serviceBody}>
-                      <h3>{service.title}</h3>
-                      <p>{service.description}</p>
+                      <h3>{service.name}</h3>
+                      <p>{service.summary}</p>
                     </div>
                   </Link>
                 </Reveal>
@@ -378,20 +481,24 @@ export default function HomePage() {
         </section>
 
         {/* INFO */}
-        <section className={styles.infoSection}>
+        <section id="informasi-terkini" className={styles.infoSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <span className={styles.eyebrow}>Informasi</span>
-                  <h2>Informasi penting untuk masyarakat</h2>
+                  <span className={styles.eyebrow}>{home.infoEyebrow}</span>
+                  <h2>{home.infoTitle}</h2>
                 </div>
               </div>
             </Reveal>
 
             <div className={styles.infoGrid}>
               {infoCards.map((item, index) => (
-                <Reveal key={item.title} enabled delay={index * 60}>
+                <Reveal
+                  key={`${item.category}-${item.title}`}
+                  enabled={settings.animationEnabled}
+                  delay={index * 60}
+                >
                   <Link href={item.href} className={styles.infoCard}>
                     <div className={styles.infoVisual}>
                       <span>{item.category}</span>
@@ -417,15 +524,12 @@ export default function HomePage() {
         {/* CTA */}
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.ctaPanel}>
                 <div className={styles.ctaCopy}>
-                  <span>Butuh Bantuan?</span>
-                  <h2>Temukan layanan atau hubungi kelurahan.</h2>
-                  <p>
-                    Lihat persyaratan pelayanan atau hubungi kantor kelurahan
-                    jika membutuhkan informasi lebih lanjut.
-                  </p>
+                  <span>{home.ctaKicker}</span>
+                  <h2>{home.ctaTitle}</h2>
+                  <p>{home.ctaText} {home.complaintText}</p>
                 </div>
 
                 <div className={styles.ctaActions}>

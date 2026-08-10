@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <AdminDocumentEditor
       collectionName="siteSettings"
-      documentId="main"
+      documentId="main" publicHref="/"
       title="Pengaturan Website"
       description="Kelola identitas website, logo, favicon, sosial media, footer, SEO, dan perilaku tampilan."
       defaults={{ ...(demoSettings as unknown as Record<string, unknown>), faviconUrl: "/icon.png" }}

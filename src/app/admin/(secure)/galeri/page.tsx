@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <>
       <AdminCollectionManager
-        collectionName="galleryAlbums"
+        collectionName="galleryAlbums" publicHref="/galeri"
         title="Galeri"
         description="Buat album dokumentasi kelurahan lalu unggah foto. Konten khusus Tim KKN tidak dikelola dari admin."
         defaults={{

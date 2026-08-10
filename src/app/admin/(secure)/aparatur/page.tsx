@@ -3,7 +3,7 @@ import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
 export default function Page() {
   return (
     <AdminCollectionManager
-      collectionName="officials"
+      collectionName="officials" publicHref="/pemerintahan"
       title="Pemerintahan & Lembaga"
       description="Kelola lurah, sekretaris, kepala seksi, staf, LPM, PKK, Karang Taruna, unsur adat, Linmas, Bhabinkamtibmas, Babinsa, dan mitra kelurahan."
       defaults={{

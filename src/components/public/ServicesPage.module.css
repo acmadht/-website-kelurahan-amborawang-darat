@@ -823,3 +823,115 @@
     transform: none;
   }
 }
+
+/* ADMIN-CONNECTED SERVICE DETAILS */
+.serviceSubheading {
+  display: block;
+  margin-top: 18px;
+  color: #7dccff;
+  font-size: .56rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.serviceSubheading + .requirements {
+  margin-top: 8px;
+}
+
+.procedureList {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.procedureList > div {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.procedureList > div > span {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  color: #7dccff;
+  background: rgba(125,204,255,.07);
+  border: 1px solid rgba(125,204,255,.08);
+  border-radius: 7px;
+  font-size: .48rem;
+  font-weight: 900;
+}
+
+.procedureList p {
+  margin: 2px 0 0;
+  color: rgba(255,255,255,.65);
+  font-size: .71rem;
+  line-height: 1.45;
+}
+
+.serviceMetaLine {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.serviceMetaLine > span {
+  min-width: 0;
+  display: block;
+  padding: 9px 10px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+}
+
+.serviceMetaLine small,
+.serviceMetaLine strong {
+  display: block;
+}
+
+.serviceMetaLine small {
+  color: rgba(255,255,255,.38);
+  font-size: .48rem;
+  text-transform: uppercase;
+}
+
+.serviceMetaLine strong {
+  margin-top: 3px;
+  color: rgba(255,255,255,.82);
+  font-size: .64rem;
+  line-height: 1.35;
+}
+
+.serviceActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.serviceActions .serviceLink {
+  margin-top: 0;
+}
+
+.serviceDocumentLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7dccff;
+  font-size: .68rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+@media (max-width: 520px) {
+  .serviceMetaLine {
+    grid-template-columns: 1fr;
+  }
+}

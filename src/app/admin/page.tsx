@@ -1,5 +1,5 @@
-import AdminDashboard from "@/components/admin/AdminDashboard";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <AdminDashboard />;
+  redirect("/admin/beranda");
 }

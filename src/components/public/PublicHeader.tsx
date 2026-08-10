@@ -27,7 +27,12 @@ const moreMenu = [
   {
     label: "Wilayah",
     href: "/wilayah",
-    description: "Data wilayah, batas administratif, dan RT",
+    description: "Data wilayah, batas administratif, dan peta",
+  },
+  {
+    label: "Data RT",
+    href: "/data-rt",
+    description: "Ketua RT, jumlah warga, KK, kontak, dan keterangan wilayah",
   },
   {
     label: "Galeri",
@@ -72,9 +77,15 @@ const staticSearchItems: SearchItem[] = [
   },
   {
     title: "Wilayah Amborawang Darat",
-    description: "Luas wilayah, batas administratif, data RT, dan peta.",
+    description: "Luas wilayah, batas administratif, karakter wilayah, dan peta.",
     category: "Wilayah",
     href: "/wilayah",
+  },
+  {
+    title: "Data RT Amborawang Darat",
+    description: "Ketua RT, jumlah warga, kepala keluarga, kontak, dan keterangan 13 RT.",
+    category: "RT",
+    href: "/data-rt",
   },
   {
     title: "Layanan Kelurahan",
@@ -474,7 +485,7 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
                   <div className={styles.quickSearch}>
                     <span>Pencarian cepat</span>
                     <div className={styles.quickSearchLinks}>
-                      {["Layanan", "Pemerintahan", "Wilayah", "Dokumen", "Kontak"].map(
+                      {["Layanan", "Pemerintahan", "Data RT", "Wilayah", "Dokumen", "Kontak"].map(
                         (keyword) => (
                           <button
                             key={keyword}

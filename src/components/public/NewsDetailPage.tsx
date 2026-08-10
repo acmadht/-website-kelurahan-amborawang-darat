@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useCollectionData } from "@/hooks/useFirestoreData";
+import type { PostItem } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
-import type { NewsItem } from "./newsData";
+import { displayPostDate, mergePublicPosts, postParagraphs } from "./newsData";
 import styles from "./NewsDetailPage.module.css";
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
@@ -49,28 +51,69 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function NewsDetailPage({ article }: { article: NewsItem }) {
+export default function NewsDetailPage({ slug }: { slug: string }) {
   const [copied, setCopied] = useState(false);
+  const { data: remotePosts, loading } = useCollectionData<PostItem>("posts", []);
+  const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
+  const article = posts.find((item) => item.slug === slug);
 
-  const getUrl = () =>
-    typeof window !== "undefined" ? window.location.href : "";
+  const getUrl = () => (typeof window !== "undefined" ? window.location.href : "");
+
+  if (loading && !article) {
+    return (
+      <PublicShell>
+        <main className={styles.page}>
+          <section className={styles.hero}>
+            <div className={styles.heroPattern} aria-hidden="true" />
+            <div className={`container ${styles.heroInner}`}>
+              <span className={styles.category}>Memuat</span>
+              <h1>Memuat berita...</h1>
+            </div>
+          </section>
+        </main>
+      </PublicShell>
+    );
+  }
+
+  if (!article) {
+    return (
+      <PublicShell>
+        <main className={styles.page}>
+          <section className={styles.hero}>
+            <div className={styles.heroPattern} aria-hidden="true" />
+            <div className={`container ${styles.heroInner}`}>
+              <span className={styles.category}>Berita</span>
+              <h1>Berita tidak ditemukan</h1>
+              <p className={styles.heroExcerpt}>Artikel mungkin belum dipublikasikan atau sudah diarsipkan.</p>
+            </div>
+          </section>
+          <section className={styles.articleFooter}>
+            <div className="container">
+              <div className={styles.footerPanel}>
+                <div><span>Kembali</span><h2>Lihat berita yang tersedia</h2></div>
+                <div className={styles.footerActions}>
+                  <Link href="/berita" className={styles.primaryLink}>Daftar Berita <ArrowIcon /></Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </PublicShell>
+    );
+  }
+
+  const paragraphs = postParagraphs(article.content);
 
   const shareNative = async () => {
     const url = getUrl();
-
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: article.title,
-          text: article.excerpt,
-          url,
-        });
+        await navigator.share({ title: article.title, text: article.summary, url });
         return;
       } catch {
         return;
       }
     }
-
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
@@ -82,168 +125,85 @@ export default function NewsDetailPage({ article }: { article: NewsItem }) {
     setTimeout(() => setCopied(false), 1800);
   };
 
-  const encodedUrl =
-    typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
+  const encodedUrl = typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
   const encodedTitle = encodeURIComponent(article.title);
 
   return (
     <PublicShell>
       <main className={styles.page}>
-        {/* ARTICLE HERO */}
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
-
           <div className={`container ${styles.heroInner}`}>
             <Reveal enabled>
               <div className={styles.breadcrumb}>
-                <Link href="/">Beranda</Link>
-                <span>/</span>
-                <Link href="/berita">Berita</Link>
-                <span>/</span>
-                <span>{article.category}</span>
+                <Link href="/">Beranda</Link><span>/</span><Link href="/berita">Berita</Link><span>/</span><span>{article.category}</span>
               </div>
-
               <span className={styles.category}>{article.category}</span>
-
               <h1>{article.title}</h1>
-
-              <p className={styles.heroExcerpt}>{article.excerpt}</p>
-
+              <p className={styles.heroExcerpt}>{article.summary}</p>
               <div className={styles.meta}>
-                <div>
-                  <span>Tanggal</span>
-                  <strong>{article.date}</strong>
-                </div>
-                <div>
-                  <span>Waktu</span>
-                  <strong>{article.time}</strong>
-                </div>
-                <div>
-                  <span>Penulis</span>
-                  <strong>{article.author}</strong>
-                </div>
+                <div><span>Tanggal</span><strong>{displayPostDate(article.publishedDate)}</strong></div>
+                <div><span>Waktu</span><strong>{article.publishedTime || "Waktu belum diisi"}</strong></div>
+                <div><span>Penulis</span><strong>{article.authorName || "Pemerintah Kelurahan Amborawang Darat"}</strong></div>
               </div>
             </Reveal>
           </div>
         </section>
 
-        {/* FEATURE IMAGE */}
         <section className={styles.imageSection}>
           <div className="container">
             <Reveal enabled>
               <figure className={styles.figure}>
-                <div className={styles.mainImage}>
-                  <Photo src={article.image} alt={article.title} />
-                </div>
-                <figcaption>
-                  Dokumentasi berita Kelurahan Amborawang Darat.
-                </figcaption>
+                <div className={styles.mainImage}><Photo src={article.coverImageUrl} alt={article.title} /></div>
+                <figcaption>Dokumentasi berita Kelurahan Amborawang Darat.</figcaption>
               </figure>
             </Reveal>
           </div>
         </section>
 
-        {/* ARTICLE */}
         <section className={styles.articleSection}>
           <div className={`container ${styles.articleGrid}`}>
             <aside className={styles.shareAside}>
               <span>Bagikan</span>
-
-              <button type="button" onClick={shareNative} className={styles.sharePrimary}>
-                <ShareIcon />
-                Share
-              </button>
-
-              <a
-                href={`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
-              </a>
-
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Facebook
-              </a>
-
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                X
-              </a>
-
-              <button type="button" onClick={copyLink}>
-                <CopyIcon />
-                {copied ? "Tersalin" : "Salin link"}
-              </button>
+              <button type="button" onClick={shareNative} className={styles.sharePrimary}><ShareIcon />Share</button>
+              <a href={`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`} target="_blank" rel="noopener noreferrer">X</a>
+              <button type="button" onClick={copyLink}><CopyIcon />{copied ? "Tersalin" : "Salin link"}</button>
             </aside>
 
             <article className={styles.article}>
               <Reveal enabled>
-                <div className={styles.articleIntro}>
-                  <span>Amborawang Darat</span>
-                  <p>{article.excerpt}</p>
-                </div>
+                <div className={styles.articleIntro}><span>Amborawang Darat</span><p>{article.summary}</p></div>
               </Reveal>
 
-              {article.content.map((paragraph, index) => (
-                <Reveal key={index} enabled delay={index * 35}>
-                  <p>{paragraph}</p>
-                </Reveal>
+              {(paragraphs.length ? paragraphs : [article.summary]).map((paragraph, index) => (
+                <Reveal key={`${paragraph.slice(0, 32)}-${index}`} enabled delay={index * 35}><p>{paragraph}</p></Reveal>
               ))}
 
               <Reveal enabled>
-                <div className={styles.articleNote}>
-                  <span>Informasi Publik</span>
-                  <strong>
-                    Berita ini dipublikasikan melalui Website Resmi Kelurahan
-                    Amborawang Darat.
-                  </strong>
-                </div>
+                <div className={styles.articleNote}><span>Informasi Publik</span><strong>Berita ini dipublikasikan melalui Website Resmi Kelurahan Amborawang Darat.</strong></div>
               </Reveal>
 
               <div className={styles.mobileShare}>
                 <span>Bagikan berita</span>
                 <div>
-                  <button type="button" onClick={shareNative}>
-                    <ShareIcon />
-                    Bagikan
-                  </button>
-                  <button type="button" onClick={copyLink}>
-                    <CopyIcon />
-                    {copied ? "Link tersalin" : "Salin link"}
-                  </button>
+                  <button type="button" onClick={shareNative}><ShareIcon />Bagikan</button>
+                  <button type="button" onClick={copyLink}><CopyIcon />{copied ? "Link tersalin" : "Salin link"}</button>
                 </div>
               </div>
             </article>
           </div>
         </section>
 
-        {/* FOOTER ARTICLE */}
         <section className={styles.articleFooter}>
           <div className="container">
             <Reveal enabled>
               <div className={styles.footerPanel}>
-                <div>
-                  <span>Selesai Membaca</span>
-                  <h2>Lihat informasi kelurahan lainnya</h2>
-                </div>
-
+                <div><span>Selesai Membaca</span><h2>Lihat informasi kelurahan lainnya</h2></div>
                 <div className={styles.footerActions}>
-                  <Link href="/berita" className={styles.primaryLink}>
-                    Berita Lainnya
-                    <ArrowIcon />
-                  </Link>
-
-                  <Link href="/kontak" className={styles.secondaryLink}>
-                    Hubungi Kelurahan
-                  </Link>
+                  <Link href="/berita" className={styles.primaryLink}>Berita Lainnya <ArrowIcon /></Link>
+                  <Link href="/kontak" className={styles.secondaryLink}>Hubungi Kelurahan</Link>
                 </div>
               </div>
             </Reveal>

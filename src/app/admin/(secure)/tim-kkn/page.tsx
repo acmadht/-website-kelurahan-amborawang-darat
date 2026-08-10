@@ -1,2 +1,5 @@
-import AdminCollectionManager from "@/components/admin/AdminCollectionManager"; import AdminDocumentEditor from "@/components/admin/AdminDocumentEditor"; import { demoKknTeam } from "@/data/demo";
-export default function Page(){return <><AdminDocumentEditor collectionName="kknTeam" documentId="main" title="Profil Tim KKN" description="Kelola identitas kelompok dan dokumentasi pengembangan website." defaults={demoKknTeam as unknown as Record<string,unknown>} fields={[{key:"universityName",label:"Nama Universitas",type:"text"},{key:"groupName",label:"Nama Kelompok",type:"text"},{key:"year",label:"Tahun",type:"text"},{key:"location",label:"Lokasi KKN",type:"text"},{key:"supervisorName",label:"Dosen Pembimbing",type:"text",full:true},{key:"description",label:"Deskripsi",type:"textarea",full:true},{key:"logoUrl",label:"Logo",type:"image",full:true},{key:"groupPhotoUrl",label:"Foto Bersama",type:"image",full:true}]}/><AdminCollectionManager collectionName="kknMembers" title="Anggota Tim KKN" description="Kelola nama, peran, foto, dan urutan anggota." defaults={{name:"",role:"Anggota",photoUrl:"",order:1,isActive:true}} displayFields={["name","role","order","isActive"]} fields={[{key:"name",label:"Nama",type:"text",required:true},{key:"role",label:"Peran",type:"text",required:true},{key:"photoUrl",label:"Foto",type:"image",full:true},{key:"order",label:"Urutan",type:"number"},{key:"isActive",label:"Status Aktif",type:"checkbox"}]}/></>}
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/admin/beranda");
+}

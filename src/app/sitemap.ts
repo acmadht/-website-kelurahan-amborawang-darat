@@ -1,15 +1,18 @@
 import type { MetadataRoute } from "next";
 import { demoPosts } from "@/data/demo";
+import { staticKknPosts } from "@/components/public/newsData";
 import type { PostItem } from "@/types";
 
 const BASE_URL = "https://website-kelurahan-amborawang-darat.vercel.app";
 
-function parseDate(val: any): Date {
-  if (!val) return new Date();
-  if (typeof val.toDate === "function") return val.toDate(); // Firestore Timestamp
-  if (val instanceof Date) return val;
-  const d = new Date(val);
-  return isNaN(d.getTime()) ? new Date() : d;
+function parseDate(value: unknown): Date {
+  if (!value) return new Date();
+  if (typeof value === "object" && value && "toDate" in value && typeof (value as { toDate?: unknown }).toDate === "function") {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  if (value instanceof Date) return value;
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? new Date() : date;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -24,25 +27,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/kontak`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${BASE_URL}/tim-kkn`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.5 },
     { url: `${BASE_URL}/wilayah`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
+    { url: `${BASE_URL}/data-rt`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 },
   ];
 
   let posts: PostItem[] = [];
   try {
     const { getAdminDb } = await import("@/lib/firebase/admin");
-    const db = getAdminDb();
-    const snapshot = await db.collection("posts").where("status", "==", "published").get();
-    posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PostItem[];
-  } catch (error) {
-    console.warn("Failed to fetch posts from Firestore for sitemap, using demoPosts fallback", error);
-    posts = demoPosts.filter(post => post.status === "published");
+    const snapshot = await getAdminDb().collection("posts").where("status", "==", "published").get();
+    posts = snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as PostItem[];
+    if (!posts.length) posts = demoPosts.filter((post) => post.status === "published");
+  } catch {
+    posts = demoPosts.filter((post) => post.status === "published");
   }
 
-  const dynamicRoutes = posts.map((post) => ({
-    url: `${BASE_URL}/berita/${post.slug}`,
-    lastModified: parseDate(post.updatedAt || post.publishedAt),
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
+  const combined = [...posts.filter((post) => post.category !== "KKN"), ...staticKknPosts];
+  const seen = new Set<string>();
+  const dynamicRoutes = combined
+    .filter((post) => {
+      if (!post.slug || seen.has(post.slug)) return false;
+      seen.add(post.slug);
+      return true;
+    })
+    .map((post) => ({
+      url: `${BASE_URL}/berita/${post.slug}`,
+      lastModified: parseDate(post.updatedAt || post.publishedAt || post.publishedDate),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
 
   return [...staticRoutes, ...dynamicRoutes];
 }

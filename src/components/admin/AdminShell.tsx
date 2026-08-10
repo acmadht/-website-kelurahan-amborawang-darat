@@ -6,14 +6,21 @@ import { useEffect, useMemo, useState } from "react";
 import { useAdminAuth } from "./AuthProvider";
 import styles from "./AdminShell.module.css";
 
-type MenuItem = { label: string; href: string; code: string };
-type MenuGroup = { title: string; items: MenuItem[] };
+type MenuItem = {
+  label: string;
+  href: string;
+  code: string;
+};
+
+type MenuGroup = {
+  title: string;
+  items: MenuItem[];
+};
 
 const editorGroups: MenuGroup[] = [
   {
     title: "Ringkasan",
     items: [
-      { label: "Dashboard", href: "/admin", code: "DB" },
       { label: "Beranda", href: "/admin/beranda", code: "BD" },
       { label: "Hero Banner", href: "/admin/hero", code: "HB" },
     ],
@@ -67,8 +74,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [open, setOpen] = useState(false);
 
   const groups = useMemo(() => {
-    if (profile?.role === "operator_rt") return operatorGroups;
-    if (profile?.role === "superadmin") return editorGroups;
+    if (profile?.role === "operator_rt") {
+      return operatorGroups;
+    }
+
+    if (profile?.role === "superadmin") {
+      return editorGroups;
+    }
+
     return editorGroups.map((group) => ({
       ...group,
       items: group.items.filter((item) => item.href !== "/admin/pengguna"),
@@ -82,13 +95,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }, [loading, configured, user, profile, router]);
 
   useEffect(() => {
-    if (!loading && profile?.role === "operator_rt" && pathname !== "/admin/rt-saya") {
+    if (
+      !loading &&
+      profile?.role === "operator_rt" &&
+      pathname !== "/admin/rt-saya"
+    ) {
       router.replace("/admin/rt-saya");
     }
   }, [loading, pathname, profile?.role, router]);
 
   if (loading) {
-    return <div className="admin-login"><div className="login-card">Memeriksa sesi admin...</div></div>;
+    return (
+      <div className="admin-login">
+        <div className="login-card">Memeriksa sesi admin...</div>
+      </div>
+    );
   }
 
   if (!configured) {
@@ -97,20 +118,34 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="login-card">
           <h1>Firebase belum dikonfigurasi</h1>
           <div className="demo-box">Isi file .env.local terlebih dahulu.</div>
-          <p><Link className="btn btn-primary" href="/">Lihat Website</Link></p>
+          <p>
+            <Link className="btn btn-primary" href="/">
+              Lihat Website
+            </Link>
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!user || !profile?.isActive) return null;
+  if (!user || !profile?.isActive) {
+    return null;
+  }
 
   return (
     <div className={styles.adminBody}>
       <div className={styles.layout}>
-        {open && <button className={styles.overlay} aria-label="Tutup menu" onClick={() => setOpen(false)} />}
+        {open && (
+          <button
+            className={styles.overlay}
+            aria-label="Tutup menu"
+            onClick={() => setOpen(false)}
+          />
+        )}
 
-        <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
+        <aside
+          className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}
+        >
           <div className={styles.brand}>
             <div className={styles.logoMark}>AD</div>
             <div>
@@ -122,7 +157,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <div className={styles.accountCard}>
             <span>Akun aktif</span>
             <strong>{profile.name}</strong>
-            <small>{profile.role === "superadmin" ? "Super Admin" : profile.role === "operator_rt" ? "Operator RT" : "Editor Kelurahan"}</small>
+            <small>
+              {profile.role === "superadmin"
+                ? "Super Admin"
+                : profile.role === "operator_rt"
+                  ? "Operator RT"
+                  : "Editor Kelurahan"}
+            </small>
           </div>
 
           <div className={styles.lockedNotice}>
@@ -135,16 +176,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             {groups.map((group) => (
               <section key={group.title} className={styles.navGroup}>
                 <span className={styles.groupTitle}>{group.title}</span>
+
                 {group.items.map((item) => {
-                  const active = item.href === "/admin"
-                    ? pathname === "/admin"
-                    : item.href !== "/" && pathname.startsWith(item.href);
+                  const active =
+                    item.href !== "/" && pathname.startsWith(item.href);
+
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setOpen(false)}
-                      className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
+                      className={`${styles.navItem} ${
+                        active ? styles.navItemActive : ""
+                      }`}
                     >
                       <span className={styles.navCode}>{item.code}</span>
                       <span>{item.label}</span>
@@ -159,7 +203,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className={styles.main}>
           <header className={styles.topbar}>
             <div className={styles.topbarLeft}>
-              <button className={styles.mobileButton} onClick={() => setOpen((value) => !value)}>Menu</button>
+              <button
+                className={styles.mobileButton}
+                onClick={() => setOpen((value) => !value)}
+              >
+                Menu
+              </button>
+
               <div>
                 <span>Dashboard Administrasi</span>
                 <strong>Kelola konten website</strong>
@@ -167,7 +217,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </div>
 
             <div className={styles.topbarActions}>
-              <Link href="/" className={styles.previewButton}>Lihat Website ↗</Link>
+              <Link href="/" className={styles.previewButton}>
+                Lihat Website ↗
+              </Link>
+
               <button
                 className={styles.logoutButton}
                 onClick={async () => {

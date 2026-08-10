@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useCollectionData } from "@/hooks/useFirestoreData";
+import type { PostItem } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
-import { newsItems } from "./newsData";
+import { displayPostDate, mergePublicPosts } from "./newsData";
 import styles from "./NewsPage.module.css";
-
-const categories = ["Semua", "Pelayanan", "Lingkungan", "KKN"] as const;
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -60,16 +60,27 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function NewsPage() {
-  const [activeCategory, setActiveCategory] =
-    useState<(typeof categories)[number]>("Semua");
+  const { data: remotePosts } = useCollectionData<PostItem>("posts", []);
+  const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
+  const categories = useMemo(
+    () => ["Semua", ...Array.from(new Set(posts.map((item) => item.category).filter(Boolean)))],
+    [posts],
+  );
+  const [activeCategory, setActiveCategory] = useState("Semua");
+
+  useEffect(() => {
+    if (!categories.includes(activeCategory)) setActiveCategory("Semua");
+  }, [activeCategory, categories]);
 
   const filteredNews = useMemo(() => {
-    if (activeCategory === "Semua") return newsItems;
-    return newsItems.filter((item) => item.category === activeCategory);
-  }, [activeCategory]);
+    if (activeCategory === "Semua") return posts;
+    return posts.filter((item) => item.category === activeCategory);
+  }, [activeCategory, posts]);
 
-  const featured = newsItems.find((item) => item.featured) ?? newsItems[0];
-  const sideNews = newsItems.filter((item) => item.slug !== featured.slug);
+  const featured = posts.find((item) => item.isFeatured) ?? posts[0];
+  const sideNews = posts.filter((item) => item.slug !== featured?.slug).slice(0, 3);
+
+  if (!featured) return null;
 
   return (
     <PublicShell>
@@ -93,14 +104,14 @@ export default function NewsPage() {
               <div className={styles.heroTicker}>
                 <div className={styles.tickerHead}>
                   <span>Berita Terkini</span>
-                  <small>{String(newsItems.length).padStart(2, "0")} artikel</small>
+                  <small>{String(posts.length).padStart(2, "0")} artikel</small>
                 </div>
                 <div className={styles.tickerList}>
-                  {newsItems.map((item, index) => (
+                  {posts.slice(0, 5).map((item, index) => (
                     <Link key={item.slug} href={`/berita/${item.slug}`} className={styles.tickerItem}>
-                      <span>0{index + 1}</span>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
                       <div>
-                        <small>{item.category} · {item.date} · {item.time}</small>
+                        <small>{item.category} · {displayPostDate(item.publishedDate)} · {item.publishedTime || "Waktu belum diisi"}</small>
                         <strong>{item.title}</strong>
                       </div>
                       <ArrowIcon size={15} />
@@ -140,16 +151,16 @@ export default function NewsPage() {
               <Reveal enabled>
                 <Link href={`/berita/${featured.slug}`} className={styles.featuredCard}>
                   <div className={styles.featuredImage}>
-                    <Photo src={featured.image} alt={featured.title} />
+                    <Photo src={featured.coverImageUrl} alt={featured.title} />
                     <span>{featured.category}</span>
                   </div>
                   <div className={styles.featuredBody}>
                     <div className={styles.articleMeta}>
-                      <span><CalendarIcon />{featured.date}</span>
-                      <span><ClockIcon />{featured.time}</span>
+                      <span><CalendarIcon />{displayPostDate(featured.publishedDate)}</span>
+                      <span><ClockIcon />{featured.publishedTime || "Waktu belum diisi"}</span>
                     </div>
                     <h3>{featured.title}</h3>
-                    <p>{featured.excerpt}</p>
+                    <p>{featured.summary}</p>
                     <span className={styles.readMore}>Baca selengkapnya <ArrowIcon size={16} /></span>
                   </div>
                 </Link>
@@ -159,13 +170,13 @@ export default function NewsPage() {
                 {sideNews.map((item, index) => (
                   <Reveal key={item.slug} enabled delay={index * 55}>
                     <Link href={`/berita/${item.slug}`} className={styles.sideCard}>
-                      <div className={styles.sideImage}><Photo src={item.image} alt={item.title} /></div>
+                      <div className={styles.sideImage}><Photo src={item.coverImageUrl} alt={item.title} /></div>
                       <div className={styles.sideBody}>
                         <span>{item.category}</span>
                         <h3>{item.title}</h3>
-                        <p>{item.excerpt}</p>
+                        <p>{item.summary}</p>
                         <div className={styles.sideFooter}>
-                          <small>{item.date} · {item.time}</small>
+                          <small>{displayPostDate(item.publishedDate)} · {item.publishedTime || "Waktu belum diisi"}</small>
                           <ArrowIcon size={16} />
                         </div>
                       </div>
@@ -190,14 +201,14 @@ export default function NewsPage() {
               {filteredNews.map((item, index) => (
                 <Reveal key={item.slug} enabled delay={(index % 6) * 45}>
                   <Link href={`/berita/${item.slug}`} className={styles.newsCard}>
-                    <div className={styles.newsImage}><Photo src={item.image} alt={item.title} /><span>{item.category}</span></div>
+                    <div className={styles.newsImage}><Photo src={item.coverImageUrl} alt={item.title} /><span>{item.category}</span></div>
                     <div className={styles.newsBody}>
                       <div className={styles.newsDateLine}>
-                        <span><CalendarIcon />{item.date}</span>
-                        <span><ClockIcon />{item.time}</span>
+                        <span><CalendarIcon />{displayPostDate(item.publishedDate)}</span>
+                        <span><ClockIcon />{item.publishedTime || "Waktu belum diisi"}</span>
                       </div>
                       <h3>{item.title}</h3>
-                      <p>{item.excerpt}</p>
+                      <p>{item.summary}</p>
                       <div className={styles.newsFooter}><span>Baca berita</span><ArrowIcon size={16} /></div>
                     </div>
                   </Link>

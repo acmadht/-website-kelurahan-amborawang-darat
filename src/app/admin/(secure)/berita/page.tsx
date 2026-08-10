@@ -3,7 +3,7 @@ import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
 export default function Page() {
   return (
     <AdminCollectionManager
-      collectionName="posts"
+      collectionName="posts" publicHref="/berita"
       title="Berita"
       description="Tulis dan publikasikan berita lengkap dengan tanggal, waktu, penulis, foto utama, dan isi artikel."
       defaults={{

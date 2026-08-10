@@ -60,11 +60,20 @@ export interface RegionLeader {
   photoUrl?: string;
   phone?: string;
   description?: string;
+  area?: string;
   populationCount?: number;
   familyCount?: number;
+  maleCount?: number;
+  femaleCount?: number;
+  houseCount?: number;
+  toddlerCount?: number;
+  elderlyCount?: number;
+  facilities?: string[];
   rwId?: string;
   order: number;
   isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }
 
 export interface ServiceItem {

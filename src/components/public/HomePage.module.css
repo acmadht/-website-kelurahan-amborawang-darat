@@ -1312,3 +1312,65 @@
     transition: none;
   }
 }
+
+/* =========================================================
+   ADMIN-CONNECTED HERO MEDIA
+========================================================= */
+.heroBackgroundImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .22;
+  filter: saturate(.85) contrast(1.04);
+  transform: scale(1.015);
+  pointer-events: none;
+}
+
+.heroBackgroundShade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(4,18,42,.94) 0%, rgba(6,28,63,.86) 47%, rgba(7,41,83,.76) 100%),
+    linear-gradient(180deg, rgba(4,18,42,.1), rgba(4,18,42,.56));
+  pointer-events: none;
+}
+
+.heroDynamicTitle {
+  max-width: 760px;
+  font-size: clamp(2.65rem, 4.8vw, 4.55rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -.045em !important;
+}
+
+.heroDots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+}
+
+.heroDots button {
+  width: 25px;
+  height: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.23);
+  cursor: pointer;
+  transition: width .2s ease, background-color .2s ease;
+}
+
+.heroDots button.heroDotActive {
+  width: 42px;
+  background: #7dccff;
+}
+
+@media (max-width: 760px) {
+  .heroDynamicTitle {
+    font-size: clamp(2.35rem, 10vw, 3.45rem) !important;
+  }
+}

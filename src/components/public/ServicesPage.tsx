@@ -1,60 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import { demoServices, demoSettings } from "@/data/demo";
+import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
+import { normalizeWhatsapp } from "@/lib/utils";
+import type { ServiceItem, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ServicesPage.module.css";
-
-const services = [
-  {
-    number: "01",
-    category: "Administrasi",
-    title: "Surat Pengantar",
-    description:
-      "Informasi persyaratan dan alur pengurusan surat pengantar melalui Kelurahan Amborawang Darat.",
-    requirements: [
-      "KTP / identitas pemohon",
-      "Kartu Keluarga bila diperlukan",
-      "Dokumen pendukung sesuai kebutuhan",
-    ],
-  },
-  {
-    number: "02",
-    category: "Kependudukan",
-    title: "Administrasi Kependudukan",
-    description:
-      "Panduan administrasi kependudukan dan dokumen pendukung sebelum proses dilanjutkan ke instansi terkait.",
-    requirements: [
-      "Kartu Keluarga",
-      "KTP / identitas",
-      "Dokumen pendukung sesuai jenis pelayanan",
-    ],
-  },
-  {
-    number: "03",
-    category: "Dokumen",
-    title: "Formulir & Dokumen Publik",
-    description:
-      "Akses formulir, berkas, dan dokumen informasi publik yang tersedia untuk masyarakat.",
-    requirements: [
-      "Pilih dokumen yang dibutuhkan",
-      "Unduh atau siapkan berkas",
-      "Pastikan data telah terisi dengan benar",
-    ],
-  },
-  {
-    number: "04",
-    category: "Informasi",
-    title: "Konsultasi Pelayanan",
-    description:
-      "Hubungi petugas kelurahan apabila memerlukan penjelasan sebelum mengurus administrasi.",
-    requirements: [
-      "Sampaikan jenis layanan",
-      "Siapkan pertanyaan atau dokumen",
-      "Konfirmasi kebutuhan sebelum datang",
-    ],
-  },
-];
 
 const steps = [
   {
@@ -77,13 +31,6 @@ const steps = [
     title: "Proses pelayanan",
     text: "Petugas memeriksa kelengkapan dan membantu proses administrasi sesuai ketentuan.",
   },
-];
-
-const quickInfo = [
-  { value: "Senin–Kamis", label: "Jam layanan utama", note: "09.00–16.00 WITA" },
-  { value: "Jumat", label: "Jam layanan", note: "09.00–11.00 WITA" },
-  { value: "RT 12", label: "Lokasi kantor", note: "Jl. Balikpapan–Handil II KM 42" },
-  { value: "0812-5800-224", label: "Kontak layanan", note: "Informasi & konfirmasi" },
 ];
 
 const faq = [
@@ -139,7 +86,66 @@ function ClockIcon() {
   );
 }
 
+function parseServiceHours(value: string) {
+  const rows = value
+    .split(/,|\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const match = item.match(/^(.+?)\s+(\d{1,2}[.:]\d{2}.*|tutup)$/i);
+      if (match) return { day: match[1].trim(), time: match[2].trim() };
+      return { day: "Jadwal", time: item };
+    });
+
+  return rows.length
+    ? rows
+    : [
+        { day: "Senin-Kamis", time: "09.00-16.00 WITA" },
+        { day: "Jumat", time: "09.00-11.00 WITA" },
+        { day: "Sabtu-Minggu", time: "Tutup" },
+      ];
+}
+
 export default function ServicesPage() {
+  const { data: rawSettings } = useDocumentData<SiteSettings>(
+    "siteSettings",
+    "main",
+    demoSettings,
+  );
+  const settings = applyAmborawangPublicSettings(rawSettings);
+  const { data: rawServices } = useCollectionData<ServiceItem>(
+    "services",
+    demoServices,
+  );
+
+  const services = rawServices.filter((item) => item.isActive !== false);
+  const displayServices = services.length ? services : demoServices;
+  const serviceHours = parseServiceHours(settings.serviceHours);
+  const whatsapp = normalizeWhatsapp(settings.whatsapp);
+
+  const quickInfo = [
+    {
+      value: serviceHours[0]?.day || "Senin-Kamis",
+      label: "Jam layanan utama",
+      note: serviceHours[0]?.time || "09.00-16.00 WITA",
+    },
+    {
+      value: serviceHours[1]?.day || "Jumat",
+      label: "Jam layanan",
+      note: serviceHours[1]?.time || "09.00-11.00 WITA",
+    },
+    {
+      value: settings.villageName,
+      label: "Lokasi kantor",
+      note: settings.address,
+    },
+    {
+      value: settings.phone || settings.whatsapp,
+      label: "Kontak layanan",
+      note: "Informasi & konfirmasi",
+    },
+  ];
+
   return (
     <PublicShell>
       <main className={styles.page}>
@@ -148,7 +154,7 @@ export default function ServicesPage() {
           <div className={styles.heroPattern} aria-hidden="true" />
 
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}>
                   <ServiceIcon />
@@ -161,9 +167,9 @@ export default function ServicesPage() {
                 </h1>
 
                 <p>
-                  Informasi layanan administrasi masyarakat Kelurahan Amborawang
-                  Darat yang disusun lebih jelas agar warga dapat menyiapkan
-                  berkas sebelum datang ke kantor.
+                  Informasi layanan administrasi masyarakat Kelurahan {settings.villageName}
+                  yang dikelola langsung dari dashboard admin agar persyaratan dan
+                  informasi pelayanan tetap mudah diperbarui.
                 </p>
 
                 <div className={styles.heroActions}>
@@ -179,7 +185,7 @@ export default function ServicesPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.serviceStatus}>
                 <div className={styles.statusTop}>
                   <div className={styles.statusIcon}>
@@ -187,23 +193,17 @@ export default function ServicesPage() {
                   </div>
                   <div>
                     <span>Informasi Pelayanan</span>
-                    <strong>Kantor Kelurahan Amborawang Darat</strong>
+                    <strong>Kantor Kelurahan {settings.villageName}</strong>
                   </div>
                 </div>
 
                 <div className={styles.statusRows}>
-                  <div>
-                    <span>Senin–Kamis</span>
-                    <strong>09.00–16.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Jumat</span>
-                    <strong>09.00–11.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Sabtu–Minggu</span>
-                    <strong>Tutup</strong>
-                  </div>
+                  {serviceHours.slice(0, 3).map((row) => (
+                    <div key={`${row.day}-${row.time}`}>
+                      <span>{row.day}</span>
+                      <strong>{row.time}</strong>
+                    </div>
+                  ))}
                 </div>
 
                 <Link href="/kontak" className={styles.statusLink}>
@@ -220,7 +220,7 @@ export default function ServicesPage() {
           <div className="container">
             <div className={styles.quickGrid}>
               {quickInfo.map((item, index) => (
-                <Reveal key={item.label} enabled delay={index * 40}>
+                <Reveal key={item.label} enabled={settings.animationEnabled} delay={index * 40}>
                   <div className={styles.quickCard}>
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
@@ -235,7 +235,7 @@ export default function ServicesPage() {
         {/* INTRO */}
         <section className={styles.introSection}>
           <div className={`container ${styles.introGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.introAside}>
                 <span className={styles.sectionNumber}>01</span>
                 <span className={styles.eyebrow}>Panduan Layanan</span>
@@ -243,26 +243,24 @@ export default function ServicesPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={60}>
+            <Reveal enabled={settings.animationEnabled} delay={60}>
               <div className={styles.introArticle}>
                 <p className={styles.lead}>
-                  Informasi pelayanan dibuat agar masyarakat dapat memahami
-                  jenis layanan, persyaratan dasar, dan langkah pengurusan secara
-                  lebih cepat.
+                  Informasi pelayanan dibuat agar masyarakat dapat memahami jenis
+                  layanan, persyaratan dasar, dan langkah pengurusan secara lebih cepat.
                 </p>
 
                 <p>
-                  Persyaratan dapat berbeda tergantung keperluan administrasi.
-                  Karena itu, apabila masih ragu terhadap berkas yang harus
-                  dibawa, masyarakat disarankan menghubungi petugas kelurahan
-                  terlebih dahulu.
+                  Persyaratan dapat berbeda tergantung keperluan administrasi. Karena
+                  itu, apabila masih ragu terhadap berkas yang harus dibawa, masyarakat
+                  disarankan menghubungi petugas kelurahan terlebih dahulu.
                 </p>
 
                 <div className={styles.introCallout}>
                   <span>Catatan</span>
                   <strong>
-                    Bawa identitas dan dokumen pendukung asli apabila diperlukan
-                    untuk pencocokan data.
+                    Bawa identitas dan dokumen pendukung asli apabila diperlukan untuk
+                    pencocokan data.
                   </strong>
                 </div>
               </div>
@@ -273,31 +271,34 @@ export default function ServicesPage() {
         {/* SERVICES */}
         <section id="daftar-layanan" className={styles.servicesSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>Daftar Layanan</span>
                 <h2>Layanan utama untuk kebutuhan masyarakat</h2>
                 <p>
-                  Pilih layanan untuk melihat gambaran persyaratan dasar sebelum
-                  proses administrasi dilakukan.
+                  Seluruh daftar di bawah ini berasal dari menu Layanan pada dashboard admin.
                 </p>
               </div>
             </Reveal>
 
             <div className={styles.servicesGrid}>
-              {services.map((service, index) => (
-                <Reveal key={service.title} enabled delay={index * 50}>
-                  <article className={styles.serviceCard}>
+              {displayServices.map((service, index) => (
+                <Reveal key={service.id ?? service.name} enabled={settings.animationEnabled} delay={index * 50}>
+                  <article id={service.slug || undefined} className={styles.serviceCard}>
                     <div className={styles.serviceCardTop}>
-                      <span>{service.number}</span>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
                       <small>{service.category}</small>
                     </div>
 
-                    <h3>{service.title}</h3>
-                    <p>{service.description}</p>
+                    <h3>{service.name}</h3>
+                    <p>{service.summary}</p>
 
+                    <span className={styles.serviceSubheading}>Persyaratan</span>
                     <div className={styles.requirements}>
-                      {service.requirements.map((item) => (
+                      {(service.requirements?.length
+                        ? service.requirements
+                        : ["Konfirmasi persyaratan kepada petugas kelurahan"]
+                      ).map((item) => (
                         <div key={item}>
                           <span><CheckIcon /></span>
                           <p>{item}</p>
@@ -305,10 +306,37 @@ export default function ServicesPage() {
                       ))}
                     </div>
 
-                    <Link href="/kontak" className={styles.serviceLink}>
-                      Konfirmasi Persyaratan
-                      <ArrowIcon size={16} />
-                    </Link>
+                    {service.procedures?.length ? (
+                      <>
+                        <span className={styles.serviceSubheading}>Prosedur</span>
+                        <div className={styles.procedureList}>
+                          {service.procedures.map((item, procedureIndex) => (
+                            <div key={`${item}-${procedureIndex}`}>
+                              <span>{String(procedureIndex + 1).padStart(2, "0")}</span>
+                              <p>{item}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+
+                    <div className={styles.serviceMetaLine}>
+                      <span><small>Waktu</small><strong>{service.duration || "Konfirmasi petugas"}</strong></span>
+                      <span><small>Biaya</small><strong>{service.cost || "Konfirmasi petugas"}</strong></span>
+                    </div>
+
+                    <div className={styles.serviceActions}>
+                      <Link href="/kontak" className={styles.serviceLink}>
+                        {service.contact ? `Kontak: ${service.contact}` : "Konfirmasi Layanan"}
+                        <ArrowIcon size={16} />
+                      </Link>
+                      {service.documentUrl ? (
+                        <a href={service.documentUrl} target="_blank" rel="noopener noreferrer" className={styles.serviceDocumentLink}>
+                          Dokumen
+                          <ArrowIcon size={15} />
+                        </a>
+                      ) : null}
+                    </div>
                   </article>
                 </Reveal>
               ))}
@@ -319,7 +347,7 @@ export default function ServicesPage() {
         {/* PROCESS */}
         <section className={styles.processSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.processHeading}>
                 <div>
                   <span className={styles.sectionNumber}>02</span>
@@ -328,15 +356,15 @@ export default function ServicesPage() {
                 </div>
 
                 <p>
-                  Alur ini membantu masyarakat memahami proses dasar pelayanan
-                  sebelum berkas diproses oleh petugas.
+                  Alur ini membantu masyarakat memahami proses dasar pelayanan sebelum
+                  berkas diproses oleh petugas.
                 </p>
               </div>
             </Reveal>
 
             <div className={styles.processGrid}>
               {steps.map((step, index) => (
-                <Reveal key={step.title} enabled delay={index * 45}>
+                <Reveal key={step.title} enabled={settings.animationEnabled} delay={index * 45}>
                   <article className={styles.processCard}>
                     <span>{step.number}</span>
                     <h3>{step.title}</h3>
@@ -351,14 +379,14 @@ export default function ServicesPage() {
         {/* DOCUMENT CTA */}
         <section className={styles.documentSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.documentPanel}>
                 <div>
                   <span>Dokumen & Formulir</span>
                   <h2>Butuh formulir atau dokumen publik?</h2>
                   <p>
-                    Akses halaman dokumen untuk melihat berkas yang tersedia
-                    sebelum datang ke kantor kelurahan.
+                    Akses halaman dokumen untuk melihat berkas yang tersedia sebelum
+                    datang ke kantor kelurahan.
                   </p>
                 </div>
 
@@ -374,7 +402,7 @@ export default function ServicesPage() {
         {/* FAQ */}
         <section className={styles.faqSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.faqHeading}>
                 <span className={styles.eyebrow}>Pertanyaan Umum</span>
                 <h2>Informasi yang sering ditanyakan</h2>
@@ -383,7 +411,7 @@ export default function ServicesPage() {
 
             <div className={styles.faqGrid}>
               {faq.map((item, index) => (
-                <Reveal key={item.question} enabled delay={index * 45}>
+                <Reveal key={item.question} enabled={settings.animationEnabled} delay={index * 45}>
                   <article className={styles.faqCard}>
                     <span>0{index + 1}</span>
                     <h3>{item.question}</h3>
@@ -398,14 +426,14 @@ export default function ServicesPage() {
         {/* CTA */}
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
                 <div>
                   <span>Butuh Bantuan?</span>
                   <h2>Konfirmasi persyaratan sebelum datang.</h2>
                   <p>
-                    Petugas kelurahan dapat membantu memastikan dokumen yang
-                    perlu disiapkan sesuai kebutuhan pelayanan.
+                    Petugas kelurahan dapat membantu memastikan dokumen yang perlu
+                    disiapkan sesuai kebutuhan pelayanan.
                   </p>
                 </div>
 
@@ -415,14 +443,16 @@ export default function ServicesPage() {
                     <ArrowIcon />
                   </Link>
 
-                  <a
-                    href="https://wa.me/628125800224"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.ctaSecondary}
-                  >
-                    WhatsApp
-                  </a>
+                  {whatsapp ? (
+                    <a
+                      href={`https://wa.me/${whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.ctaSecondary}
+                    >
+                      WhatsApp
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </Reveal>

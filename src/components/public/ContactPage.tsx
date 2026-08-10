@@ -1,41 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import { demoSettings } from "@/data/demo";
+import { useDocumentData } from "@/hooks/useFirestoreData";
+import { db } from "@/lib/firebase/client";
+import { normalizeWhatsapp } from "@/lib/utils";
+import type { SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ContactPage.module.css";
-
-const contactInfo = [
-  {
-    label: "Telepon / WhatsApp",
-    value: "0812-5800-224",
-    note: "Informasi dan konfirmasi pelayanan",
-    href: "https://wa.me/628125800224",
-    type: "phone",
-  },
-  {
-    label: "Alamat Kantor",
-    value: "Jl. Balikpapan–Handil II KM 42, RT 12",
-    note: "Kelurahan Amborawang Darat, Samboja Barat",
-    href: "https://www.google.com/maps/search/?api=1&query=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur",
-    type: "location",
-  },
-  {
-    label: "Senin–Kamis",
-    value: "09.00–16.00 WITA",
-    note: "Jam pelayanan kantor",
-    href: "#jam-layanan",
-    type: "clock",
-  },
-  {
-    label: "Jumat",
-    value: "09.00–11.00 WITA",
-    note: "Jam pelayanan kantor",
-    href: "#jam-layanan",
-    type: "clock",
-  },
-];
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -87,16 +63,117 @@ function IconByType({ type }: { type: string }) {
   return <ClockIcon />;
 }
 
+function parseServiceHours(value: string) {
+  const rows = value
+    .split(/,|\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const match = item.match(/^(.+?)\s+(\d{1,2}[.:]\d{2}.*|tutup)$/i);
+      if (match) return { day: match[1].trim(), time: match[2].trim() };
+      return { day: "Jadwal", time: item };
+    });
+
+  return rows.length
+    ? rows
+    : [
+        { day: "Senin-Kamis", time: "09.00-16.00 WITA" },
+        { day: "Jumat", time: "09.00-11.00 WITA" },
+        { day: "Sabtu-Minggu", time: "Tutup" },
+      ];
+}
+
 export default function ContactPage() {
-  const [sent, setSent] = useState(false);
+  const { data: rawSettings } = useDocumentData<SiteSettings>(
+    "siteSettings",
+    "main",
+    demoSettings,
+  );
+  const settings = applyAmborawangPublicSettings(rawSettings);
+  const whatsapp = normalizeWhatsapp(settings.whatsapp);
+  const whatsappUrl = whatsapp ? `https://wa.me/${whatsapp}` : "#";
+  const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`;
+  const serviceRows = useMemo(
+    () => parseServiceHours(settings.serviceHours),
+    [settings.serviceHours],
+  );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const contactInfo = useMemo(() => {
+    const items = [
+      {
+        label: "Telepon / WhatsApp",
+        value: settings.phone || settings.whatsapp,
+        note: "Informasi dan konfirmasi pelayanan",
+        href: whatsappUrl,
+        type: "phone",
+      },
+      {
+        label: "Alamat Kantor",
+        value: settings.address,
+        note: `Kelurahan ${settings.villageName}`,
+        href: mapsSearchUrl,
+        type: "location",
+      },
+      ...serviceRows.slice(0, 2).map((row) => ({
+        label: row.day,
+        value: row.time,
+        note: "Jam pelayanan kantor",
+        href: "#jam-layanan",
+        type: "clock",
+      })),
+    ];
+
+    return items.slice(0, 4);
+  }, [mapsSearchUrl, serviceRows, settings.address, settings.phone, settings.villageName, settings.whatsapp, whatsappUrl]);
+
+  const [submitState, setSubmitState] = useState<
+    "idle" | "saving" | "success" | "error"
+  >("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSent(true);
+    if (!db || submitState === "saving") {
+      if (!db) {
+        setSubmitState("error");
+        setSubmitMessage("Firebase belum tersedia. Silakan gunakan WhatsApp kelurahan.");
+      }
+      return;
+    }
 
-    window.setTimeout(() => {
-      setSent(false);
-    }, 2600);
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const name = String(data.get("name") ?? "").trim();
+    const contact = String(data.get("phone") ?? "").trim();
+    const subject = String(data.get("subject") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
+
+    if (!name || !contact || !subject || !message) return;
+
+    setSubmitState("saving");
+    setSubmitMessage("");
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        name,
+        contact,
+        subject,
+        message,
+        status: "baru",
+        source: "website",
+        createdAt: serverTimestamp(),
+      });
+      form.reset();
+      setSubmitState("success");
+      setSubmitMessage("Pesan berhasil dikirim dan masuk ke dashboard admin kelurahan.");
+    } catch (error) {
+      setSubmitState("error");
+      setSubmitMessage(
+        error instanceof Error
+          ? error.message
+          : "Pesan gagal dikirim. Silakan gunakan WhatsApp kelurahan.",
+      );
+    }
   }
 
   return (
@@ -107,7 +184,7 @@ export default function ContactPage() {
           <div className={styles.heroPattern} aria-hidden="true" />
 
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}>
                   <MessageIcon />
@@ -116,17 +193,17 @@ export default function ContactPage() {
 
                 <h1>
                   Kontak
-                  <strong>Amborawang Darat</strong>
+                  <strong>{settings.villageName}</strong>
                 </h1>
 
                 <p>
-                  Hubungi Kelurahan Amborawang Darat untuk informasi pelayanan,
+                  Hubungi Kelurahan {settings.villageName} untuk informasi pelayanan,
                   koreksi data, kebutuhan administrasi, dan informasi publik.
                 </p>
 
                 <div className={styles.heroActions}>
                   <a
-                    href="https://wa.me/628125800224"
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.primaryButton}
@@ -135,17 +212,14 @@ export default function ContactPage() {
                     <ArrowIcon />
                   </a>
 
-                  <a
-                    href="tel:+628125800224"
-                    className={styles.secondaryButton}
-                  >
+                  <a href={`tel:${settings.phone}`} className={styles.secondaryButton}>
                     Telepon
                   </a>
                 </div>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.heroContactCard}>
                 <div className={styles.contactCardHead}>
                   <div className={styles.contactCardIcon}>
@@ -153,27 +227,23 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span>Kantor Kelurahan</span>
-                    <strong>Amborawang Darat</strong>
+                    <strong>{settings.villageName}</strong>
                   </div>
                 </div>
 
                 <div className={styles.officeAddress}>
                   <span>Alamat</span>
-                  <p>
-                    Jl. Balikpapan–Handil II KM 42, RT 12, Kelurahan
-                    Amborawang Darat, Kecamatan Samboja Barat,
-                    Kabupaten Kutai Kartanegara, Kalimantan Timur 75274
-                  </p>
+                  <p>{settings.address}</p>
                 </div>
 
                 <div className={styles.officeQuick}>
                   <div>
                     <span>WhatsApp</span>
-                    <strong>0812-5800-224</strong>
+                    <strong>{settings.phone || settings.whatsapp}</strong>
                   </div>
                   <div>
                     <span>Hari kerja</span>
-                    <strong>Senin–Jumat</strong>
+                    <strong>{serviceRows[0]?.day || "Senin-Jumat"}</strong>
                   </div>
                 </div>
 
@@ -191,7 +261,7 @@ export default function ContactPage() {
           <div className="container">
             <div className={styles.quickGrid}>
               {contactInfo.map((item, index) => (
-                <Reveal key={`${item.label}-${item.value}`} enabled delay={index * 40}>
+                <Reveal key={`${item.label}-${item.value}`} enabled={settings.animationEnabled} delay={index * 40}>
                   <a
                     href={item.href}
                     target={item.href.startsWith("http") ? "_blank" : undefined}
@@ -219,7 +289,7 @@ export default function ContactPage() {
         {/* INTRO */}
         <section className={styles.introSection}>
           <div className={`container ${styles.introGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.introAside}>
                 <span className={styles.sectionNumber}>01</span>
                 <span className={styles.eyebrow}>Pusat Informasi</span>
@@ -227,25 +297,24 @@ export default function ContactPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={60}>
+            <Reveal enabled={settings.animationEnabled} delay={60}>
               <div className={styles.introArticle}>
                 <p className={styles.lead}>
-                  Kontak kelurahan digunakan untuk membantu masyarakat
-                  mendapatkan informasi sebelum datang ke kantor.
+                  Kontak kelurahan digunakan untuk membantu masyarakat mendapatkan
+                  informasi sebelum datang ke kantor.
                 </p>
 
                 <p>
-                  Untuk pelayanan administrasi, masyarakat disarankan
-                  menyampaikan jenis kebutuhan terlebih dahulu agar petugas
-                  dapat memberikan informasi mengenai dokumen yang perlu
-                  disiapkan.
+                  Untuk pelayanan administrasi, masyarakat disarankan menyampaikan
+                  jenis kebutuhan terlebih dahulu agar petugas dapat memberikan
+                  informasi mengenai dokumen yang perlu disiapkan.
                 </p>
 
                 <div className={styles.introCallout}>
                   <span>Respon Pelayanan</span>
                   <strong>
-                    Pesan yang dikirim di luar jam kantor dapat ditanggapi pada
-                    jam pelayanan berikutnya.
+                    Pesan yang dikirim di luar jam kantor dapat ditanggapi pada jam
+                    pelayanan berikutnya.
                   </strong>
                 </div>
               </div>
@@ -256,29 +325,25 @@ export default function ContactPage() {
         {/* MAP */}
         <section id="peta" className={styles.mapSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.mapHeading}>
                 <div>
                   <span className={styles.eyebrowLight}>Lokasi Kantor</span>
                   <h2>Temukan kantor kelurahan</h2>
                 </div>
 
-                <a
-                  href="https://www.google.com/maps/search/?api=1&query=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={mapsSearchUrl} target="_blank" rel="noopener noreferrer">
                   Buka Google Maps
                   <ArrowIcon size={16} />
                 </a>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={50}>
+            <Reveal enabled={settings.animationEnabled} delay={50}>
               <div className={styles.mapPanel}>
                 <iframe
-                  src="https://www.google.com/maps?q=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur&z=15&output=embed"
-                  title="Lokasi Kantor Kelurahan Amborawang Darat"
+                  src={settings.mapsEmbedUrl}
+                  title={`Lokasi Kantor Kelurahan ${settings.villageName}`}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   allowFullScreen
@@ -291,7 +356,7 @@ export default function ContactPage() {
         {/* HOURS + FORM */}
         <section id="jam-layanan" className={styles.serviceSection}>
           <div className={`container ${styles.serviceGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.hoursCard}>
                 <div className={styles.hoursHead}>
                   <div className={styles.hoursIcon}>
@@ -304,47 +369,32 @@ export default function ContactPage() {
                 </div>
 
                 <div className={styles.hoursList}>
-                  <div>
-                    <span>Senin</span>
-                    <strong>09.00–16.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Selasa</span>
-                    <strong>09.00–16.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Rabu</span>
-                    <strong>09.00–16.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Kamis</span>
-                    <strong>09.00–16.00 WITA</strong>
-                  </div>
-                  <div>
-                    <span>Jumat</span>
-                    <strong>09.00–11.00 WITA</strong>
-                  </div>
-                  <div className={styles.closedRow}>
-                    <span>Sabtu–Minggu</span>
-                    <strong>Tutup</strong>
-                  </div>
+                  {serviceRows.map((row) => (
+                    <div
+                      key={`${row.day}-${row.time}`}
+                      className={/tutup/i.test(row.time) ? styles.closedRow : undefined}
+                    >
+                      <span>{row.day}</span>
+                      <strong>{row.time}</strong>
+                    </div>
+                  ))}
                 </div>
 
                 <p>
-                  Jam pelayanan dapat menyesuaikan hari libur nasional,
-                  kegiatan dinas, atau ketentuan kantor.
+                  Jam pelayanan dapat menyesuaikan hari libur nasional, kegiatan
+                  dinas, atau ketentuan kantor.
                 </p>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={60}>
+            <Reveal enabled={settings.animationEnabled} delay={60}>
               <div className={styles.formCard}>
                 <div className={styles.formHead}>
                   <span>Kirim Pesan</span>
                   <h2>Sampaikan kebutuhan Anda</h2>
                   <p>
-                    Formulir ini dapat diarahkan ke sistem backend atau email
-                    kelurahan ketika integrasi sudah tersedia.
+                    Pesan yang dikirim melalui formulir ini masuk ke menu Pesan
+                    Masuk pada dashboard admin kelurahan.
                   </p>
                 </div>
 
@@ -383,17 +433,16 @@ export default function ContactPage() {
                     />
                   </label>
 
-                  <button type="submit">
-                    {sent ? "Pesan diterima" : "Kirim Pesan"}
-                    {!sent && <ArrowIcon />}
+                  <button type="submit" disabled={submitState === "saving"}>
+                    {submitState === "saving" ? "Mengirim..." : "Kirim Pesan"}
+                    {submitState !== "saving" && <ArrowIcon />}
                   </button>
 
-                  {sent && (
+                  {submitMessage ? (
                     <p className={styles.successMessage}>
-                      Tampilan formulir berhasil. Hubungkan submit ini ke backend
-                      atau email agar pesan benar-benar terkirim.
+                      {submitMessage}
                     </p>
-                  )}
+                  ) : null}
                 </form>
               </div>
             </Reveal>
@@ -403,7 +452,7 @@ export default function ContactPage() {
         {/* QUICK ACCESS */}
         <section className={styles.accessSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.accessPanel}>
                 <div>
                   <span>Akses Cepat</span>
@@ -411,20 +460,9 @@ export default function ContactPage() {
                 </div>
 
                 <div className={styles.accessLinks}>
-                  <Link href="/layanan">
-                    Layanan
-                    <ArrowIcon size={15} />
-                  </Link>
-
-                  <Link href="/dokumen">
-                    Dokumen
-                    <ArrowIcon size={15} />
-                  </Link>
-
-                  <Link href="/wilayah">
-                    Wilayah
-                    <ArrowIcon size={15} />
-                  </Link>
+                  <Link href="/layanan">Layanan <ArrowIcon size={15} /></Link>
+                  <Link href="/dokumen">Dokumen <ArrowIcon size={15} /></Link>
+                  <Link href="/data-rt">Data RT <ArrowIcon size={15} /></Link>
                 </div>
               </div>
             </Reveal>
@@ -434,20 +472,20 @@ export default function ContactPage() {
         {/* CTA */}
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
                 <div>
                   <span>Butuh Respon Cepat?</span>
                   <h2>Gunakan WhatsApp untuk konfirmasi pelayanan.</h2>
                   <p>
-                    Sampaikan keperluan secara singkat agar petugas dapat
-                    memberikan informasi yang sesuai.
+                    Sampaikan keperluan secara singkat agar petugas dapat memberikan
+                    informasi yang sesuai.
                   </p>
                 </div>
 
                 <div className={styles.ctaActions}>
                   <a
-                    href="https://wa.me/628125800224"
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.ctaPrimary}

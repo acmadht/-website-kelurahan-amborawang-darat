@@ -1,93 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useDocumentData } from "@/hooks/useFirestoreData";
+import {
+  amborawangProfileFallback,
+  resolveAmborawangProfile,
+  type ProfileContent,
+} from "@/data/amborawangProfile";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ProfilePage.module.css";
-
-const stats = [
-  { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
-  { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
-  { value: "13 RT", label: "Wilayah RT", note: "Laporan lokal, Mei 2026" },
-  { value: "5,3 km", label: "Ke ibu kota kecamatan", note: "BPS, data 2023" },
-];
-
-const timeline = [
-  {
-    year: "Sebelum 2020",
-    title: "Bagian dari Kecamatan Samboja",
-    text: "Amborawang Darat menjalankan pemerintahan kelurahan dalam wilayah Kecamatan Samboja.",
-  },
-  {
-    year: "2020",
-    title: "Pembentukan Kecamatan Samboja Barat",
-    text: "Perda Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020 memasukkan Amborawang Darat ke wilayah kecamatan baru.",
-  },
-  {
-    year: "2023",
-    title: "Pemerintahan kecamatan mulai efektif",
-    text: "Kecamatan Samboja Barat mulai berjalan efektif pada 15 Februari 2023 dan memperkuat koordinasi pelayanan kewilayahan.",
-  },
-  {
-    year: "Sekarang",
-    title: "Penguatan pelayanan digital",
-    text: "Informasi publik, layanan, berita, dan data wilayah dikembangkan agar lebih mudah diakses masyarakat.",
-  },
-];
-
-const missions = [
-  "Meningkatkan pelayanan publik yang cepat, jelas, ramah, dan mudah diakses.",
-  "Memperkuat keterbukaan informasi serta pengelolaan data kelurahan yang akurat.",
-  "Mendorong partisipasi masyarakat dalam perencanaan, pembangunan, dan pengawasan lingkungan.",
-  "Mendukung pengembangan UMKM, pertanian, pendidikan, dan kegiatan produktif masyarakat.",
-  "Menjaga kebersihan, ketertiban, keamanan, serta keberlanjutan lingkungan kelurahan.",
-];
-
-const boundaries = [
-  ["Utara", "Kelurahan Margomulyo"],
-  ["Timur", "Kelurahan Argosari dan Kelurahan Amborawang Laut"],
-  ["Selatan", "Kelurahan Salok Api Laut dan Kelurahan Salok Api Darat"],
-  ["Barat", "Desa Tani Bhakti"],
-];
-
-const potentials = [
-  {
-    title: "Pertanian dan Hortikultura",
-    text: "Lahan dan aktivitas budidaya dapat dikembangkan melalui peningkatan produktivitas, pengolahan hasil, dan pemasaran.",
-  },
-  {
-    title: "UMKM dan Ekonomi Lokal",
-    text: "Usaha rumah tangga, perdagangan, kuliner, dan jasa menjadi ruang penguatan pendapatan masyarakat.",
-  },
-  {
-    title: "Pendidikan dan SDM",
-    text: "Keberadaan satuan pendidikan mendukung peningkatan keterampilan, literasi, dan kapasitas generasi muda.",
-  },
-  {
-    title: "Konektivitas Wilayah",
-    text: "Posisi pada koridor Samboja Barat membuka peluang pengembangan layanan, logistik lokal, dan kegiatan produktif.",
-  },
-];
-
-const facilities = [
-  "Kantor Kelurahan Amborawang Darat dan layanan administrasi masyarakat",
-  "SD Negeri 005 Samboja",
-  "SMP Negeri 2 Samboja",
-  "MI Al Fatah Samboja dan satuan pendidikan keagamaan",
-  "Layanan kesehatan dalam wilayah kerja Puskesmas Sungai Merdeka",
-  "Tempat ibadah dan fasilitas sosial kemasyarakatan",
-  "Jalan Balikpapan–Handil II dan jaringan jalan lingkungan",
-  "Sarana perdagangan serta ruang usaha masyarakat",
-];
-
-const priorities = [
-  "Pelayanan publik berbasis data",
-  "Jalan, drainase, dan penerangan",
-  "Penguatan UMKM dan usaha warga",
-  "Kebersihan dan pengelolaan sampah",
-  "Pendidikan serta kegiatan pemuda",
-  "Pembaruan data wilayah berkala",
-];
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -128,6 +50,18 @@ function PinIcon() {
 }
 
 export default function ProfilePage() {
+  const { data } = useDocumentData<ProfileContent>(
+    "pages",
+    "profil",
+    amborawangProfileFallback,
+  );
+  const profile = resolveAmborawangProfile(data);
+  const quickStats = profile.stats.slice(0, 3);
+  const historyParagraphs = profile.history
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
   return (
     <PublicShell>
       <main className={styles.page}>
@@ -137,12 +71,9 @@ export default function ProfilePage() {
           <div className={`container ${styles.heroInner}`}>
             <Reveal enabled>
               <div className={styles.heroCopy}>
-                <span className={styles.eyebrowLight}>Profil Kelurahan</span>
-                <h1>Mengenal Amborawang Darat</h1>
-                <p>
-                  Sejarah, arah pelayanan, kondisi wilayah, batas administratif,
-                  potensi, dan fasilitas umum dalam satu halaman yang lebih informatif.
-                </p>
+                <span className={styles.eyebrowLight}>{profile.heroEyebrow}</span>
+                <h1>{profile.heroTitle}</h1>
+                <p>{profile.heroDescription}</p>
               </div>
             </Reveal>
 
@@ -150,14 +81,18 @@ export default function ProfilePage() {
               <div className={styles.heroPhotoCard}>
                 <div className={styles.heroPhoto}>
                   <img
-                    src="/images/kantor-kelurahan-amborawang-darat.jpg"
-                    alt="Kantor Kelurahan Amborawang Darat"
+                    src={profile.imageUrl}
+                    alt={profile.heroImageTitle}
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = amborawangProfileFallback.imageUrl;
+                    }}
                   />
                 </div>
                 <div className={styles.heroPhotoMeta}>
-                  <span>Kantor Kelurahan Amborawang Darat</span>
-                  <small>Dokumentasi bangunan kantor, 19 September 2015</small>
-                  <small>Foto: Arief R. Sandan (Ezagren)</small>
+                  <span>{profile.heroImageTitle}</span>
+                  <small>{profile.heroImageCaption}</small>
+                  <small>{profile.heroImageCredit}</small>
                 </div>
               </div>
             </Reveal>
@@ -170,32 +105,20 @@ export default function ProfilePage() {
             <div className={styles.quickBandGrid}>
               <Reveal enabled>
                 <div className={styles.quickBandIntro}>
-                  <span>Ringkasan Profil</span>
-                  <strong>Amborawang Darat</strong>
-                  <p>Kelurahan di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara.</p>
+                  <span>{profile.summaryEyebrow}</span>
+                  <strong>{profile.summaryName}</strong>
+                  <p>{profile.summaryDescription}</p>
                 </div>
               </Reveal>
 
-              <Reveal enabled delay={40}>
-                <div className={styles.quickBandItem}>
-                  <span>Wilayah</span>
-                  <strong>19,47 km²</strong>
-                </div>
-              </Reveal>
-
-              <Reveal enabled delay={80}>
-                <div className={styles.quickBandItem}>
-                  <span>Penduduk</span>
-                  <strong>2.921 jiwa</strong>
-                </div>
-              </Reveal>
-
-              <Reveal enabled delay={120}>
-                <div className={styles.quickBandItem}>
-                  <span>Administrasi</span>
-                  <strong>13 RT</strong>
-                </div>
-              </Reveal>
+              {quickStats.map((item, index) => (
+                <Reveal key={`${item.label}-${index}`} enabled delay={(index + 1) * 40}>
+                  <div className={styles.quickBandItem}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                </Reveal>
+              ))}
             </div>
           </div>
         </section>
@@ -212,23 +135,13 @@ export default function ProfilePage() {
 
             <Reveal enabled delay={60}>
               <div className={styles.article}>
-                <h2>Dari wilayah Samboja menuju pelayanan Samboja Barat</h2>
+                <h2>{profile.historyTitle}</h2>
 
-                <p>
-                  Amborawang Darat telah menjadi salah satu kelurahan dalam wilayah administratif Kecamatan Samboja, Kabupaten Kutai Kartanegara. Perkembangan permukiman, aktivitas masyarakat, pendidikan, pertanian, perdagangan, dan pelayanan pemerintahan membentuk karakter wilayah ini dari waktu ke waktu.
-                </p>
+                {historyParagraphs.map((paragraph, index) => (
+                  <p key={`${paragraph.slice(0, 30)}-${index}`}>{paragraph}</p>
+                ))}
 
-                <p>
-                  Melalui Peraturan Daerah Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020, Amborawang Darat ditetapkan sebagai salah satu kelurahan dalam Kecamatan Samboja Barat. Kecamatan baru tersebut mulai menjalankan pemerintahan secara efektif pada 15 Februari 2023. Perubahan administratif ini mendekatkan koordinasi pembangunan dan pelayanan publik kepada masyarakat.
-                </p>
-
-                <p>
-                  Saat ini, Kelurahan Amborawang Darat terus memperkuat pelayanan administrasi, keterbukaan informasi, partisipasi warga, pengembangan potensi ekonomi lokal, dan pengelolaan lingkungan yang berkelanjutan.
-                </p>
-
-                <div className={styles.factCallout}>
-                  Amborawang Darat menjadi bagian Kecamatan Samboja Barat berdasarkan Perda Kabupaten Kutai Kartanegara Nomor 6 Tahun 2020.
-                </div>
+                <div className={styles.factCallout}>{profile.historyCallout}</div>
               </div>
             </Reveal>
           </div>
@@ -238,8 +151,8 @@ export default function ProfilePage() {
         <section className={styles.statsSection}>
           <div className="container">
             <div className={styles.statsGrid}>
-              {stats.map((item, index) => (
-                <Reveal key={item.label} enabled delay={index * 45}>
+              {profile.stats.map((item, index) => (
+                <Reveal key={`${item.label}-${index}`} enabled delay={index * 45}>
                   <div className={styles.statItem}>
                     <strong>{item.value}</strong>
                     <span>{item.label}</span>
@@ -255,18 +168,16 @@ export default function ProfilePage() {
         <section className={styles.timelineSection}>
           <div className="container">
             <Reveal enabled>
-              <div className={styles.sectionHeading}>
-                <span className={styles.eyebrowLight}>Jejak Perkembangan</span>
-                <h2>Perubahan administratif dan penguatan pelayanan</h2>
-                <p>
-                  Bagian ini menampilkan tonggak yang dapat diverifikasi tanpa menambahkan cerita asal-usul yang belum memiliki dokumen resmi.
-                </p>
+              <div className={styles.sectionHeadingDark}>
+                <span className={styles.eyebrowLight}>{profile.timelineEyebrow}</span>
+                <h2>{profile.timelineTitle}</h2>
+                <p>{profile.timelineDescription}</p>
               </div>
             </Reveal>
 
             <div className={styles.timeline}>
-              {timeline.map((item, index) => (
-                <Reveal key={item.year} enabled delay={index * 55}>
+              {profile.timeline.map((item, index) => (
+                <Reveal key={`${item.year}-${index}`} enabled delay={index * 55}>
                   <div className={styles.timelineItem}>
                     <div className={styles.timelineMarker}>
                       <span>{item.year}</span>
@@ -289,12 +200,8 @@ export default function ProfilePage() {
               <Reveal enabled>
                 <div className={styles.visionCard}>
                   <span className={styles.eyebrowLight}>Visi Pelayanan</span>
-                  <blockquote>
-                    Terwujudnya Kelurahan Amborawang Darat yang tertib, responsif, transparan, berdaya, dan berkelanjutan dalam memberikan pelayanan kepada masyarakat.
-                  </blockquote>
-                  <p>
-                    Rumusan profil digital ini tetap dapat disesuaikan melalui dashboard apabila dokumen visi kelurahan yang ditetapkan tersedia.
-                  </p>
+                  <blockquote>{profile.vision}</blockquote>
+                  <p>{profile.visionNote}</p>
                 </div>
               </Reveal>
 
@@ -302,15 +209,15 @@ export default function ProfilePage() {
                 <Reveal enabled>
                   <div className={styles.missionHeading}>
                     <span className={styles.eyebrow}>Misi</span>
-                    <h2>Arah kerja yang dekat dengan kebutuhan warga</h2>
+                    <h2>{profile.missionTitle}</h2>
                   </div>
                 </Reveal>
 
                 <div className={styles.missionList}>
-                  {missions.map((item, index) => (
-                    <Reveal key={item} enabled delay={index * 40}>
+                  {profile.missions.map((item, index) => (
+                    <Reveal key={`${item}-${index}`} enabled delay={index * 40}>
                       <div className={styles.missionItem}>
-                        <span>0{index + 1}</span>
+                        <span>{String(index + 1).padStart(2, "0")}</span>
                         <p>{item}</p>
                       </div>
                     </Reveal>
@@ -326,33 +233,21 @@ export default function ProfilePage() {
           <div className="container">
             <Reveal enabled>
               <div className={styles.sectionHeadingDark}>
-                <span className={styles.eyebrowLight}>Kondisi Wilayah</span>
-                <h2>Geografi dan batas administratif</h2>
-                <p>
-                  Kelurahan Amborawang Darat berada di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Luas wilayahnya sekitar 19,47 km² atau 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan sekitar 5,3 km. Wilayah ini berada pada kawasan beriklim tropis basah dan terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan.
-                </p>
+                <span className={styles.eyebrowLight}>{profile.regionEyebrow}</span>
+                <h2>{profile.regionTitle}</h2>
+                <p>{profile.geography}</p>
               </div>
             </Reveal>
 
             <div className={styles.regionFacts}>
-              <Reveal enabled>
-                <div className={styles.regionFact}>
-                  <span>04,68%</span>
-                  <small>Proporsi luas terhadap Kecamatan Samboja Barat</small>
-                </div>
-              </Reveal>
-              <Reveal enabled delay={40}>
-                <div className={styles.regionFact}>
-                  <span>5,3 km</span>
-                  <small>Jarak menuju ibu kota kecamatan</small>
-                </div>
-              </Reveal>
-              <Reveal enabled delay={80}>
-                <div className={styles.regionFact}>
-                  <span>Tropis</span>
-                  <small>Karakter iklim wilayah</small>
-                </div>
-              </Reveal>
+              {profile.regionFacts.map((item, index) => (
+                <Reveal key={`${item.label}-${index}`} enabled delay={index * 40}>
+                  <div className={styles.regionFact}>
+                    <span>{item.value}</span>
+                    <small>{item.label}</small>
+                  </div>
+                </Reveal>
+              ))}
             </div>
 
             <div className={styles.regionGrid}>
@@ -361,10 +256,10 @@ export default function ProfilePage() {
                   <div className={styles.mapTop}>
                     <div>
                       <span>Peta Wilayah</span>
-                      <strong>Amborawang Darat</strong>
+                      <strong>{profile.mapTitle}</strong>
                     </div>
                     <a
-                      href="/images/peta-amborawang-darat.png"
+                      href={profile.mapImageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -375,19 +270,23 @@ export default function ProfilePage() {
 
                   <div className={styles.mapImageWrap}>
                     <img
-                      src="/images/peta-amborawang-darat.png"
-                      alt="Peta wilayah Kelurahan Amborawang Darat"
+                      src={profile.mapImageUrl}
+                      alt={`Peta wilayah ${profile.mapTitle}`}
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = amborawangProfileFallback.mapImageUrl;
+                      }}
                     />
                   </div>
                 </div>
               </Reveal>
 
               <div className={styles.boundaryList}>
-                {boundaries.map(([dir, place], index) => (
-                  <Reveal key={dir} enabled delay={index * 45}>
+                {profile.boundaryItems.map((item, index) => (
+                  <Reveal key={`${item.direction}-${index}`} enabled delay={index * 45}>
                     <div className={styles.boundaryItem}>
-                      <span>{dir}</span>
-                      <strong>{place}</strong>
+                      <span>{item.direction}</span>
+                      <strong>{item.places}</strong>
                     </div>
                   </Reveal>
                 ))}
@@ -395,9 +294,7 @@ export default function ProfilePage() {
             </div>
 
             <Reveal enabled>
-              <p className={styles.regionNote}>
-                Batas administratif Kelurahan Amborawang Darat ditetapkan melalui Peraturan Bupati Kutai Kartanegara Nomor 43 Tahun 2019. Wilayah yang berbatasan langsung meliputi Kelurahan Margomulyo, Kelurahan Argosari, Kelurahan Amborawang Laut, Kelurahan Salok Api Laut, Kelurahan Salok Api Darat, dan Desa Tani Bhakti.
-              </p>
+              <p className={styles.regionNote}>{profile.boundaries}</p>
             </Reveal>
           </div>
         </section>
@@ -407,19 +304,19 @@ export default function ProfilePage() {
           <div className="container">
             <Reveal enabled>
               <div className={styles.sectionHeading}>
-                <span className={styles.eyebrow}>Potensi Kelurahan</span>
-                <h2>Peluang yang dapat dikembangkan bersama</h2>
-                <p>
-                  Potensi wilayah mencakup pertanian dan hortikultura, usaha mikro dan perdagangan lokal, pendidikan, kegiatan sosial kemasyarakatan, serta posisi strategis pada koridor pengembangan Samboja Barat. Pengembangan potensi diarahkan pada peningkatan nilai tambah usaha warga, penguatan kapasitas sumber daya manusia, perbaikan infrastruktur dasar, dan pengelolaan lingkungan.
-                </p>
+                <span className={styles.eyebrow}>{profile.potentialEyebrow}</span>
+                <h2>{profile.potentialTitle}</h2>
+                <p>{profile.potential}</p>
               </div>
             </Reveal>
 
             <div className={styles.potentialGrid}>
-              {potentials.map((item, index) => (
-                <Reveal key={item.title} enabled delay={index * 50}>
+              {profile.potentials.map((item, index) => (
+                <Reveal key={`${item.title}-${index}`} enabled delay={index * 50}>
                   <article className={styles.potentialCard}>
-                    <span className={styles.cardNumber}>0{index + 1}</span>
+                    <span className={styles.cardNumber}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                     <h3>{item.title}</h3>
                     <p>{item.text}</p>
                   </article>
@@ -435,29 +332,24 @@ export default function ProfilePage() {
             <Reveal enabled>
               <div className={styles.facilityHeading}>
                 <div>
-                  <span className={styles.eyebrow}>Fasilitas Umum</span>
-                  <h2>Sarana yang mendukung aktivitas masyarakat</h2>
+                  <span className={styles.eyebrow}>{profile.facilityEyebrow}</span>
+                  <h2>{profile.facilityTitle}</h2>
                 </div>
-                <p>
-                  Daftar dapat diperbarui melalui dashboard ketika terdapat fasilitas baru atau perubahan nama layanan.
-                </p>
+                <p>{profile.facilityIntro}</p>
               </div>
             </Reveal>
 
             <div className={styles.facilityLead}>
               <div>
-                <span>08</span>
+                <span>{String(profile.facilities.length).padStart(2, "0")}</span>
                 <strong>Kelompok fasilitas utama</strong>
               </div>
-              <p>
-                Pelayanan pemerintahan, pendidikan, kesehatan, keagamaan,
-                konektivitas, dan kegiatan ekonomi masyarakat.
-              </p>
+              <p>{profile.facilityLeadText}</p>
             </div>
 
             <div className={styles.facilityList}>
-              {facilities.map((item, index) => (
-                <Reveal key={item} enabled delay={index * 35}>
+              {profile.facilities.map((item, index) => (
+                <Reveal key={`${item}-${index}`} enabled delay={index * 35}>
                   <div className={styles.facilityItem}>
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <strong>{item}</strong>
@@ -473,19 +365,17 @@ export default function ProfilePage() {
           <div className="container">
             <Reveal enabled>
               <div className={styles.sectionHeadingDark}>
-                <span className={styles.eyebrowLight}>Tambahan Profil</span>
-                <h2>Prioritas pengembangan wilayah</h2>
-                <p>
-                  Bagian ini membuat halaman profil lebih relevan dengan kebutuhan perencanaan dan menunjukkan fokus perbaikan secara ringkas.
-                </p>
+                <span className={styles.eyebrowLight}>{profile.priorityEyebrow}</span>
+                <h2>{profile.priorityTitle}</h2>
+                <p>{profile.priorityIntro}</p>
               </div>
             </Reveal>
 
             <div className={styles.priorityGrid}>
-              {priorities.map((item, index) => (
-                <Reveal key={item} enabled delay={index * 40}>
+              {profile.priorities.map((item, index) => (
+                <Reveal key={`${item}-${index}`} enabled delay={index * 40}>
                   <div className={styles.priorityItem}>
-                    <span>0{index + 1}</span>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
                     <strong>{item}</strong>
                   </div>
                 </Reveal>
@@ -504,11 +394,9 @@ export default function ProfilePage() {
                 </div>
 
                 <div className={styles.updateCopy}>
-                  <span>Data wilayah perlu diperbarui secara berkala</span>
-                  <h2>Menemukan data atau fasilitas yang belum tercantum?</h2>
-                  <p>
-                    Sampaikan koreksi kepada kelurahan agar profil publik tetap akurat.
-                  </p>
+                  <span>{profile.updateKicker}</span>
+                  <h2>{profile.updateTitle}</h2>
+                  <p>{profile.updateText}</p>
                 </div>
 
                 <div className={styles.updateActions}>

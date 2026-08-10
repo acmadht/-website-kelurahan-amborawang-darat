@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <AdminDocumentEditor
       collectionName="siteSettings"
-      documentId="main"
+      documentId="main" publicHref="/kontak"
       title="Kontak & Jam Pelayanan"
       description="Kelola informasi yang digunakan pada halaman kontak, footer, tombol WhatsApp, dan lokasi kantor."
       defaults={demoSettings as unknown as Record<string, unknown>}

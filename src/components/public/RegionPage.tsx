@@ -1,46 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useDocumentData } from "@/hooks/useFirestoreData";
+import { demoSettings } from "@/data/demo";
+import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import { regionContentFallback, type RegionContent } from "@/data/siteContent";
+import type { SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./RegionPage.module.css";
-
-const stats = [
-  { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
-  { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
-  { value: "13 RT", label: "Wilayah RT", note: "Data kelurahan" },
-  { value: "5,3 km", label: "Ke ibu kota kecamatan", note: "BPS, data 2023" },
-];
-
-const boundaries = [
-  { direction: "Utara", place: "Kelurahan Margomulyo" },
-  { direction: "Timur", place: "Kelurahan Argosari dan Kelurahan Amborawang Laut" },
-  { direction: "Selatan", place: "Kelurahan Salok Api Laut dan Kelurahan Salok Api Darat" },
-  { direction: "Barat", place: "Desa Tani Bhakti" },
-];
-
-const rtList = Array.from({ length: 13 }, (_, index) => ({
-  number: String(index + 1).padStart(2, "0"),
-  title: `RT ${String(index + 1).padStart(2, "0")}`,
-}));
-
-const regionFacts = [
-  {
-    number: "01",
-    title: "Kawasan Tropis Basah",
-    text: "Karakter iklim wilayah dipengaruhi kondisi tropis Kalimantan Timur dengan curah hujan dan kelembapan yang relatif tinggi.",
-  },
-  {
-    number: "02",
-    title: "Koridor Balikpapan–Handil II",
-    text: "Wilayah terhubung dengan koridor Jalan Balikpapan–Handil II yang mendukung mobilitas masyarakat dan aktivitas lokal.",
-  },
-  {
-    number: "03",
-    title: "Permukiman & Lahan Produktif",
-    text: "Karakter wilayah mencakup area permukiman, aktivitas masyarakat, lahan produktif, dan ruang lingkungan kelurahan.",
-  },
-];
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -70,15 +38,51 @@ function CompassIcon() {
 }
 
 export default function RegionPage() {
+  const { data: rawSettings } = useDocumentData<SiteSettings>(
+    "siteSettings",
+    "main",
+    demoSettings,
+  );
+  const { data: region } = useDocumentData<RegionContent>(
+    "pages",
+    "wilayah",
+    regionContentFallback,
+  );
+
+  const settings = applyAmborawangPublicSettings(rawSettings);
+  const animationEnabled = settings.animationEnabled !== false;
+
+  const stats = [
+    { value: region.area, label: "Luas wilayah", note: region.areaNote },
+    { value: region.population, label: "Jumlah penduduk", note: region.populationNote },
+    { value: region.rtCount, label: "Wilayah RT", note: region.rtNote },
+    { value: region.districtDistance, label: "Ke ibu kota kecamatan", note: region.districtDistanceNote },
+  ];
+
+  const boundaries = [
+    { direction: "Utara", place: region.northBoundary },
+    { direction: "Timur", place: region.eastBoundary },
+    { direction: "Selatan", place: region.southBoundary },
+    { direction: "Barat", place: region.westBoundary },
+  ];
+
+  const regionFacts = [
+    { number: "01", title: region.climateTitle, text: region.climateText },
+    { number: "02", title: region.corridorTitle, text: region.corridorText },
+    { number: "03", title: region.landTitle, text: region.landText },
+  ];
+
+  const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address || "Kelurahan Amborawang Darat")}`;
+  const mapImageUrl = region.mapImageUrl || "/images/peta-amborawang-darat.png";
+
   return (
     <PublicShell>
       <main className={styles.page}>
-        {/* HERO */}
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
 
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}>
                   <CompassIcon />
@@ -87,12 +91,12 @@ export default function RegionPage() {
 
                 <h1>
                   Wilayah
-                  <strong>Amborawang Darat</strong>
+                  <strong>{settings.villageName}</strong>
                 </h1>
 
                 <p>
-                  Informasi geografis, batas administratif, data RT,
-                  konektivitas, dan gambaran wilayah Kelurahan Amborawang Darat.
+                  Informasi geografis, batas administratif, konektivitas, peta,
+                  dan gambaran wilayah Kelurahan {settings.villageName}.
                 </p>
 
                 <div className={styles.heroMeta}>
@@ -102,34 +106,27 @@ export default function RegionPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={animationEnabled} delay={70}>
               <div className={styles.heroMapCard}>
                 <div className={styles.mapCardHead}>
-                  <div className={styles.mapCardIcon}>
-                    <PinIcon />
-                  </div>
+                  <div className={styles.mapCardIcon}><PinIcon /></div>
                   <div>
                     <span>Lokasi Wilayah</span>
-                    <strong>Kelurahan Amborawang Darat</strong>
+                    <strong>Kelurahan {settings.villageName}</strong>
                   </div>
                 </div>
 
                 <div className={styles.heroMap}>
                   <iframe
-                    src="https://www.google.com/maps?q=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur&z=14&output=embed"
-                    title="Google Maps Kelurahan Amborawang Darat"
+                    src={settings.mapsEmbedUrl}
+                    title={`Google Maps Kelurahan ${settings.villageName}`}
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     allowFullScreen
                   />
                 </div>
 
-                <a
-                  href="https://www.google.com/maps/search/?api=1&query=Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara,+Kalimantan+Timur"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.mapCardLink}
-                >
+                <a href={mapSearchUrl} target="_blank" rel="noopener noreferrer" className={styles.mapCardLink}>
                   Buka Google Maps
                   <ArrowIcon size={16} />
                 </a>
@@ -138,12 +135,11 @@ export default function RegionPage() {
           </div>
         </section>
 
-        {/* STATS */}
         <section className={styles.statsSection}>
           <div className="container">
             <div className={styles.statsGrid}>
               {stats.map((item, index) => (
-                <Reveal key={item.label} enabled delay={index * 40}>
+                <Reveal key={item.label} enabled={animationEnabled} delay={index * 40}>
                   <div className={styles.statCard}>
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
@@ -155,10 +151,9 @@ export default function RegionPage() {
           </div>
         </section>
 
-        {/* OVERVIEW */}
         <section className={styles.overviewSection}>
           <div className={`container ${styles.overviewGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.overviewAside}>
                 <span className={styles.sectionNumber}>01</span>
                 <span className={styles.eyebrow}>Gambaran Wilayah</span>
@@ -166,65 +161,40 @@ export default function RegionPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={60}>
+            <Reveal enabled={animationEnabled} delay={60}>
               <div className={styles.overviewArticle}>
-                <p className={styles.lead}>
-                  Kelurahan Amborawang Darat merupakan bagian dari Kecamatan
-                  Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur.
-                </p>
-
-                <p>
-                  Luas wilayahnya sekitar 19,47 km² atau sekitar 4,68 persen dari
-                  luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan
-                  sekitar 5,3 km.
-                </p>
-
-                <p>
-                  Wilayah ini terhubung dengan koridor Jalan Balikpapan–Handil II
-                  serta jaringan jalan lingkungan yang mendukung aktivitas
-                  masyarakat, pelayanan, pendidikan, perdagangan, dan mobilitas
-                  antarkawasan.
-                </p>
+                <p className={styles.lead}>{region.geography}</p>
+                <p>{region.geographyDetail}</p>
+                <p>{region.connectivity}</p>
 
                 <div className={styles.overviewCallout}>
                   <span>Administrasi Wilayah</span>
-                  <strong>
-                    Amborawang Darat terdiri atas 13 wilayah RT.
-                  </strong>
+                  <strong>{settings.villageName} terdiri atas {region.rtCount}.</strong>
                 </div>
               </div>
             </Reveal>
           </div>
         </section>
 
-        {/* MAP + BOUNDARIES */}
         <section className={styles.boundarySection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>Batas Administratif</span>
                 <h2>Wilayah yang berbatasan langsung</h2>
-                <p>
-                  Batas administratif membantu memberikan gambaran posisi
-                  Amborawang Darat dalam wilayah Samboja Barat.
-                </p>
+                <p>Batas administratif membantu memberikan gambaran posisi {settings.villageName} dalam wilayah Samboja Barat.</p>
               </div>
             </Reveal>
 
             <div className={styles.boundaryGrid}>
-              <Reveal enabled>
+              <Reveal enabled={animationEnabled}>
                 <div className={styles.staticMapCard}>
                   <div className={styles.staticMapHead}>
                     <div>
                       <span>Peta Administratif</span>
-                      <strong>Amborawang Darat</strong>
+                      <strong>{settings.villageName}</strong>
                     </div>
-
-                    <a
-                      href="/images/peta-amborawang-darat.png"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={mapImageUrl} target="_blank" rel="noopener noreferrer">
                       Lihat Peta Penuh
                       <ArrowIcon size={16} />
                     </a>
@@ -232,8 +202,12 @@ export default function RegionPage() {
 
                   <div className={styles.staticMapImage}>
                     <img
-                      src="/images/peta-amborawang-darat.png"
-                      alt="Peta wilayah Kelurahan Amborawang Darat"
+                      src={mapImageUrl}
+                      alt={`Peta wilayah Kelurahan ${settings.villageName}`}
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/images/peta-amborawang-darat.png";
+                      }}
                     />
                   </div>
                 </div>
@@ -241,7 +215,7 @@ export default function RegionPage() {
 
               <div className={styles.boundaryList}>
                 {boundaries.map((item, index) => (
-                  <Reveal key={item.direction} enabled delay={index * 45}>
+                  <Reveal key={item.direction} enabled={animationEnabled} delay={index * 45}>
                     <article className={styles.boundaryCard}>
                       <span>0{index + 1}</span>
                       <small>{item.direction}</small>
@@ -252,54 +226,18 @@ export default function RegionPage() {
               </div>
             </div>
 
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.boundaryNote}>
                 <span>Dasar Wilayah</span>
-                <p>
-                  Batas administratif Kelurahan Amborawang Darat ditetapkan
-                  melalui Peraturan Bupati Kutai Kartanegara Nomor 43 Tahun 2019.
-                </p>
+                <p>{region.boundaryNote}</p>
               </div>
             </Reveal>
           </div>
         </section>
 
-        {/* RT */}
-        <section className={styles.rtSection}>
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.rtHeading}>
-                <div>
-                  <span className={styles.sectionNumber}>02</span>
-                  <span className={styles.eyebrow}>Struktur Wilayah</span>
-                  <h2>13 RT Amborawang Darat</h2>
-                </div>
-
-                <p>
-                  RT menjadi unit lingkungan yang paling dekat dengan masyarakat
-                  dalam koordinasi administrasi dan kegiatan kewilayahan.
-                </p>
-              </div>
-            </Reveal>
-
-            <div className={styles.rtGrid}>
-              {rtList.map((rt, index) => (
-                <Reveal key={rt.number} enabled delay={(index % 6) * 35}>
-                  <article className={styles.rtCard}>
-                    <span>{rt.number}</span>
-                    <h3>{rt.title}</h3>
-                    <small>Kelurahan Amborawang Darat</small>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CHARACTER */}
         <section className={styles.characterSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.characterHeading}>
                 <span className={styles.eyebrowLight}>Karakter Wilayah</span>
                 <h2>Lingkungan yang terus berkembang</h2>
@@ -308,7 +246,7 @@ export default function RegionPage() {
 
             <div className={styles.characterGrid}>
               {regionFacts.map((item, index) => (
-                <Reveal key={item.title} enabled delay={index * 50}>
+                <Reveal key={item.number} enabled={animationEnabled} delay={index * 50}>
                   <article className={styles.characterCard}>
                     <span>{item.number}</span>
                     <h3>{item.title}</h3>
@@ -320,24 +258,16 @@ export default function RegionPage() {
           </div>
         </section>
 
-        {/* LOCATION CTA */}
         <section className={styles.locationSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.locationPanel}>
-                <div className={styles.locationIcon}>
-                  <PinIcon />
-                </div>
-
+                <div className={styles.locationIcon}><PinIcon /></div>
                 <div className={styles.locationCopy}>
                   <span>Lokasi Kantor</span>
-                  <h2>Kantor Kelurahan Amborawang Darat</h2>
-                  <p>
-                    Jl. Balikpapan–Handil II KM 42, RT 12, Kelurahan Amborawang
-                    Darat, Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara.
-                  </p>
+                  <h2>Kantor Kelurahan {settings.villageName}</h2>
+                  <p>{settings.address}</p>
                 </div>
-
                 <Link href="/kontak" className={styles.locationButton}>
                   Kontak & Lokasi
                   <ArrowIcon />
@@ -347,28 +277,18 @@ export default function RegionPage() {
           </div>
         </section>
 
-        {/* CTA */}
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={animationEnabled}>
               <div className={styles.cta}>
                 <div>
                   <span>Data Wilayah</span>
                   <h2>Menemukan data yang perlu diperbarui?</h2>
-                  <p>
-                    Sampaikan koreksi agar informasi publik wilayah tetap akurat.
-                  </p>
+                  <p>Sampaikan koreksi agar informasi publik wilayah tetap akurat.</p>
                 </div>
-
                 <div className={styles.ctaActions}>
-                  <Link href="/kontak" className={styles.ctaPrimary}>
-                    Hubungi Kelurahan
-                    <ArrowIcon />
-                  </Link>
-
-                  <Link href="/profil" className={styles.ctaSecondary}>
-                    Lihat Profil
-                  </Link>
+                  <Link href="/kontak" className={styles.ctaPrimary}>Hubungi Kelurahan <ArrowIcon /></Link>
+                  <Link href="/profil" className={styles.ctaSecondary}>Lihat Profil</Link>
                 </div>
               </div>
             </Reveal>
