@@ -286,7 +286,6 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
             </span>
 
             <span className={styles.brandText}>
-              <span className={styles.officialLabel}>Website Resmi</span>
               <strong>{settings.villageName}</strong>
               <small>Kecamatan Samboja Barat</small>
             </span>
@@ -297,9 +296,8 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${styles.navLink} ${
-                  isCurrent(pathname, item.href) ? styles.navLinkActive : ""
-                }`}
+                className={`${styles.navLink} ${isCurrent(pathname, item.href) ? styles.navLinkActive : ""
+                  }`}
               >
                 {item.label}
               </Link>
@@ -308,9 +306,8 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
             <div className={styles.dropdown}>
               <button
                 type="button"
-                className={`${styles.navLink} ${styles.dropdownButton} ${
-                  moreActive ? styles.navLinkActive : ""
-                }`}
+                className={`${styles.navLink} ${styles.dropdownButton} ${moreActive ? styles.navLinkActive : ""
+                  }`}
                 aria-haspopup="true"
               >
                 Informasi
@@ -345,7 +342,6 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
             >
               <SearchIcon />
               <span className={styles.searchButtonText}>Cari</span>
-              <kbd className={styles.searchShortcut}>Ctrl K</kbd>
             </button>
 
             <button
@@ -363,9 +359,8 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
 
         <div
           id="mobile-public-navigation"
-          className={`${styles.mobileNavigation} ${
-            mobileOpen ? styles.mobileNavigationOpen : ""
-          }`}
+          className={`${styles.mobileNavigation} ${mobileOpen ? styles.mobileNavigationOpen : ""
+            }`}
         >
           <div className={styles.mobileNavInner}>
             <button
@@ -382,11 +377,10 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`${styles.mobileNavLink} ${
-                    isCurrent(pathname, item.href)
-                      ? styles.mobileNavLinkActive
-                      : ""
-                  }`}
+                  className={`${styles.mobileNavLink} ${isCurrent(pathname, item.href)
+                    ? styles.mobileNavLinkActive
+                    : ""
+                    }`}
                 >
                   <span>{item.label}</span>
                   <ArrowIcon />
