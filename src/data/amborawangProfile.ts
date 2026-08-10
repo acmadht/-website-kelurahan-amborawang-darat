@@ -110,7 +110,7 @@ export const amborawangProfileFallback: ProfileContent = {
   stats: [
     { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
     { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
-    { value: "13 RT", label: "Wilayah RT", note: "Laporan lokal, Mei 2026" },
+    { value: "Data RT", label: "Wilayah RT", note: "Terhubung ke Data RT" },
     { value: "5,3 km", label: "Ke ibu kota kecamatan", note: "BPS, data 2023" },
   ],
 
@@ -240,16 +240,17 @@ export const amborawangProfileFallback: ProfileContent = {
 };
 
 function cleanText(value: unknown, fallback: string) {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+  // Field yang belum ada memakai fallback. String kosong tetap dianggap nilai sah
+  // sehingga admin benar-benar dapat mengosongkan konten yang tidak diperlukan.
+  return typeof value === "string" ? value.trim() : fallback;
 }
 
 function cleanStringList(value: unknown, fallback: string[]) {
   if (!Array.isArray(value)) return fallback;
-  const cleaned = value
+  return value
     .filter((item): item is string => typeof item === "string")
     .map((item) => item.trim())
     .filter(Boolean);
-  return cleaned.length ? cleaned : fallback;
 }
 
 function cleanStats(value: unknown) {
@@ -265,7 +266,7 @@ function cleanStats(value: unknown) {
       return { value: valueText, label, note };
     })
     .filter((item): item is ProfileStat => Boolean(item));
-  return cleaned.length ? cleaned : amborawangProfileFallback.stats;
+  return cleaned;
 }
 
 function cleanTimeline(value: unknown) {
@@ -281,7 +282,7 @@ function cleanTimeline(value: unknown) {
       return { year, title, text };
     })
     .filter((item): item is ProfileTimelineItem => Boolean(item));
-  return cleaned.length ? cleaned : amborawangProfileFallback.timeline;
+  return cleaned;
 }
 
 function cleanRegionFacts(value: unknown) {
@@ -296,7 +297,7 @@ function cleanRegionFacts(value: unknown) {
       return { value: valueText, label };
     })
     .filter((item): item is ProfileRegionFact => Boolean(item));
-  return cleaned.length ? cleaned : amborawangProfileFallback.regionFacts;
+  return cleaned;
 }
 
 function cleanBoundaryItems(value: unknown) {
@@ -312,7 +313,7 @@ function cleanBoundaryItems(value: unknown) {
       return { direction, places };
     })
     .filter((item): item is ProfileBoundaryItem => Boolean(item));
-  return cleaned.length ? cleaned : amborawangProfileFallback.boundaryItems;
+  return cleaned;
 }
 
 function cleanPotentials(value: unknown) {
@@ -327,7 +328,7 @@ function cleanPotentials(value: unknown) {
       return { title, text };
     })
     .filter((item): item is ProfilePotentialItem => Boolean(item));
-  return cleaned.length ? cleaned : amborawangProfileFallback.potentials;
+  return cleaned;
 }
 
 export function resolveAmborawangProfile(

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { Official, RegionLeader } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
@@ -12,130 +13,72 @@ type Person = {
   name: string;
   role: string;
   unit: string;
+  category?: string;
+  parentId?: string;
   photo: string;
   status?: "aktif" | "kosong" | "verifikasi";
   description?: string;
 };
 
 const fallbackStructuralOfficials: Person[] = [
-  {
-    name: "A. Achmad Dendi, S.Sos",
-    role: "Lurah Amborawang Darat",
-    unit: "Pimpinan Kelurahan",
-    photo: "/images/pemerintahan/lurah.jpg",
-    status: "aktif",
-  },
-  {
-    name: "Akhmad Deni Sopiani, S.P",
-    role: "Sekretaris Lurah",
-    unit: "Sekretariat",
-    photo: "/images/pemerintahan/sekretaris-lurah.jpg",
-    status: "aktif",
-  },
-  {
-    name: "Belum terisi",
-    role: "Kepala Seksi Pemerintahan",
-    unit: "Seksi Pemerintahan",
-    photo: "/images/pemerintahan/placeholder.svg",
-    status: "kosong",
-  },
-  {
-    name: "Nurhalis, S.Sos., M.Si",
-    role: "Kepala Seksi Sosial",
-    unit: "Seksi Sosial",
-    photo: "/images/pemerintahan/kasi-sosial.jpg",
-    status: "aktif",
-  },
-  {
-    name: "A. Sofiar, S.H",
-    role: "Kepala Seksi Pembangunan",
-    unit: "Seksi Pembangunan",
-    photo: "/images/pemerintahan/kasi-pembangunan.jpg",
-    status: "aktif",
-  },
+  { name: "", role: "Lurah", unit: "Pimpinan Kelurahan", category: "Pimpinan Kelurahan", photo: "/images/pemerintahan/placeholder.svg", status: "kosong" },
+  { name: "", role: "Sekretaris Kelurahan", unit: "Sekretariat", category: "Sekretariat", photo: "/images/pemerintahan/placeholder.svg", status: "kosong" },
+  { name: "", role: "Kepala Seksi Pemerintahan", unit: "Seksi Pemerintahan", category: "Seksi Pemerintahan", photo: "/images/pemerintahan/placeholder.svg", status: "kosong" },
+  { name: "", role: "Kepala Seksi Sosial", unit: "Seksi Sosial", category: "Seksi Sosial", photo: "/images/pemerintahan/placeholder.svg", status: "kosong" },
+  { name: "", role: "Kepala Seksi Pembangunan", unit: "Seksi Pembangunan", category: "Seksi Pembangunan", photo: "/images/pemerintahan/placeholder.svg", status: "kosong" },
 ];
 
-const fallbackStaff: Person[] = [
-  { name: "Suwandi", role: "Pengolah Data dan Informasi", unit: "Seksi Pemerintahan", photo: "/images/pemerintahan/suwandi.jpg" },
-  { name: "Yeni Rahayu", role: "Pengolah Data dan Informasi", unit: "Seksi Pembangunan", photo: "/images/pemerintahan/yeni-rahayu.jpg" },
-  { name: "Nilfa Fatmuria, S.Sos", role: "Pengadministrasi Perkantoran", unit: "Seksi Sosial", photo: "/images/pemerintahan/nilfa-fatmuria.jpg" },
-  { name: "Sheila Novindya", role: "Pengadministrasi Perkantoran", unit: "Seksi Sosial", photo: "/images/pemerintahan/sheila-novindya.jpg" },
-  { name: "Satriyani", role: "Pengadministrasi Perkantoran", unit: "Seksi Pembangunan", photo: "/images/pemerintahan/satriyani.jpg" },
-  { name: "Suharianto", role: "Pengadministrasi Perkantoran", unit: "Sekretariat", photo: "/images/pemerintahan/suharianto.jpg" },
-  { name: "Dini Hariasdika", role: "Pengadministrasi Perkantoran", unit: "Sekretariat", photo: "/images/pemerintahan/dini-hariasdika.jpg" },
-  { name: "Sofia Salsabila", role: "Pengadministrasi Perkantoran", unit: "Sekretariat", photo: "/images/pemerintahan/sofia-salsabila.jpg" },
-  { name: "Johni Fatmanto", role: "Pengadministrasi Perkantoran", unit: "Seksi Pemerintahan", photo: "/images/pemerintahan/johni-fatmanto.jpg" },
-  { name: "M. Ali AS", role: "Pengadministrasi Perkantoran", unit: "Seksi Pemerintahan", photo: "/images/pemerintahan/m-ali-as.jpg" },
-  { name: "Sopiansyah", role: "Pengadministrasi Perkantoran", unit: "Seksi Pembangunan", photo: "/images/pemerintahan/sopiansyah.jpg" },
-  { name: "Galina", role: "Pengadministrasi Perkantoran", unit: "Seksi Sosial", photo: "/images/pemerintahan/galina.jpg" },
-  { name: "Suparno", role: "Pengelola Umum Operasional", unit: "Seksi Sosial", photo: "/images/pemerintahan/suparno.jpg" },
-];
 
 const fallbackCommunityInstitutions: Person[] = [
   {
-    name: "Isi sesuai SK / data resmi kelurahan",
+    name: "",
     role: "Ketua LPM",
     unit: "Lembaga Pemberdayaan Masyarakat",
-    photo: "/images/pemerintahan/ketua-lpm.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai SK / data resmi kelurahan",
+    name: "",
     role: "Ketua TP PKK",
     unit: "Pemberdayaan Kesejahteraan Keluarga",
-    photo: "/images/pemerintahan/ketua-pkk.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai SK / data resmi kelurahan",
+    name: "",
     role: "Ketua Karang Taruna",
     unit: "Karang Taruna",
-    photo: "/images/pemerintahan/ketua-karang-taruna.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai SK / data resmi kelurahan",
+    name: "",
     role: "Kepala / Ketua Adat",
     unit: "Lembaga Adat",
-    photo: "/images/pemerintahan/kepala-adat.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai data resmi kelurahan",
+    name: "",
     role: "Koordinator Linmas",
     unit: "Perlindungan Masyarakat",
-    photo: "/images/pemerintahan/koordinator-linmas.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai data resmi wilayah",
+    name: "",
     role: "Bhabinkamtibmas",
     unit: "Mitra Keamanan",
-    photo: "/images/pemerintahan/bhabinkamtibmas.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
   {
-    name: "Isi sesuai data resmi wilayah",
+    name: "",
     role: "Babinsa",
     unit: "Mitra Kewilayahan",
-    photo: "/images/pemerintahan/babinsa.jpg",
+    photo: "/images/pemerintahan/placeholder.svg",
     status: "verifikasi",
   },
-];
-
-const fallbackRtList: Person[] = Array.from({ length: 13 }, (_, i) => ({
-  name: "Isi nama Ketua RT sesuai SK",
-  role: `Ketua RT ${String(i + 1).padStart(2, "0")}`,
-  unit: "Kelurahan Amborawang Darat",
-  photo: `/images/pemerintahan/rt-${String(i + 1).padStart(2, "0")}.jpg`,
-  status: "verifikasi",
-}));
-
-const coordinationSteps = [
-  { number: "01", title: "Lurah", subtitle: "Pimpinan" },
-  { number: "02", title: "Perangkat", subtitle: "Pelayanan" },
-  { number: "03", title: "Lembaga", subtitle: "Kemitraan" },
-  { number: "04", title: "13 RT", subtitle: "Kewilayahan" },
 ];
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
@@ -196,33 +139,87 @@ function PersonCard({ person, compact = false }: { person: Person; compact?: boo
           <span>{person.unit}</span>
           <i />
         </div>
-        <h3>{person.name}</h3>
+        <h3>{person.name || "Belum terisi"}</h3>
         <strong>{person.role}</strong>
       </div>
     </article>
   );
 }
 
+
+function inferGovernmentUnit(person: Person) {
+  const text = `${person.unit} ${person.role}`.toLowerCase();
+
+  if (/sekretaris|sekretariat/.test(text)) return "Sekretariat";
+  if (/pemerintahan/.test(text)) return "Seksi Pemerintahan";
+  if (/sosial/.test(text)) return "Seksi Sosial";
+  if (/pembangunan/.test(text)) return "Seksi Pembangunan";
+
+  if (person.unit && !/^(kelurahan|staf|pimpinan kelurahan)$/i.test(person.unit)) {
+    return person.unit;
+  }
+
+  return "Staf Kelurahan";
+}
+
+const structureUnitDefinitions = [
+  {
+    key: "Sekretariat",
+    label: "Sekretariat",
+    shortLabel: "Administrasi & koordinasi",
+  },
+  {
+    key: "Seksi Pemerintahan",
+    label: "Seksi Pemerintahan",
+    shortLabel: "Administrasi pemerintahan",
+  },
+  {
+    key: "Seksi Sosial",
+    label: "Seksi Sosial",
+    shortLabel: "Pelayanan sosial masyarakat",
+  },
+  {
+    key: "Seksi Pembangunan",
+    label: "Seksi Pembangunan",
+    shortLabel: "Pembangunan & pemberdayaan",
+  },
+];
+
 export default function GovernmentPage() {
   const { data: rawOfficials } = useCollectionData<Official>("officials", []);
   const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
+  const { settings } = usePublicSettings();
 
   const activeOfficials = useMemo(
     () => rawOfficials.filter((item) => item.isActive !== false),
     [rawOfficials],
   );
 
+  const officialById = useMemo(
+    () => new Map(rawOfficials.filter((item) => item.id).map((item) => [String(item.id), item])),
+    [rawOfficials],
+  );
+
   const people = useMemo<Person[]>(
     () =>
-      activeOfficials.map((item) => ({
-        name: item.name || "Belum terisi",
-        role: item.title || "Jabatan belum diisi",
-        unit: item.category || "Kelurahan",
-        photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
-        description: item.description,
-        status: item.name?.trim() ? "aktif" : "kosong",
-      })),
-    [activeOfficials],
+      activeOfficials.map((item) => {
+        const parent = item.parentId ? officialById.get(item.parentId) : undefined;
+        const resolvedUnit = item.unit?.trim() ||
+          (item.category === "Staf" ? parent?.unit || parent?.category : item.category) ||
+          "Kelurahan";
+
+        return {
+          name: item.name || "",
+          role: item.title || "Jabatan belum diisi",
+          unit: resolvedUnit,
+          category: item.category || "Kelurahan",
+          parentId: item.parentId,
+          photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
+          description: item.description,
+          status: item.name?.trim() ? "aktif" : "kosong",
+        };
+      }),
+    [activeOfficials, officialById],
   );
 
   const institutionCategories = new Set([
@@ -238,25 +235,56 @@ export default function GovernmentPage() {
   ]);
 
   const communityInstitutions = useMemo(() => {
-    const items = people.filter((person) => institutionCategories.has(person.unit));
-    return items.length ? items : fallbackCommunityInstitutions;
+    const items = people.filter((person) => institutionCategories.has(person.category || person.unit));
+    if (!items.length) return fallbackCommunityInstitutions;
+
+    const used = new Set<number>();
+    const patterns = [
+      /\blpm\b/i,
+      /\bpkk\b/i,
+      /karang taruna/i,
+      /adat/i,
+      /linmas/i,
+      /bhabinkamtibmas/i,
+      /babinsa/i,
+    ];
+
+    const completed = fallbackCommunityInstitutions.map((fallback, slotIndex) => {
+      const pattern = patterns[slotIndex];
+      const matchIndex = items.findIndex((person, index) => {
+        if (used.has(index)) return false;
+        return pattern.test(`${person.unit} ${person.role}`);
+      });
+
+      if (matchIndex >= 0) {
+        used.add(matchIndex);
+        return items[matchIndex];
+      }
+
+      return fallback;
+    });
+
+    return [
+      ...completed,
+      ...items.filter((_, index) => !used.has(index)),
+    ];
   }, [people]);
 
   const staff = useMemo(() => {
     const items = people.filter((person) => {
-      if (person.unit === "Staf") return true;
+      if (person.category === "Staf" || person.unit === "Staf") return true;
       return /pengadministrasi|pengolah data|pengelola umum|pelaksana|staf/i.test(
         person.role,
       );
     });
-    return items.length ? items : fallbackStaff;
+    return items;
   }, [people]);
 
   const structuralOfficials = useMemo(() => {
     const items = people.filter(
       (person) =>
-        !institutionCategories.has(person.unit) &&
-        person.unit !== "Staf" &&
+        !institutionCategories.has(person.category || person.unit) &&
+        person.category !== "Staf" &&
         !/pengadministrasi|pengolah data|pengelola umum|pelaksana|staf/i.test(
           person.role,
         ),
@@ -264,38 +292,153 @@ export default function GovernmentPage() {
 
     if (!items.length) return fallbackStructuralOfficials;
 
-    const leaderIndex = items.findIndex(
-      (item) => /^lurah\b/i.test(item.role) && !/sekretaris/i.test(item.role),
-    );
+    const slotPatterns = [
+      (person: Person) =>
+        person.category === "Pimpinan Kelurahan" ||
+        (/^lurah\b/i.test(person.role) && !/sekretaris/i.test(person.role)),
+      (person: Person) =>
+        person.category === "Sekretariat" || /sekretaris/i.test(person.role),
+      (person: Person) =>
+        person.category === "Seksi Pemerintahan" ||
+        /kepala seksi.*pemerintahan|kasi.*pemerintahan/i.test(person.role),
+      (person: Person) =>
+        person.category === "Seksi Sosial" ||
+        /kepala seksi.*sosial|kasi.*sosial/i.test(person.role),
+      (person: Person) =>
+        person.category === "Seksi Pembangunan" ||
+        /kepala seksi.*pembangunan|kasi.*pembangunan/i.test(person.role),
+    ];
 
-    if (leaderIndex > 0) {
-      const copy = [...items];
-      const [leader] = copy.splice(leaderIndex, 1);
-      copy.unshift(leader);
-      return copy;
-    }
+    const used = new Set<number>();
+    const completed = fallbackStructuralOfficials.map((fallback, slotIndex) => {
+      const matchIndex = items.findIndex(
+        (person, index) => !used.has(index) && slotPatterns[slotIndex](person),
+      );
 
-    return items;
+      if (matchIndex >= 0) {
+        used.add(matchIndex);
+        return items[matchIndex];
+      }
+
+      return {
+        ...fallback,
+        name: "",
+        photo: "/images/pemerintahan/placeholder.svg",
+        status: "kosong" as const,
+      };
+    });
+
+    return [
+      ...completed,
+      ...items.filter((_, index) => !used.has(index)),
+    ];
   }, [people]);
 
-  const rtList = useMemo<Person[]>(() => {
-    const items = rawRts
-      .filter((item) => item.isActive !== false)
-      .map((item) => ({
-        name: item.chairmanName || `Ketua RT ${item.number}`,
-        role: `Ketua RT ${String(item.number || "").padStart(2, "0")}`,
-        unit: item.area || "Kelurahan Amborawang Darat",
-        photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
-        description: item.description,
-        status: item.chairmanName?.trim() ? ("aktif" as const) : ("verifikasi" as const),
-      }));
-    return items.length ? items : fallbackRtList;
-  }, [rawRts]);
+  const rtList = useMemo<Person[]>(
+    () =>
+      rawRts
+        .filter((item) => {
+          if (item.isActive === false) return false;
+          const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+          return Number.isInteger(numeric) && numeric >= 1;
+        })
+        .map((item): Person => {
+          const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+          const number = String(numeric).padStart(2, "0");
+          return {
+            name: item.chairmanName || "",
+            role: `Ketua RT ${number}`,
+            unit: item.area || `Kelurahan ${settings.villageName}`,
+            photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
+            description: item.description,
+            status: item.chairmanName?.trim() ? "aktif" : "verifikasi",
+          };
+        })
+        .sort((a, b) => {
+          const aNumber = Number(a.role.replace(/\D/g, ""));
+          const bNumber = Number(b.role.replace(/\D/g, ""));
+          return aNumber - bNumber;
+        }),
+    [rawRts, settings.villageName],
+  );
+
+  const rtRangeLabel = useMemo(
+    () => (rtList.length ? `Ketua RT (${rtList.length} RT aktif)` : "Data Ketua RT"),
+    [rtList.length],
+  );
+
+  const coordinationSteps = useMemo(
+    () => [
+      { number: "01", title: "Lurah", subtitle: "Pimpinan" },
+      { number: "02", title: "Perangkat", subtitle: "Pelayanan" },
+      { number: "03", title: "Lembaga", subtitle: "Kemitraan" },
+      {
+        number: "04",
+        title: rtList.length ? `${rtList.length} RT` : "Data RT",
+        subtitle: "Kewilayahan",
+      },
+    ],
+    [rtList.length],
+  );
 
   const leader = structuralOfficials[0] ?? fallbackStructuralOfficials[0];
   const institutionLabels = Array.from(
     new Set(communityInstitutions.map((item) => item.unit).filter(Boolean)),
   ).slice(0, 8);
+
+  const structureUnits = useMemo(() => {
+    const officialsWithoutLeader = structuralOfficials.filter(
+      (person) => person !== leader && !(/^lurah\b/i.test(person.role) && !/sekretaris/i.test(person.role)),
+    );
+
+    const assignedOfficialRoles = new Set<string>();
+    const assignedStaffKeys = new Set<string>();
+
+    const units = structureUnitDefinitions.map((definition) => {
+      const head = officialsWithoutLeader.find(
+        (person) => inferGovernmentUnit(person) === definition.key,
+      );
+
+      if (head) assignedOfficialRoles.add(`${head.name}|${head.role}`);
+
+      const members = staff.filter((person) => {
+        const match = inferGovernmentUnit(person) === definition.key;
+        if (match) assignedStaffKeys.add(`${person.name}|${person.role}`);
+        return match;
+      });
+
+      return { ...definition, head, members };
+    });
+
+    const extraOfficials = officialsWithoutLeader.filter(
+      (person) => !assignedOfficialRoles.has(`${person.name}|${person.role}`),
+    );
+    const extraStaff = staff.filter(
+      (person) => !assignedStaffKeys.has(`${person.name}|${person.role}`),
+    );
+
+    if (extraOfficials.length || extraStaff.length) {
+      units.push({
+        key: "Staf Kelurahan",
+        label: "Unit / Staf Lainnya",
+        shortLabel: "Aparatur pendukung kelurahan",
+        head: extraOfficials[0],
+        members: [...extraOfficials.slice(1), ...extraStaff],
+      });
+    }
+
+    return units;
+  }, [leader, staff, structuralOfficials]);
+
+  const filledGovernmentCount = people.filter(
+    (person) => !institutionCategories.has(person.category || person.unit),
+  ).length;
+  const filledRtCount = rawRts.filter(
+    (item) => item.isActive !== false && Boolean(item.chairmanName?.trim()),
+  ).length;
+  const filledInstitutionCount = people.filter((person) =>
+    institutionCategories.has(person.category || person.unit),
+  ).length;
 
   return (
     <PublicShell>
@@ -305,32 +448,32 @@ export default function GovernmentPage() {
           <div className={styles.heroGridTexture} aria-hidden="true" />
 
           <div className={`container ${styles.heroLayout}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.govSeal}>
                   <GovernmentIcon />
-                  <span>Struktur Pemerintahan 2026</span>
+                  <span>Struktur Pemerintahan {new Date().getFullYear()}</span>
                 </div>
 
                 <h1>
                   Pemerintahan
-                  <strong>Amborawang Darat</strong>
+                  <strong>{settings.villageName}</strong>
                 </h1>
 
                 <p>
                   Struktur aparatur, lembaga kemasyarakatan, mitra kewilayahan,
-                  lembaga adat, serta 13 Ketua RT dalam satu halaman resmi.
+                  lembaga adat, serta data Ketua RT dalam satu halaman resmi.
                 </p>
 
                 <div className={styles.heroStats}>
-                  <div><strong>{String(structuralOfficials.length + staff.length).padStart(2, "0")}</strong><span>Aparatur terdata</span></div>
-                  <div><strong>{String(rtList.length).padStart(2, "0")}</strong><span>Wilayah RT</span></div>
-                  <div><strong>{String(communityInstitutions.length).padStart(2, "0")}</strong><span>Lembaga & mitra</span></div>
+                  <div><strong>{String(filledGovernmentCount).padStart(2, "0")}</strong><span>Aparatur terisi</span></div>
+                  <div><strong>{String(filledRtCount).padStart(2, "0")}</strong><span>Ketua RT terisi</span></div>
+                  <div><strong>{String(filledInstitutionCount).padStart(2, "0")}</strong><span>Lembaga terisi</span></div>
                 </div>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.commandPanel}>
                 <div className={styles.commandGlow} aria-hidden="true" />
                 <div className={styles.commandOrbit} aria-hidden="true" />
@@ -373,7 +516,7 @@ export default function GovernmentPage() {
                 </div>
 
                 <div className={styles.commandFooter}>
-                  <a href="#rt" className={styles.commandLink}>
+                  <a href="#struktur" className={styles.commandLink}>
                     Lihat Struktur Lengkap
                     <ArrowIcon size={16} />
                   </a>
@@ -392,166 +535,124 @@ export default function GovernmentPage() {
         <section className={styles.navSection}>
           <div className="container">
             <nav className={styles.sectionNav}>
-              <a href="#pimpinan">Pimpinan</a>
-              <a href="#struktural">Struktural</a>
-              <a href="#staf">Staf</a>
-              <a href="#lembaga">Lembaga</a>
-              <a href="#rt">Ketua RT</a>
+              <a href="#struktur">Struktur Pemerintahan</a>
+              <a href="#lembaga">Lembaga & Mitra</a>
+              <a href="#rt">{rtRangeLabel}</a>
             </nav>
           </div>
         </section>
 
-        {/* EXECUTIVE SUMMARY */}
-        <section className={styles.executiveSection}>
+        {/* STRUKTUR PEMERINTAHAN LENGKAP */}
+        <section id="struktur" className={styles.fullStructureSection}>
           <div className="container">
-            <div className={styles.executiveGrid}>
-              <Reveal enabled>
-                <div className={styles.executiveIntro}>
-                  <span>Ringkasan Struktur</span>
-                  <strong>Pemerintahan yang terhubung sampai tingkat RT</strong>
+            <Reveal enabled={settings.animationEnabled}>
+              <div className={styles.fullStructureHeading}>
+                <div>
+                  <span>01</span>
+                  <small>Bagan Organisasi Kelurahan</small>
+                  <h2>Struktur Pemerintahan Lengkap</h2>
                   <p>
-                    Struktur halaman dirancang agar masyarakat dapat mengenali
-                    aparatur, lembaga, dan unsur kewilayahan secara cepat.
+                    Susunan aparatur ditampilkan dari Lurah, pejabat struktural,
+                    sampai staf pada masing-masing unit pelayanan.
                   </p>
                 </div>
-              </Reveal>
-
-              <Reveal enabled delay={40}>
-                <div className={styles.executiveStat}>
-                  <span>Struktural</span>
-                  <strong>{String(structuralOfficials.length).padStart(2, "0")}</strong>
-                  <small>Lurah, Sekretaris, dan Kepala Seksi</small>
-                </div>
-              </Reveal>
-
-              <Reveal enabled delay={80}>
-                <div className={styles.executiveStat}>
-                  <span>Staf</span>
-                  <strong>{String(staff.length).padStart(2, "0")}</strong>
-                  <small>Pelaksana dan pengadministrasi</small>
-                </div>
-              </Reveal>
-
-              <Reveal enabled delay={120}>
-                <div className={styles.executiveStat}>
-                  <span>Kewilayahan</span>
-                  <strong>{rtList.length} RT</strong>
-                  <small>Struktur lingkungan masyarakat</small>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* PIMPINAN */}
-        <section id="pimpinan" className={styles.leaderSection}>
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.sectionHeading}>
-                <span>01</span>
-                <div>
-                  <small>Pimpinan Kelurahan</small>
-                  <h2>Lurah Amborawang Darat</h2>
+                <div className={styles.structureCountBox}>
+                  <strong>{filledGovernmentCount}</strong>
+                  <span>Aparatur terisi</span>
                 </div>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={50}>
-              <article className={styles.leaderProfile}>
-                <div className={styles.leaderPhoto}>
-                  <Photo src={leader.photo} alt="Foto Lurah Amborawang Darat" />
-                </div>
-
-                <div className={styles.leaderText}>
-                  <span>Pimpinan Pemerintahan</span>
-                  <h3>{leader.name}</h3>
-                  <strong>{leader.role}</strong>
-
-                  <p>
-                    {leader.description ||
-                      "Memimpin penyelenggaraan pemerintahan kelurahan, pelayanan publik, pembangunan, pembinaan kemasyarakatan, serta koordinasi perangkat dan lembaga di wilayah Amborawang Darat."}
-                  </p>
-
-                  <div className={styles.leaderMeta}>
-                    <div><small>Wilayah</small><strong>Amborawang Darat</strong></div>
-                    <div><small>Kecamatan</small><strong>Samboja Barat</strong></div>
+            <div className={styles.orgChart}>
+              <Reveal enabled={settings.animationEnabled} delay={40}>
+                <article className={styles.orgLeaderCard}>
+                  <div className={styles.orgLeaderPhoto}>
+                    <Photo src={leader.photo} alt={`Foto ${leader.role}`} />
                   </div>
-                </div>
-              </article>
-            </Reveal>
-          </div>
-        </section>
+                  <div className={styles.orgLeaderInfo}>
+                    <span>Pimpinan Kelurahan</span>
+                    <h3>{leader.name || "Belum terisi"}</h3>
+                    <strong>{leader.role}</strong>
+                    <p>
+                      {leader.description ||
+                        `Memimpin penyelenggaraan pemerintahan, pelayanan publik, pembangunan, dan pembinaan kemasyarakatan di Kelurahan ${settings.villageName}.`}
+                    </p>
+                  </div>
+                </article>
+              </Reveal>
 
-        {/* PEJABAT STRUKTURAL */}
-        <section id="struktural" className={styles.darkSection}>
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.sectionHeadingDark}>
-                <span>02</span>
-                <div>
-                  <small>Pejabat Struktural</small>
-                  <h2>Perangkat inti kelurahan</h2>
-                </div>
+              <div className={styles.orgConnector} aria-hidden="true">
+                <span />
               </div>
-            </Reveal>
 
-            <div className={styles.structuralGrid}>
-              {structuralOfficials.slice(1).map((person, index) => (
-                <Reveal key={person.role} enabled delay={index * 45}>
-                  <PersonCard person={person} />
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
+              <div className={styles.orgUnitGrid}>
+                {structureUnits.map((unit, index) => (
+                  <Reveal key={unit.key} enabled delay={(index % 4) * 45}>
+                    <article className={styles.orgUnitCard}>
+                      <header className={styles.orgUnitHeader}>
+                        <div>
+                          <span>{String(index + 2).padStart(2, "0")}</span>
+                          <div>
+                            <h3>{unit.label}</h3>
+                            <p>{unit.shortLabel}</p>
+                          </div>
+                        </div>
+                        <strong>{unit.members.length + (unit.head ? 1 : 0)}</strong>
+                      </header>
 
-        {/* STAF */}
-        <section id="staf" className={styles.staffSection}>
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.sectionHeading}>
-                <span>03</span>
-                <div>
-                  <small>Staf & Pelaksana</small>
-                  <h2>Aparatur pendukung pelayanan kelurahan</h2>
-                </div>
+                      {unit.head ? (
+                        <div className={styles.orgHeadPerson}>
+                          <div className={styles.orgHeadPhoto}>
+                            <Photo src={unit.head.photo} alt={`Foto ${unit.head.role}`} />
+                          </div>
+                          <div>
+                            <small>Penanggung Jawab</small>
+                            <h4>{unit.head.name}</h4>
+                            <span>{unit.head.role}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.orgVacantHead}>
+                          <span>Jabatan struktural belum terdata</span>
+                        </div>
+                      )}
+
+                      <div className={styles.orgStaffBlock}>
+                        <div className={styles.orgStaffTitle}>
+                          <span>Staf / Pelaksana</span>
+                          <strong>{unit.members.length}</strong>
+                        </div>
+
+                        {unit.members.length ? (
+                          <div className={styles.orgStaffList}>
+                            {unit.members.map((person) => (
+                              <div className={styles.orgStaffItem} key={`${unit.key}-${person.name}-${person.role}`}>
+                                <div className={styles.orgStaffAvatar}>
+                                  <Photo src={person.photo} alt={`Foto ${person.name}`} />
+                                </div>
+                                <div>
+                                  <strong>{person.name || "Belum terisi"}</strong>
+                                  <span>{person.role}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className={styles.orgEmptyText}>Belum ada staf yang terdata pada unit ini.</p>
+                        )}
+                      </div>
+                    </article>
+                  </Reveal>
+                ))}
               </div>
-            </Reveal>
-
-            <div className={styles.staffSummary}>
-              <div>
-                <strong>{staff.length}</strong>
-                <span>Staf & pelaksana terdata</span>
-              </div>
-              <p>
-                Mendukung administrasi, pengolahan data, pelayanan kantor,
-                kegiatan sosial, pembangunan, dan pemerintahan.
-              </p>
             </div>
 
-            <div className={styles.staffGrid}>
-              {staff.map((person, index) => (
-                <Reveal key={`${person.name}-${person.role}`} enabled delay={(index % 6) * 35}>
-                  <PersonCard person={person} compact />
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* TRANSITION PANEL */}
-        <section className={styles.transitionSection}>
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.transitionPanel}>
+            <Reveal enabled={settings.animationEnabled}>
+              <div className={styles.structureAdminNote}>
                 <div>
-                  <span>Kolaborasi Pemerintahan</span>
-                  <h2>Kelurahan tidak bekerja sendiri.</h2>
+                  <span>Data dinamis</span>
+                  <strong>Nama, jabatan, foto, dan unit dapat diperbarui melalui menu Pemerintahan di dashboard admin.</strong>
                 </div>
-                <p>
-                  Lembaga kemasyarakatan, mitra keamanan, adat, dan Ketua RT
-                  menjadi bagian penting dalam koordinasi pelayanan di tingkat wilayah.
-                </p>
               </div>
             </Reveal>
           </div>
@@ -560,17 +661,17 @@ export default function GovernmentPage() {
         {/* LEMBAGA */}
         <section id="lembaga" className={styles.institutionSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.institutionHeading}>
                 <div>
-                  <span>04</span>
+                  <span>02</span>
                   <small>Lembaga & Mitra Kelurahan</small>
                   <h2>Unsur masyarakat yang bekerja bersama pemerintah</h2>
                 </div>
 
                 <p>
                   Nama dan foto pada bagian ini harus mengikuti SK atau daftar
-                  resmi Kelurahan Amborawang Darat agar tidak salah menampilkan
+                  resmi Kelurahan {settings.villageName} agar tidak salah menampilkan
                   pengurus.
                 </p>
               </div>
@@ -595,18 +696,18 @@ export default function GovernmentPage() {
         {/* RT */}
         <section id="rt" className={styles.rtSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.rtHeading}>
                 <div>
-                  <span>05</span>
+                  <span>03</span>
                   <small>Struktur Kewilayahan</small>
-                  <h2>Ketua RT 01 sampai RT 13</h2>
+                  <h2>{rtRangeLabel}</h2>
                 </div>
 
                 <div className={styles.rtCount}>
                   <small>Struktur Wilayah</small>
                   <strong>{rtList.length}</strong>
-                  <span>RT Kelurahan Amborawang Darat</span>
+                  <span>RT Kelurahan {settings.villageName}</span>
                 </div>
               </div>
             </Reveal>
@@ -614,18 +715,24 @@ export default function GovernmentPage() {
             <div className={styles.rtMetaStrip}>
               <div><span>Jumlah</span><strong>{rtList.length} RT</strong></div>
               <div><span>Status</span><strong>Data terhubung dengan dashboard RT</strong></div>
-              <div><span>Wilayah</span><strong>Amborawang Darat</strong></div>
+              <div><span>Wilayah</span><strong>{settings.villageName}</strong></div>
             </div>
 
-            <div className={styles.rtGrid}>
-              {rtList.map((person, index) => (
-                <Reveal key={person.role} enabled delay={(index % 6) * 32}>
-                  <PersonCard person={person} compact />
-                </Reveal>
-              ))}
-            </div>
+            {rtList.length ? (
+              <div className={styles.rtGrid}>
+                {rtList.map((person, index) => (
+                  <Reveal key={person.role} enabled delay={(index % 6) * 32}>
+                    <PersonCard person={person} compact />
+                  </Reveal>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.orgEmptyText}>
+                Belum ada data RT aktif. Tambahkan data melalui menu Data RT di dashboard admin.
+              </p>
+            )}
 
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.dataNotice}>
                 <div>
                   <span>Dokumen yang dibutuhkan</span>
@@ -646,7 +753,7 @@ export default function GovernmentPage() {
         {/* CTA */}
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
                 <div>
                   <small>Data Pemerintahan</small>

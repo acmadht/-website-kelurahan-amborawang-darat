@@ -63,7 +63,7 @@ const divisions: { title: string; members: Member[] }[] = [
         studyProgram: "Manajemen Pendidikan Islam",
         nim: "2311102020",
         quote:
-          "Gak Ada",
+          "فن الحب هو الشوك - Seni Cinta ialah Rindu.",
       },
       {
         name: "Devi Sulistyowati",
@@ -82,7 +82,7 @@ const divisions: { title: string; members: Member[] }[] = [
         studyProgram: "Ilmu Al-Quran Dan Tafsir",
         nim: "2342115007",
         quote:
-          "Gak Ada",
+          "Tetap bertahan walau semuanya berantakan.",
       },
     ],
   },
@@ -97,7 +97,7 @@ const divisions: { title: string; members: Member[] }[] = [
         studyProgram: "Manajemen Dakwah",
         nim: "2341913021",
         quote:
-          "Belum",
+          "Ini Bukan Soal Apakah Aku Bisa, Aku Akan Melakukannya Karena Aku Menginginkannya.",
       },
     ],
   },

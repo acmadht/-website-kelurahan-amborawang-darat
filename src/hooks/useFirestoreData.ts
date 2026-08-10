@@ -24,7 +24,7 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
   fallback: T[],
   filters: Filter[] = [],
 ) {
-  const [data, setData] = useState<T[]>(fallback);
+  const [data, setData] = useState<T[]>(isFirebaseConfigured ? [] : fallback);
   const [loading, setLoading] = useState(isFirebaseConfigured);
   const [usingDemo, setUsingDemo] = useState(!isFirebaseConfigured);
 
@@ -61,8 +61,10 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
       },
       (error) => {
         console.error(`Gagal memantau ${collectionName}`, error);
-        setData(fallback);
-        setUsingDemo(true);
+        // Jangan tampilkan data demo saat Firebase sudah terhubung tetapi gagal
+        // dibaca. Lebih aman menampilkan keadaan kosong daripada data palsu/stale.
+        setData([]);
+        setUsingDemo(false);
         setLoading(false);
       },
     );

@@ -32,7 +32,6 @@ export default function Page() {
           { key: "coverImageUrl", label: "Foto Sampul", type: "image", full: true },
           { key: "location", label: "Lokasi", type: "text" },
           { key: "eventDate", label: "Tanggal Kegiatan", type: "date" },
-          { key: "photoCount", label: "Jumlah Foto", type: "number" },
           { key: "isFeatured", label: "Tampil di Beranda", type: "checkbox" },
           { key: "status", label: "Status", type: "select", options: ["draft", "published"] },
           { key: "order", label: "Urutan", type: "number" },

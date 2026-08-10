@@ -2,35 +2,15 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
-import { amborawangStatistics } from "@/data/amborawang";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { RegionLeader } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./RtPage.module.css";
 
-const fallbackRts: RegionLeader[] = Array.from({ length: 13 }, (_, index) => ({
-  id: `rt-${String(index + 1).padStart(2, "0")}`,
-  number: String(index + 1).padStart(2, "0"),
-  chairmanName: "",
-  photoUrl: "",
-  phone: "",
-  area: "",
-  description: "",
-  populationCount: 0,
-  familyCount: 0,
-  maleCount: 0,
-  femaleCount: 0,
-  houseCount: 0,
-  toddlerCount: 0,
-  elderlyCount: 0,
-  facilities: [],
-  order: index + 1,
-  isActive: true,
-}));
-
 function normalizeRtNumber(value: string | number | undefined) {
   const numeric = Number(String(value ?? "").replace(/\D/g, ""));
-  if (!numeric || numeric < 1 || numeric > 13) return "";
+  if (!Number.isInteger(numeric) || numeric < 1) return "";
   return String(numeric).padStart(2, "0");
 }
 
@@ -259,33 +239,24 @@ function StatBox({
 export default function RtPage() {
   const { data: rawRts, loading } = useCollectionData<RegionLeader>(
     "rts",
-    fallbackRts,
+    [],
   );
+  const { settings } = usePublicSettings();
   const [selectedRt, setSelectedRt] = useState<RegionLeader | null>(null);
 
-  const rts = useMemo(() => {
-    const map = new Map<string, RegionLeader>();
-
-    fallbackRts.forEach((item) => {
-      map.set(item.number, item);
-    });
-
-    rawRts.forEach((item) => {
-      const number = normalizeRtNumber(item.number);
-      if (!number) return;
-
-      map.set(number, {
-        ...map.get(number),
-        ...item,
-        number,
-        facilities: Array.isArray(item.facilities) ? item.facilities : [],
-      } as RegionLeader);
-    });
-
-    return Array.from(map.values())
-      .filter((item) => item.isActive !== false)
-      .sort((a, b) => Number(a.number) - Number(b.number));
-  }, [rawRts]);
+  const rts = useMemo(
+    () =>
+      rawRts
+        .filter((item) => item.isActive !== false)
+        .map((item) => ({
+          ...item,
+          number: normalizeRtNumber(item.number),
+          facilities: Array.isArray(item.facilities) ? item.facilities : [],
+        }))
+        .filter((item) => Boolean(item.number))
+        .sort((a, b) => Number(a.number) - Number(b.number)),
+    [rawRts],
+  );
 
   const totals = useMemo(() => {
     const population = rts.reduce(
@@ -298,12 +269,16 @@ export default function RtPage() {
     );
 
     return {
-      population:
-        population > 0 ? population : amborawangStatistics.population,
-      families: families > 0 ? families : amborawangStatistics.families,
-      rt: rts.length || amborawangStatistics.rt,
+      population,
+      families,
+      rt: rts.length,
     };
   }, [rts]);
+
+  const rtRangeLabel = useMemo(
+    () => (rts.length ? `${rts.length} RT aktif` : "Daftar RT"),
+    [rts.length],
+  );
 
   useEffect(() => {
     if (!selectedRt) return;
@@ -331,7 +306,7 @@ export default function RtPage() {
           <div className={styles.heroOrb} aria-hidden="true" />
 
           <div className={`container ${styles.heroInner}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <span className={styles.heroBadge}>
                   <RtIcon />
@@ -339,8 +314,8 @@ export default function RtPage() {
                 </span>
 
                 <h1>
-                  Data 13 RT
-                  <strong>Amborawang Darat</strong>
+                  {totals.rt ? `Data ${totals.rt} RT` : "Data RT"}
+                  <strong>{settings.villageName}</strong>
                 </h1>
 
                 <p>
@@ -356,11 +331,11 @@ export default function RtPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.heroSummary}>
                 <div className={styles.summaryTop}>
                   <span>Ringkasan Wilayah RT</span>
-                  <strong>Kelurahan Amborawang Darat</strong>
+                  <strong>Kelurahan {settings.villageName}</strong>
                 </div>
 
                 <div className={styles.summaryGrid}>
@@ -392,8 +367,8 @@ export default function RtPage() {
                 </div>
 
                 <p>
-                  Angka total mengikuti data RT yang tersedia. Jika data per RT
-                  belum lengkap, ringkasan menggunakan data kelurahan.
+                  Angka total dihitung otomatis dari data RT aktif yang tersimpan
+                  pada dashboard admin.
                 </p>
               </div>
             </Reveal>
@@ -402,14 +377,14 @@ export default function RtPage() {
 
         <section className={styles.introSection}>
           <div className={`container ${styles.introGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.introLabel}>
                 <span>01</span>
                 <small>Data Publik RT</small>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={50}>
+            <Reveal enabled={settings.animationEnabled} delay={50}>
               <div className={styles.introCopy}>
                 <h2>Informasi setiap lingkungan RT dalam satu halaman</h2>
                 <p>
@@ -425,11 +400,11 @@ export default function RtPage() {
 
         <section className={styles.rtSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.eyebrow}>Daftar RT</span>
-                  <h2>RT 01 sampai RT 13</h2>
+                  <h2>{rtRangeLabel}</h2>
                 </div>
                 <p>
                   Data yang ditampilkan bersifat ringkasan wilayah. Informasi
@@ -440,6 +415,10 @@ export default function RtPage() {
 
             {loading ? (
               <div className={styles.loadingBox}>Memuat data RT...</div>
+            ) : rts.length === 0 ? (
+              <div className={styles.loadingBox}>
+                Belum ada data RT aktif. Tambahkan data melalui menu Data RT di dashboard admin.
+              </div>
             ) : (
               <div className={styles.rtGrid}>
                 {rts.map((rt, index) => {
@@ -546,7 +525,7 @@ export default function RtPage() {
                           <p>
                             {rt.area ||
                               rt.description ||
-                              `RT ${rt.number}, Kelurahan Amborawang Darat, Kecamatan Samboja Barat.`}
+                              `RT ${rt.number}, Kelurahan ${settings.villageName}, Kecamatan ${settings.subdistrictName || "Samboja Barat"}.`}
                           </p>
                         </div>
 
@@ -585,7 +564,7 @@ export default function RtPage() {
 
         <section className={styles.infoSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.infoPanel}>
                 <div className={styles.infoIcon}>
                   <RtIcon />
@@ -626,7 +605,7 @@ export default function RtPage() {
                   <h2 id="rt-detail-title">
                     {selectedRt.chairmanName || `RT ${selectedRt.number}`}
                   </h2>
-                  <p>Ketua RT {selectedRt.number} • Amborawang Darat</p>
+                  <p>Ketua RT {selectedRt.number} • {settings.villageName}</p>
                 </div>
 
                 <button
@@ -719,7 +698,7 @@ export default function RtPage() {
                     </div>
                     <p>
                       {selectedRt.description ||
-                        `RT ${selectedRt.number} merupakan bagian dari Kelurahan Amborawang Darat, Kecamatan Samboja Barat.`}
+                        `RT ${selectedRt.number} merupakan bagian dari Kelurahan ${settings.villageName}, Kecamatan ${settings.subdistrictName || "Samboja Barat"}.`}
                     </p>
                   </div>
 

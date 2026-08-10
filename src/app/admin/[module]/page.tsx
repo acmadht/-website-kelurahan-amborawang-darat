@@ -1,18 +1,17 @@
-import { notFound } from "next/navigation";
-import AdminModuleEditor from "@/components/admin/AdminModuleEditor";
+import { notFound, redirect } from "next/navigation";
 
-const allowed = [
-  "profil",
-  "pemerintahan",
-  "layanan",
-  "berita",
-  "pengumuman",
-  "galeri",
-  "dokumen",
-  "wilayah",
-  "kontak",
-  "pengaturan",
-];
+const legacyRedirects: Record<string, string> = {
+  pemerintahan: "/admin/aparatur",
+  profil: "/admin/profil",
+  layanan: "/admin/layanan",
+  berita: "/admin/berita",
+  pengumuman: "/admin/pengumuman",
+  galeri: "/admin/galeri",
+  dokumen: "/admin/dokumen",
+  wilayah: "/admin/wilayah",
+  kontak: "/admin/kontak",
+  pengaturan: "/admin/pengaturan",
+};
 
 export default async function Page({
   params,
@@ -20,11 +19,10 @@ export default async function Page({
   params: Promise<{ module: string }>;
 }) {
   const { module } = await params;
+  const target = legacyRedirects[module];
 
-  // Tim KKN sengaja TIDAK masuk allowed.
-  if (!allowed.includes(module)) {
-    notFound();
-  }
+  if (target) redirect(target);
 
-  return <AdminModuleEditor moduleKey={module} />;
+  // Tim KKN dan modul lain yang tidak dikenal tidak pernah membuka editor lama.
+  notFound();
 }

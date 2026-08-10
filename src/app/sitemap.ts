@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
-import { demoPosts } from "@/data/demo";
 import { staticKknPosts } from "@/components/public/newsData";
 import type { PostItem } from "@/types";
 
-const BASE_URL = "https://website-kelurahan-amborawang-darat.vercel.app";
+const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://website-kelurahan-amborawang-darat.vercel.app").replace(/\/$/, "");
 
 function parseDate(value: unknown): Date {
   if (!value) return new Date();
@@ -35,9 +34,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { getAdminDb } = await import("@/lib/firebase/admin");
     const snapshot = await getAdminDb().collection("posts").where("status", "==", "published").get();
     posts = snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as PostItem[];
-    if (!posts.length) posts = demoPosts.filter((post) => post.status === "published");
   } catch {
-    posts = demoPosts.filter((post) => post.status === "published");
+    // Jika server admin Firebase belum tersedia, sitemap tetap valid dengan
+    // rute statis dan artikel KKN yang memang dikunci di source code.
+    posts = [];
   }
 
   const combined = [...posts.filter((post) => post.category !== "KKN"), ...staticKknPosts];

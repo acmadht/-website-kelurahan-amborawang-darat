@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { GalleryAlbum, GalleryPhoto } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
@@ -18,16 +19,10 @@ type GalleryItem = {
   size?: "wide" | "tall" | "normal";
 };
 
-const fallbackGalleryItems: GalleryItem[] = [
-  { id: "static-1", title: "Kantor Kelurahan Amborawang Darat", category: "Pemerintahan", date: "19 September 2015", image: "/images/galeri/kantor-kelurahan.jpg", caption: "Dokumentasi bangunan Kantor Kelurahan Amborawang Darat.", size: "wide" },
+const staticKknItems: GalleryItem[] = [
   { id: "static-kkn-1", title: "Koordinasi Program Kerja KKN", category: "KKN", date: "6 Agustus 2026", image: "/images/galeri/koordinasi-kkn.jpg", caption: "Koordinasi program kerja bersama pihak Kelurahan Amborawang Darat.", size: "normal" },
-  { id: "static-3", title: "Kerja Bakti Lingkungan", category: "Lingkungan", date: "8 Agustus 2026", image: "/images/galeri/kerja-bakti.jpg", caption: "Kegiatan kebersihan lingkungan bersama masyarakat.", size: "tall" },
-  { id: "static-4", title: "Pelayanan Masyarakat", category: "Pemerintahan", date: "10 Agustus 2026", image: "/images/galeri/pelayanan-masyarakat.jpg", caption: "Dokumentasi pelayanan administrasi masyarakat di kantor kelurahan.", size: "normal" },
-  { id: "static-5", title: "Kegiatan Warga", category: "Masyarakat", date: "Agustus 2026", image: "/images/galeri/kegiatan-warga.jpg", caption: "Dokumentasi partisipasi masyarakat dalam kegiatan lingkungan.", size: "wide" },
   { id: "static-kkn-2", title: "Dokumentasi KKN", category: "KKN", date: "Agustus 2026", image: "/images/galeri/dokumentasi-kkn.jpg", caption: "Dokumentasi kegiatan Kelompok KKN di Kelurahan Amborawang Darat.", size: "normal" },
 ];
-
-const staticKknItems = fallbackGalleryItems.filter((item) => item.category === "KKN");
 const sizes: GalleryItem["size"][] = ["wide", "normal", "tall", "normal", "wide", "normal"];
 
 function displayDate(value?: string) {
@@ -79,6 +74,7 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 export default function GalleryPage() {
   const { data: albums } = useCollectionData<GalleryAlbum>("galleryAlbums", []);
   const { data: photos } = useCollectionData<GalleryPhoto>("galleryPhotos", []);
+  const { settings } = usePublicSettings();
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [selected, setSelected] = useState<GalleryItem | null>(null);
 
@@ -113,7 +109,6 @@ export default function GalleryPage() {
       }
     });
 
-    if (!remoteItems.length) return fallbackGalleryItems;
     return [...remoteItems, ...staticKknItems];
   }, [albums, photos]);
 
@@ -134,16 +129,16 @@ export default function GalleryPage() {
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}><GalleryIcon /><span>Dokumentasi Kelurahan</span></div>
-                <h1>Galeri<strong>Amborawang Darat</strong></h1>
-                <p>Dokumentasi kegiatan pemerintahan, masyarakat, lingkungan, dan program KKN di Kelurahan Amborawang Darat.</p>
+                <h1>Galeri<strong>{settings.villageName}</strong></h1>
+                <p>Dokumentasi kegiatan pemerintahan, masyarakat, lingkungan, dan program KKN di Kelurahan {settings.villageName}.</p>
                 <div className={styles.heroMeta}><span><i />Dokumentasi kegiatan</span><span>Arsip visual kelurahan</span></div>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.heroPreview}>
                 <div className={styles.previewMain}>
                   <Photo src={featured.image} alt={featured.title} />
@@ -173,9 +168,9 @@ export default function GalleryPage() {
 
         <section className={styles.featuredSection}>
           <div className="container">
-            <Reveal enabled><div className={styles.sectionHeading}><span className={styles.sectionNumber}>01</span><div><span className={styles.eyebrow}>Dokumentasi Pilihan</span><h2>Momen dan aktivitas kelurahan</h2></div></div></Reveal>
+            <Reveal enabled={settings.animationEnabled}><div className={styles.sectionHeading}><span className={styles.sectionNumber}>01</span><div><span className={styles.eyebrow}>Dokumentasi Pilihan</span><h2>Momen dan aktivitas kelurahan</h2></div></div></Reveal>
             <div className={styles.featuredGrid}>
-              <Reveal enabled>
+              <Reveal enabled={settings.animationEnabled}>
                 <button type="button" className={styles.featuredMain} onClick={() => setSelected(featured)}>
                   <Photo src={featured.image} alt={featured.title} />
                   <div className={styles.featuredOverlay}><div><span>{featured.category}</span><h3>{featured.title}</h3><small>{featured.date}</small></div><span className={styles.expandButton}><ExpandIcon /></span></div>
@@ -197,7 +192,7 @@ export default function GalleryPage() {
 
         <section className={styles.gallerySection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.galleryHeading}>
                 <div><span className={styles.eyebrowLight}>Arsip Visual</span><h2>Dokumentasi kegiatan</h2></div>
                 <div className={styles.galleryCount}><strong>{String(filteredItems.length).padStart(2, "0")}</strong><span>foto ditampilkan</span></div>
@@ -218,7 +213,7 @@ export default function GalleryPage() {
 
         <section className={styles.infoSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.infoPanel}>
                 <div><span>Dokumentasi Publik</span><h2>Galeri menjadi arsip visual kegiatan kelurahan.</h2><p>Foto kegiatan dapat diperbarui secara berkala sebagai bagian dari dokumentasi dan keterbukaan informasi publik.</p></div>
                 <div className={styles.infoLinks}><Link href="/berita">Lihat Berita <ArrowIcon size={15} /></Link><Link href="/kontak">Kirim Dokumentasi <ArrowIcon size={15} /></Link></div>
@@ -229,7 +224,7 @@ export default function GalleryPage() {
 
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
                 <div><span>Punya Dokumentasi?</span><h2>Sampaikan foto kegiatan kepada kelurahan.</h2><p>Dokumentasi dapat diverifikasi terlebih dahulu sebelum ditampilkan pada galeri publik.</p></div>
                 <div className={styles.ctaActions}><Link href="/kontak" className={styles.ctaPrimary}>Hubungi Kelurahan <ArrowIcon /></Link><Link href="/berita" className={styles.ctaSecondary}>Lihat Berita</Link></div>

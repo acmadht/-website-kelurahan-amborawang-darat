@@ -97,15 +97,16 @@
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
   gap: 10px;
-  max-width: 780px;
-  margin-top: 28px;
+  width: 100%;
+  margin-top: 16px;
 }
 
 .meta > div {
   padding: 11px 13px;
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.09);
+  background: linear-gradient(135deg,#103762,#17497c);
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 11px;
+  box-shadow: 0 8px 20px rgba(7,26,61,.08);
 }
 
 .meta span,

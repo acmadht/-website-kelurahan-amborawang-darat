@@ -4,7 +4,7 @@ import { demoSettings } from "@/data/demo";
 import type { SiteSettings } from "@/types";
 import "./globals.css";
 
-const BASE_URL = "https://website-kelurahan-amborawang-darat.vercel.app";
+const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://website-kelurahan-amborawang-darat.vercel.app").replace(/\/$/, "");
 
 export const dynamic = "force-dynamic";
 
@@ -39,9 +39,9 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [
       settings.villageName || "Amborawang Darat",
       `Kelurahan ${settings.villageName || "Amborawang Darat"}`,
-      "Samboja Barat",
-      "Kutai Kartanegara",
-      "Kalimantan Timur",
+      settings.subdistrictName || "Samboja Barat",
+      settings.regencyName || "Kutai Kartanegara",
+      settings.provinceName || "Kalimantan Timur",
       "Pelayanan Kelurahan",
     ],
     category: "Pemerintahan",

@@ -13,7 +13,7 @@ export default function Page() {
         content: "",
         coverImageUrl: "",
         category: "Pelayanan",
-        authorName: "Pemerintah Kelurahan Amborawang Darat",
+        authorName: "",
         publishedDate: "",
         publishedTime: "",
         status: "draft",

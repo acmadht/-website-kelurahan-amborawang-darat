@@ -26,7 +26,6 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
                 <div><strong>{settings.villageName}</strong><span>{settings.tagline}</span></div>
               </div>
               <p style={{ color: "rgba(255,255,255,.65)", maxWidth: 420 }}>{settings.address}</p>
-              <small className="footer-attribution">Foto kantor: Arief R. Sandan (Ezagren), Wikimedia Commons.</small>
             </div>
             <div><div className="footer-title">Menu cepat</div><div className="footer-list"><Link href="/profil">Profil</Link><Link href="/layanan">Layanan</Link><Link href="/berita">Berita</Link><Link href="/galeri">Galeri</Link></div></div>
             <div><div className="footer-title">Pemerintahan</div><div className="footer-list"><Link href="/pemerintahan">Aparatur</Link><Link href="/data-rt">Data RT</Link><Link href="/dokumen">Dokumen publik</Link><Link href="/tim-kkn">Tim KKN</Link></div></div>
@@ -44,7 +43,7 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
           <div className="footer-bottom"><span>© {new Date().getFullYear()} {settings.footerText}</span><span>Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</span></div>
         </div>
       </footer>
-      {settings.whatsappEnabled && whatsapp ? <a className="whatsapp-float" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" aria-label="Hubungi Kelurahan Amborawang Darat melalui WhatsApp">WA</a> : null}
+      {settings.whatsappEnabled && whatsapp ? <a className="whatsapp-float" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" aria-label={`Hubungi Kelurahan ${settings.villageName} melalui WhatsApp`}>WA</a> : null}
     </>
   );
 }

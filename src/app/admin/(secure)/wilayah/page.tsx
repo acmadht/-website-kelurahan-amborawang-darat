@@ -8,15 +8,13 @@ export default function Page() {
       documentId="wilayah"
       publicHref="/wilayah"
       title="Wilayah"
-      description="Kelola statistik kewilayahan, batas administratif, gambaran wilayah, karakter wilayah, dan peta."
+      description="Kelola statistik kewilayahan, batas administratif, gambaran wilayah, karakter wilayah, dan peta. Jumlah RT dihitung otomatis dari menu Data RT."
       defaults={regionContentFallback as unknown as Record<string, unknown>}
       fields={[
         { key: "area", label: "Luas Wilayah", type: "text" },
         { key: "areaNote", label: "Sumber / Catatan Luas", type: "text" },
         { key: "population", label: "Jumlah Penduduk", type: "text" },
         { key: "populationNote", label: "Sumber / Catatan Penduduk", type: "text" },
-        { key: "rtCount", label: "Jumlah RT", type: "text" },
-        { key: "rtNote", label: "Sumber / Catatan RT", type: "text" },
         { key: "districtDistance", label: "Jarak ke Ibu Kota Kecamatan", type: "text" },
         { key: "districtDistanceNote", label: "Sumber / Catatan Jarak", type: "text" },
         { key: "northBoundary", label: "Batas Utara", type: "text", full: true },

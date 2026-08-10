@@ -101,3 +101,65 @@ export async function verifyEditorToken(idToken: string) {
     );
   }
 }
+
+export async function verifyUploadToken(idToken: string) {
+  const app = getAdminApp();
+  const decoded = await getAuth(app).verifyIdToken(idToken, true);
+  const claimRole = typeof decoded.role === "string" ? decoded.role : "";
+  const allowedRoles = ["superadmin", "editor", "operator_rt"];
+
+  if (
+    decoded.isActive !== false &&
+    allowedRoles.includes(claimRole)
+  ) {
+    return { uid: decoded.uid, role: claimRole };
+  }
+
+  if (isAllowedEmail(decoded)) {
+    return { uid: decoded.uid, role: "editor" };
+  }
+
+  try {
+    const userDoc = await getAdminDb().collection("users").doc(decoded.uid).get();
+    if (!userDoc.exists) {
+      throw new Error("Profil pengguna tidak ditemukan di Firestore.");
+    }
+
+    const data = userDoc.data() as { role?: string; isActive?: boolean };
+    const role = data.role ?? "";
+    if (!data.isActive || !allowedRoles.includes(role)) {
+      throw new Error("Akun tidak memiliki izin upload.");
+    }
+
+    return { uid: decoded.uid, role };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "koneksi Firestore gagal";
+    throw new Error(`Izin upload tidak valid. Detail: ${reason}`);
+  }
+}
+
+
+export async function verifySuperadminToken(idToken: string) {
+  const app = getAdminApp();
+  const decoded = await getAuth(app).verifyIdToken(idToken, true);
+
+  if (
+    decoded.isActive !== false &&
+    typeof decoded.role === "string" &&
+    decoded.role === "superadmin"
+  ) {
+    return { uid: decoded.uid, role: "superadmin" as const };
+  }
+
+  const userDoc = await getAdminDb().collection("users").doc(decoded.uid).get();
+  if (!userDoc.exists) {
+    throw new Error("Profil superadmin tidak ditemukan.");
+  }
+
+  const data = userDoc.data() as { role?: string; isActive?: boolean };
+  if (data.isActive === false || data.role !== "superadmin") {
+    throw new Error("Akun tidak memiliki izin superadmin.");
+  }
+
+  return { uid: decoded.uid, role: "superadmin" as const };
+}

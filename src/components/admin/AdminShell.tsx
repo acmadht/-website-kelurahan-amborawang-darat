@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useAdminAuth } from "./AuthProvider";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import styles from "./AdminShell.module.css";
 
 type MenuItem = {
@@ -12,81 +13,85 @@ type MenuItem = {
   code: string;
 };
 
-type MenuGroup = {
-  title: string;
+type ExpandableMenu = {
+  id: string;
+  label: string;
+  code: string;
   items: MenuItem[];
 };
 
-const editorGroups: MenuGroup[] = [
-  {
-    title: "Ringkasan",
-    items: [
-      { label: "Beranda", href: "/admin/beranda", code: "BD" },
-      { label: "Hero Banner", href: "/admin/hero", code: "HB" },
-    ],
-  },
-  {
-    title: "Informasi Kelurahan",
-    items: [
-      { label: "Profil Kelurahan", href: "/admin/profil", code: "PR" },
-      { label: "Pemerintahan", href: "/admin/aparatur", code: "PM" },
-      { label: "Data RT", href: "/admin/rt", code: "RT" },
-      { label: "Wilayah", href: "/admin/wilayah", code: "WL" },
-      { label: "Kontak & Jam Layanan", href: "/admin/kontak", code: "KT" },
-    ],
-  },
-  {
-    title: "Pelayanan & Publikasi",
-    items: [
-      { label: "Layanan", href: "/admin/layanan", code: "LY" },
-      { label: "Berita", href: "/admin/berita", code: "BR" },
-      { label: "Pengumuman", href: "/admin/pengumuman", code: "PG" },
-      { label: "Agenda", href: "/admin/agenda", code: "AG" },
-      { label: "Galeri", href: "/admin/galeri", code: "GL" },
-      { label: "Dokumen", href: "/admin/dokumen", code: "DK" },
-      { label: "Pesan Masuk", href: "/admin/pesan", code: "PS" },
-    ],
-  },
-  {
-    title: "Sistem",
-    items: [
-      { label: "Pengaturan Website", href: "/admin/pengaturan", code: "ST" },
-      { label: "Pengguna Admin", href: "/admin/pengguna", code: "US" },
-      { label: "Lihat Website", href: "/", code: "↗" },
-    ],
-  },
+const mainItems: MenuItem[] = [
+  { label: "Beranda", href: "/admin/beranda", code: "BD" },
+  { label: "Profil", href: "/admin/profil", code: "PR" },
+  { label: "Pemerintahan", href: "/admin/aparatur", code: "PM" },
+  { label: "Layanan", href: "/admin/layanan", code: "LY" },
+  { label: "Berita", href: "/admin/berita", code: "BR" },
 ];
 
-const operatorGroups: MenuGroup[] = [
-  {
-    title: "Akses Operator RT",
-    items: [
-      { label: "Data RT Saya", href: "/admin/rt-saya", code: "RT" },
-      { label: "Lihat Website", href: "/", code: "↗" },
-    ],
-  },
+const informationItems: MenuItem[] = [
+  { label: "Wilayah", href: "/admin/wilayah", code: "WL" },
+  { label: "Data RT", href: "/admin/rt", code: "RT" },
+  { label: "Galeri", href: "/admin/galeri", code: "GL" },
+  { label: "Dokumen", href: "/admin/dokumen", code: "DK" },
+  { label: "Kontak & Jam Layanan", href: "/admin/kontak", code: "KT" },
 ];
+
+const homeSupportItems: MenuItem[] = [
+  { label: "Hero Banner", href: "/admin/hero", code: "HB" },
+  { label: "Pengumuman", href: "/admin/pengumuman", code: "PG" },
+  { label: "Agenda", href: "/admin/agenda", code: "AG" },
+];
+
+const systemBaseItems: MenuItem[] = [
+  { label: "Pesan Masuk", href: "/admin/pesan", code: "PS" },
+  { label: "Pengaturan Website", href: "/admin/pengaturan", code: "ST" },
+  { label: "Pengguna Admin", href: "/admin/pengguna", code: "US" },
+];
+
+function isItemActive(pathname: string, href: string) {
+  return href !== "/" && pathname.startsWith(href);
+}
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, configured, logout } = useAdminAuth();
+  const { settings } = usePublicSettings();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    information: false,
+    homeSupport: false,
+    system: false,
+  });
 
-  const groups = useMemo(() => {
-    if (profile?.role === "operator_rt") {
-      return operatorGroups;
-    }
-
-    if (profile?.role === "superadmin") {
-      return editorGroups;
-    }
-
-    return editorGroups.map((group) => ({
-      ...group,
-      items: group.items.filter((item) => item.href !== "/admin/pengguna"),
-    }));
+  const systemItems = useMemo(() => {
+    if (profile?.role === "superadmin") return systemBaseItems;
+    return systemBaseItems.filter((item) => item.href !== "/admin/pengguna");
   }, [profile?.role]);
+
+  const expandableMenus = useMemo<ExpandableMenu[]>(
+    () => [
+      {
+        id: "information",
+        label: "Informasi Publik",
+        code: "IN",
+        items: informationItems,
+      },
+      {
+        id: "homeSupport",
+        label: "Konten Beranda",
+        code: "KB",
+        items: homeSupportItems,
+      },
+      {
+        id: "system",
+        label: "Pengaturan",
+        code: "ST",
+        items: systemItems,
+      },
+    ],
+    [systemItems],
+  );
 
   useEffect(() => {
     if (!loading && configured && (!user || !profile?.isActive)) {
@@ -103,6 +108,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       router.replace("/admin/rt-saya");
     }
   }, [loading, pathname, profile?.role, router]);
+
+  useEffect(() => {
+    if (profile?.role === "operator_rt") return;
+
+    const nextState: Record<string, boolean> = {};
+    for (const group of expandableMenus) {
+      if (group.items.some((item) => isItemActive(pathname, item.href))) {
+        nextState[group.id] = true;
+      }
+    }
+
+    if (Object.keys(nextState).length) {
+      setExpanded((current) => ({ ...current, ...nextState }));
+    }
+  }, [pathname, profile?.role, expandableMenus]);
 
   if (loading) {
     return (
@@ -150,37 +170,30 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <div className={styles.logoMark}>AD</div>
             <div>
               <strong>Admin Kelurahan</strong>
-              <span>Amborawang Darat</span>
+              <span>{settings.villageName}</span>
             </div>
           </div>
 
-          <div className={styles.accountCard}>
-            <span>Akun aktif</span>
-            <strong>{profile.name}</strong>
-            <small>
-              {profile.role === "superadmin"
-                ? "Super Admin"
-                : profile.role === "operator_rt"
-                  ? "Operator RT"
-                  : "Editor Kelurahan"}
-            </small>
-          </div>
-
-          <div className={styles.lockedNotice}>
-            <span>Area terkunci</span>
-            <strong>Tim KKN</strong>
-            <p>Tidak tersedia pada dashboard admin.</p>
-          </div>
-
-          <nav className={styles.nav}>
-            {groups.map((group) => (
-              <section key={group.title} className={styles.navGroup}>
-                <span className={styles.groupTitle}>{group.title}</span>
-
-                {group.items.map((item) => {
-                  const active =
-                    item.href !== "/" && pathname.startsWith(item.href);
-
+          {profile.role === "operator_rt" ? (
+            <nav className={styles.nav}>
+              <span className={styles.groupTitle}>Menu Operator</span>
+              <Link
+                href="/admin/rt-saya"
+                onClick={() => setOpen(false)}
+                className={`${styles.navItem} ${
+                  pathname.startsWith("/admin/rt-saya") ? styles.navItemActive : ""
+                }`}
+              >
+                <span className={styles.navCode}>RT</span>
+                <span>Data RT Saya</span>
+              </Link>
+            </nav>
+          ) : (
+            <nav className={styles.nav}>
+              <section className={styles.navGroup}>
+                <span className={styles.groupTitle}>Menu Website</span>
+                {mainItems.map((item) => {
+                  const active = isItemActive(pathname, item.href);
                   return (
                     <Link
                       key={item.href}
@@ -195,9 +208,84 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     </Link>
                   );
                 })}
+
+                {expandableMenus.map((group) => {
+                  const groupActive = group.items.some((item) =>
+                    isItemActive(pathname, item.href),
+                  );
+                  const isExpanded = expanded[group.id] || groupActive;
+
+                  return (
+                    <div className={styles.expandable} key={group.id}>
+                      <button
+                        type="button"
+                        className={`${styles.navItem} ${styles.navButton} ${
+                          groupActive ? styles.navItemActive : ""
+                        }`}
+                        aria-expanded={isExpanded}
+                        onClick={() =>
+                          setExpanded((current) => ({
+                            ...current,
+                            [group.id]: !isExpanded,
+                          }))
+                        }
+                      >
+                        <span className={styles.navCode}>{group.code}</span>
+                        <span>{group.label}</span>
+                        <span
+                          className={`${styles.chevron} ${
+                            isExpanded ? styles.chevronOpen : ""
+                          }`}
+                          aria-hidden="true"
+                        >
+                          ▾
+                        </span>
+                      </button>
+
+                      {isExpanded ? (
+                        <div className={styles.subnav}>
+                          {group.items.map((item) => {
+                            const active = isItemActive(pathname, item.href);
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className={`${styles.subnavItem} ${
+                                  active ? styles.subnavItemActive : ""
+                                }`}
+                              >
+                                <span>{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </section>
-            ))}
-          </nav>
+            </nav>
+          )}
+
+          <div className={styles.sidebarFooter}>
+            <div className={styles.accountCompact}>
+              <span className={styles.avatar}>{profile.name?.charAt(0)?.toUpperCase() || "A"}</span>
+              <div>
+                <strong>{profile.name}</strong>
+                <small>
+                  {profile.role === "superadmin"
+                    ? "Super Admin"
+                    : profile.role === "operator_rt"
+                      ? "Operator RT"
+                      : "Editor Kelurahan"}
+                </small>
+              </div>
+            </div>
+            <Link href="/" className={styles.websiteShortcut} onClick={() => setOpen(false)}>
+              Lihat Website ↗
+            </Link>
+          </div>
         </aside>
 
         <div className={styles.main}>

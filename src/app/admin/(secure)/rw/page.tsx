@@ -1,2 +1,5 @@
-import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
-export default function Page(){return <AdminCollectionManager collectionName="rws" title="Data RW" description="Kelola ketua, data penduduk, kepala keluarga, kontak, dan status wilayah." defaults={{number:"",chairmanName:"",photoUrl:"",phone:"",description:"",populationCount:0,familyCount:0,order:1,isActive:true}} displayFields={["number","chairmanName","populationCount","isActive"]} fields={[{key:"number",label:"Nomor RW",type:"text",required:true},{key:"chairmanName",label:"Nama Ketua",type:"text",required:true},{key:"photoUrl",label:"Foto Ketua",type:"image",full:true},{key:"phone",label:"Kontak",type:"text"},{key:"description",label:"Deskripsi Wilayah",type:"textarea",full:true},{key:"populationCount",label:"Jumlah Penduduk",type:"number"},{key:"familyCount",label:"Jumlah Kepala Keluarga",type:"number"},{key:"order",label:"Urutan",type:"number"},{key:"isActive",label:"Status Aktif",type:"checkbox"}]}/>}
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/admin/rt");
+}

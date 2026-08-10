@@ -65,7 +65,7 @@ export interface RegionContent {
 export const regionContentFallback: RegionContent = {
   area: "19,47 km²",
   population: "2.921 jiwa",
-  rtCount: "13 RT",
+  rtCount: "Data RT",
   districtDistance: "5,3 km",
   areaNote: "BPS, data 2023",
   populationNote: "BPS, data 2023",

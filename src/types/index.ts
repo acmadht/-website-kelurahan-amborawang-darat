@@ -3,6 +3,9 @@ export type UserRole = "superadmin" | "editor" | "operator_rt";
 export interface SiteSettings {
   siteName: string;
   villageName: string;
+  subdistrictName?: string;
+  regencyName?: string;
+  provinceName?: string;
   tagline: string;
   logoUrl: string;
   faviconUrl?: string;
@@ -43,6 +46,7 @@ export interface Official {
   name: string;
   title: string;
   category: string;
+  unit?: string;
   photoUrl: string;
   phone?: string;
   description?: string;

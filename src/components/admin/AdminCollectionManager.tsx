@@ -7,9 +7,13 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
+  query,
   serverTimestamp,
   updateDoc,
+  where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { slugify, sortByOrder } from "@/lib/utils";
@@ -49,8 +53,32 @@ interface AdminCollectionManagerProps {
 
 function normalizeRtNumber(value: unknown) {
   const numeric = Number(String(value ?? "").replace(/\D/g, ""));
-  if (!numeric || numeric < 1 || numeric > 13) return "";
+  if (!Number.isInteger(numeric) || numeric < 1) return "";
   return String(numeric).padStart(2, "0");
+}
+
+function witaNow() {
+  const now = new Date();
+  const dateParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Makassar",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const timeParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Makassar",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const pick = (parts: Intl.DateTimeFormatPart[], type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return {
+    date: `${pick(dateParts, "year")}-${pick(dateParts, "month")}-${pick(dateParts, "day")}`,
+    time: `${pick(timeParts, "hour")}.${pick(timeParts, "minute")} WITA`,
+  };
 }
 
 export default function AdminCollectionManager({
@@ -160,6 +188,8 @@ export default function AdminCollectionManager({
           .split("\n")
           .map((item) => item.trim())
           .filter(Boolean);
+      } else if (typeof value === "string") {
+        value = value.trim();
       }
 
       payload[field.key] = value;
@@ -169,7 +199,7 @@ export default function AdminCollectionManager({
       const normalized = normalizeRtNumber(payload.number);
 
       if (!normalized) {
-        setStatus("Nomor RT harus berada pada rentang RT 01 sampai RT 13.");
+        setStatus("Nomor RT harus berupa angka positif, contoh 01.");
         return;
       }
 
@@ -188,12 +218,42 @@ export default function AdminCollectionManager({
       payload.order = Number(normalized);
     }
 
-    if ("slug" in payload && !payload.slug && payload.title) {
-      payload.slug = slugify(String(payload.title));
+    if ("slug" in payload) {
+      const slugSource = payload.slug || payload.title || payload.name || "";
+      const normalizedSlug = slugify(String(slugSource));
+
+      if (!normalizedSlug) {
+        setStatus("Slug tidak dapat dibuat. Isi judul atau nama terlebih dahulu.");
+        return;
+      }
+
+      const duplicateSlug = items.find(
+        (item) =>
+          String(item.id) !== editing &&
+          slugify(String(item.slug ?? "")) === normalizedSlug,
+      );
+
+      if (duplicateSlug) {
+        setStatus(`Slug “${normalizedSlug}” sudah digunakan. Gunakan judul atau slug lain.`);
+        return;
+      }
+
+      payload.slug = normalizedSlug;
     }
 
-    if ("slug" in payload && !payload.slug && payload.name) {
-      payload.slug = slugify(String(payload.name));
+    // Konten KKN sengaja dikunci dari admin dan hanya berasal dari source statis.
+    if (
+      (collectionName === "posts" || collectionName === "galleryAlbums") &&
+      String(payload.category ?? "").toUpperCase() === "KKN"
+    ) {
+      setStatus("Konten kategori KKN dikunci dan tidak dapat dibuat atau diubah dari admin.");
+      return;
+    }
+
+    if (collectionName === "posts" && payload.status === "published") {
+      const now = witaNow();
+      if (!String(payload.publishedDate ?? "").trim()) payload.publishedDate = now.date;
+      if (!String(payload.publishedTime ?? "").trim()) payload.publishedTime = now.time;
     }
 
     setSaving(true);
@@ -231,9 +291,33 @@ export default function AdminCollectionManager({
       return;
     }
 
+    setStatus("");
+    setNotice("");
+
     try {
+      // Saat album galeri dihapus, bersihkan metadata foto terkait agar tidak
+      // menyisakan dokumen yatim di Firestore. Aset Cloudinary tetap aman.
+      if (collectionName === "galleryAlbums") {
+        const photoSnapshot = await getDocs(
+          query(collection(db, "galleryPhotos"), where("albumId", "==", id)),
+        );
+
+        const photoDocs = photoSnapshot.docs;
+        for (let start = 0; start < photoDocs.length; start += 400) {
+          const batch = writeBatch(db);
+          photoDocs.slice(start, start + 400).forEach((photoDoc) =>
+            batch.delete(photoDoc.ref),
+          );
+          await batch.commit();
+        }
+      }
+
       await deleteDoc(doc(db, collectionName, id));
-      setNotice("Data berhasil dihapus dari Firestore.");
+      setNotice(
+        collectionName === "galleryAlbums"
+          ? "Album dan metadata foto terkait berhasil dihapus."
+          : "Data berhasil dihapus dari Firestore.",
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Gagal menghapus data.");
     }

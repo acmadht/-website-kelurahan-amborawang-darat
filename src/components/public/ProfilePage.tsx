@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useDocumentData } from "@/hooks/useFirestoreData";
+import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import {
   amborawangProfileFallback,
   resolveAmborawangProfile,
   type ProfileContent,
 } from "@/data/amborawangProfile";
+import type { RegionLeader } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ProfilePage.module.css";
@@ -50,13 +52,29 @@ function PinIcon() {
 }
 
 export default function ProfilePage() {
+  const { settings } = usePublicSettings();
   const { data } = useDocumentData<ProfileContent>(
     "pages",
     "profil",
     amborawangProfileFallback,
   );
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
   const profile = resolveAmborawangProfile(data);
-  const quickStats = profile.stats.slice(0, 3);
+  const activeRtCount = rawRts.filter((item) => {
+    if (item.isActive === false) return false;
+    const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+    return Number.isInteger(numeric) && numeric > 0;
+  }).length;
+  const profileStats = profile.stats.map((item) =>
+    /(?:wilayah|jumlah)\s*rt|\brt\b/i.test(item.label)
+      ? {
+          ...item,
+          value: activeRtCount ? `${activeRtCount} RT` : "Belum ada data",
+          note: "Data RT aktif pada dashboard",
+        }
+      : item,
+  );
+  const quickStats = profileStats.slice(0, 3);
   const historyParagraphs = profile.history
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -69,7 +87,7 @@ export default function ProfilePage() {
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
           <div className={`container ${styles.heroInner}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <span className={styles.eyebrowLight}>{profile.heroEyebrow}</span>
                 <h1>{profile.heroTitle}</h1>
@@ -77,7 +95,7 @@ export default function ProfilePage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.heroPhotoCard}>
                 <div className={styles.heroPhoto}>
                   <img
@@ -103,7 +121,7 @@ export default function ProfilePage() {
         <section className={styles.quickBand}>
           <div className="container">
             <div className={styles.quickBandGrid}>
-              <Reveal enabled>
+              <Reveal enabled={settings.animationEnabled}>
                 <div className={styles.quickBandIntro}>
                   <span>{profile.summaryEyebrow}</span>
                   <strong>{profile.summaryName}</strong>
@@ -126,14 +144,14 @@ export default function ProfilePage() {
         {/* SEJARAH */}
         <section className={styles.historyIntro}>
           <div className={`container ${styles.twoCol}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionLabelBlock}>
                 <span className={styles.sectionIndex}>01</span>
                 <span className={styles.eyebrow}>Sejarah Kelurahan</span>
               </div>
             </Reveal>
 
-            <Reveal enabled delay={60}>
+            <Reveal enabled={settings.animationEnabled} delay={60}>
               <div className={styles.article}>
                 <h2>{profile.historyTitle}</h2>
 
@@ -151,7 +169,7 @@ export default function ProfilePage() {
         <section className={styles.statsSection}>
           <div className="container">
             <div className={styles.statsGrid}>
-              {profile.stats.map((item, index) => (
+              {profileStats.map((item, index) => (
                 <Reveal key={`${item.label}-${index}`} enabled delay={index * 45}>
                   <div className={styles.statItem}>
                     <strong>{item.value}</strong>
@@ -167,7 +185,7 @@ export default function ProfilePage() {
         {/* TIMELINE */}
         <section className={styles.timelineSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.timelineEyebrow}</span>
                 <h2>{profile.timelineTitle}</h2>
@@ -197,7 +215,7 @@ export default function ProfilePage() {
         <section className={styles.visionSection}>
           <div className="container">
             <div className={styles.visionGrid}>
-              <Reveal enabled>
+              <Reveal enabled={settings.animationEnabled}>
                 <div className={styles.visionCard}>
                   <span className={styles.eyebrowLight}>Visi Pelayanan</span>
                   <blockquote>{profile.vision}</blockquote>
@@ -206,7 +224,7 @@ export default function ProfilePage() {
               </Reveal>
 
               <div className={styles.missionArea}>
-                <Reveal enabled>
+                <Reveal enabled={settings.animationEnabled}>
                   <div className={styles.missionHeading}>
                     <span className={styles.eyebrow}>Misi</span>
                     <h2>{profile.missionTitle}</h2>
@@ -231,7 +249,7 @@ export default function ProfilePage() {
         {/* WILAYAH */}
         <section className={styles.regionSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.regionEyebrow}</span>
                 <h2>{profile.regionTitle}</h2>
@@ -251,7 +269,7 @@ export default function ProfilePage() {
             </div>
 
             <div className={styles.regionGrid}>
-              <Reveal enabled>
+              <Reveal enabled={settings.animationEnabled}>
                 <div className={styles.mapCard}>
                   <div className={styles.mapTop}>
                     <div>
@@ -293,7 +311,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <p className={styles.regionNote}>{profile.boundaries}</p>
             </Reveal>
           </div>
@@ -302,7 +320,7 @@ export default function ProfilePage() {
         {/* POTENSI */}
         <section className={styles.potentialSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeading}>
                 <span className={styles.eyebrow}>{profile.potentialEyebrow}</span>
                 <h2>{profile.potentialTitle}</h2>
@@ -329,7 +347,7 @@ export default function ProfilePage() {
         {/* FASILITAS */}
         <section className={styles.facilitySection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.facilityHeading}>
                 <div>
                   <span className={styles.eyebrow}>{profile.facilityEyebrow}</span>
@@ -363,7 +381,7 @@ export default function ProfilePage() {
         {/* PRIORITAS */}
         <section className={styles.prioritySection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.priorityEyebrow}</span>
                 <h2>{profile.priorityTitle}</h2>
@@ -387,7 +405,7 @@ export default function ProfilePage() {
         {/* UPDATE DATA */}
         <section className={styles.updateSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.updatePanel}>
                 <div className={styles.updateIcon}>
                   <PinIcon />

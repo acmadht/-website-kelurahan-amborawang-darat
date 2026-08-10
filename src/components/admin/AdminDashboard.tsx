@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import styles from "./AdminDashboard.module.css";
 
 const statsConfig = [
@@ -25,6 +26,7 @@ const quickActions = [
 ];
 
 export default function AdminDashboard() {
+  const { settings } = usePublicSettings();
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
@@ -63,7 +65,7 @@ export default function AdminDashboard() {
           <span>Dashboard Kelurahan</span>
           <h1>Pusat pengelolaan website</h1>
           <p>
-            Kelola informasi publik Amborawang Darat dari satu dashboard yang
+            Kelola informasi publik {settings.villageName} dari satu dashboard yang
             terhubung dengan Firestore.
           </p>
         </div>
@@ -71,18 +73,6 @@ export default function AdminDashboard() {
           <small>Konten terdata</small>
           <strong>{loading ? "…" : total}</strong>
           <span>pada modul utama</span>
-        </div>
-      </section>
-
-      <section className={styles.lockNotice}>
-        <div className={styles.lockIcon}>KKN</div>
-        <div>
-          <span>Konten Dilindungi</span>
-          <strong>Tim KKN tidak dapat diubah melalui admin.</strong>
-          <p>
-            Nama, foto, divisi, dosen pembimbing, dan struktur KKN tetap dikunci
-            di source code agar tidak terubah oleh admin kelurahan.
-          </p>
         </div>
       </section>
 
@@ -134,7 +124,7 @@ export default function AdminDashboard() {
           <h2>Alur kerja yang disarankan</h2>
           <ol>
             <li>Periksa Beranda, Hero Banner, dan Profil Kelurahan.</li>
-            <li>Lengkapi Pemerintahan, lembaga, dan 13 RT.</li>
+            <li>Lengkapi Pemerintahan, lembaga, dan data RT.</li>
             <li>Perbarui Wilayah, Layanan, Kontak, dan jam pelayanan.</li>
             <li>Publikasikan Berita, Pengumuman, Agenda, Galeri, dan Dokumen.</li>
             <li>Periksa hasil akhir melalui tampilan website publik.</li>

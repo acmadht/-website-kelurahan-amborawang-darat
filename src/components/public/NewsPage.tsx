@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { PostItem } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
@@ -61,6 +62,7 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 
 export default function NewsPage() {
   const { data: remotePosts } = useCollectionData<PostItem>("posts", []);
+  const { settings } = usePublicSettings();
   const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
   const categories = useMemo(
     () => ["Semua", ...Array.from(new Set(posts.map((item) => item.category).filter(Boolean)))],
@@ -88,11 +90,11 @@ export default function NewsPage() {
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
           <div className={`container ${styles.heroGrid}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}><NewsIcon /><span>Informasi Kelurahan</span></div>
-                <h1>Berita<strong>Amborawang Darat</strong></h1>
-                <p>Informasi pelayanan, lingkungan, kegiatan masyarakat, dan perkembangan Kelurahan Amborawang Darat dalam satu halaman yang ringkas dan mudah dipindai.</p>
+                <h1>Berita<strong>{settings.villageName}</strong></h1>
+                <p>Informasi pelayanan, lingkungan, kegiatan masyarakat, dan perkembangan Kelurahan {settings.villageName} dalam satu halaman yang ringkas dan mudah dipindai.</p>
                 <div className={styles.heroMeta}>
                   <span><i />Informasi resmi kelurahan</span>
                   <span>Tanggal & waktu publikasi tercantum</span>
@@ -100,7 +102,7 @@ export default function NewsPage() {
               </div>
             </Reveal>
 
-            <Reveal enabled delay={70}>
+            <Reveal enabled={settings.animationEnabled} delay={70}>
               <div className={styles.heroTicker}>
                 <div className={styles.tickerHead}>
                   <span>Berita Terkini</span>
@@ -140,7 +142,7 @@ export default function NewsPage() {
 
         <section className={styles.featuredSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeading}>
                 <span className={styles.sectionNumber}>01</span>
                 <div><span className={styles.eyebrow}>Sorotan Utama</span><h2>Informasi yang perlu diketahui warga</h2></div>
@@ -148,7 +150,7 @@ export default function NewsPage() {
             </Reveal>
 
             <div className={styles.featuredGrid}>
-              <Reveal enabled>
+              <Reveal enabled={settings.animationEnabled}>
                 <Link href={`/berita/${featured.slug}`} className={styles.featuredCard}>
                   <div className={styles.featuredImage}>
                     <Photo src={featured.coverImageUrl} alt={featured.title} />
@@ -190,7 +192,7 @@ export default function NewsPage() {
 
         <section className={styles.archiveSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.archiveHeading}>
                 <div><span className={styles.eyebrowLight}>Arsip Berita</span><h2>Informasi terbaru kelurahan</h2></div>
                 <div className={styles.archiveCount}><strong>{String(filteredNews.length).padStart(2, "0")}</strong><span>artikel ditampilkan</span></div>
@@ -220,7 +222,7 @@ export default function NewsPage() {
 
         <section className={styles.infoSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.infoPanel}>
                 <div><span>Informasi Publik</span><h2>Berita menjadi bagian dari keterbukaan informasi kelurahan.</h2></div>
                 <div className={styles.infoLinks}>
@@ -235,7 +237,7 @@ export default function NewsPage() {
 
         <section className={styles.ctaSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
                 <div><span>Punya Informasi?</span><h2>Sampaikan informasi atau dokumentasi kegiatan.</h2><p>Informasi masyarakat dapat diteruskan kepada kelurahan untuk diverifikasi sebelum dipublikasikan.</p></div>
                 <div className={styles.ctaActions}>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { PostItem } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
@@ -53,6 +54,7 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 
 export default function NewsDetailPage({ slug }: { slug: string }) {
   const [copied, setCopied] = useState(false);
+  const { settings } = usePublicSettings();
   const { data: remotePosts, loading } = useCollectionData<PostItem>("posts", []);
   const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
   const article = posts.find((item) => item.slug === slug);
@@ -134,29 +136,30 @@ export default function NewsDetailPage({ slug }: { slug: string }) {
         <section className={styles.hero}>
           <div className={styles.heroPattern} aria-hidden="true" />
           <div className={`container ${styles.heroInner}`}>
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.breadcrumb}>
                 <Link href="/">Beranda</Link><span>/</span><Link href="/berita">Berita</Link><span>/</span><span>{article.category}</span>
               </div>
               <span className={styles.category}>{article.category}</span>
               <h1>{article.title}</h1>
               <p className={styles.heroExcerpt}>{article.summary}</p>
-              <div className={styles.meta}>
-                <div><span>Tanggal</span><strong>{displayPostDate(article.publishedDate)}</strong></div>
-                <div><span>Waktu</span><strong>{article.publishedTime || "Waktu belum diisi"}</strong></div>
-                <div><span>Penulis</span><strong>{article.authorName || "Pemerintah Kelurahan Amborawang Darat"}</strong></div>
-              </div>
             </Reveal>
           </div>
         </section>
 
         <section className={styles.imageSection}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <figure className={styles.figure}>
                 <div className={styles.mainImage}><Photo src={article.coverImageUrl} alt={article.title} /></div>
-                <figcaption>Dokumentasi berita Kelurahan Amborawang Darat.</figcaption>
+                <figcaption>Dokumentasi berita Kelurahan {settings.villageName}.</figcaption>
               </figure>
+
+              <div className={styles.meta}>
+                <div><span>Tanggal</span><strong>{displayPostDate(article.publishedDate)}</strong></div>
+                <div><span>Waktu</span><strong>{article.publishedTime || "Waktu belum diisi"}</strong></div>
+                <div><span>Penulis</span><strong>{article.authorName || "Penulis belum diisi"}</strong></div>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -173,16 +176,16 @@ export default function NewsDetailPage({ slug }: { slug: string }) {
             </aside>
 
             <article className={styles.article}>
-              <Reveal enabled>
-                <div className={styles.articleIntro}><span>Amborawang Darat</span><p>{article.summary}</p></div>
+              <Reveal enabled={settings.animationEnabled}>
+                <div className={styles.articleIntro}><span>{settings.villageName}</span><p>{article.summary}</p></div>
               </Reveal>
 
               {(paragraphs.length ? paragraphs : [article.summary]).map((paragraph, index) => (
                 <Reveal key={`${paragraph.slice(0, 32)}-${index}`} enabled delay={index * 35}><p>{paragraph}</p></Reveal>
               ))}
 
-              <Reveal enabled>
-                <div className={styles.articleNote}><span>Informasi Publik</span><strong>Berita ini dipublikasikan melalui Website Resmi Kelurahan Amborawang Darat.</strong></div>
+              <Reveal enabled={settings.animationEnabled}>
+                <div className={styles.articleNote}><span>Informasi Publik</span><strong>Berita ini dipublikasikan melalui Website Resmi Kelurahan {settings.villageName}.</strong></div>
               </Reveal>
 
               <div className={styles.mobileShare}>
@@ -198,7 +201,7 @@ export default function NewsDetailPage({ slug }: { slug: string }) {
 
         <section className={styles.articleFooter}>
           <div className="container">
-            <Reveal enabled>
+            <Reveal enabled={settings.animationEnabled}>
               <div className={styles.footerPanel}>
                 <div><span>Selesai Membaca</span><h2>Lihat informasi kelurahan lainnya</h2></div>
                 <div className={styles.footerActions}>

@@ -2,11 +2,9 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { applyAmborawangPublicSettings } from "@/data/amborawang";
 import { demoSettings } from "@/data/demo";
 import { useDocumentData } from "@/hooks/useFirestoreData";
-import { db } from "@/lib/firebase/client";
 import { normalizeWhatsapp } from "@/lib/utils";
 import type { SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
@@ -74,13 +72,7 @@ function parseServiceHours(value: string) {
       return { day: "Jadwal", time: item };
     });
 
-  return rows.length
-    ? rows
-    : [
-        { day: "Senin-Kamis", time: "09.00-16.00 WITA" },
-        { day: "Jumat", time: "09.00-11.00 WITA" },
-        { day: "Sabtu-Minggu", time: "Tutup" },
-      ];
+  return rows;
 }
 
 export default function ContactPage() {
@@ -100,20 +92,24 @@ export default function ContactPage() {
 
   const contactInfo = useMemo(() => {
     const items = [
-      {
-        label: "Telepon / WhatsApp",
-        value: settings.phone || settings.whatsapp,
-        note: "Informasi dan konfirmasi pelayanan",
-        href: whatsappUrl,
-        type: "phone",
-      },
-      {
-        label: "Alamat Kantor",
-        value: settings.address,
-        note: `Kelurahan ${settings.villageName}`,
-        href: mapsSearchUrl,
-        type: "location",
-      },
+      ...(settings.phone || settings.whatsapp
+        ? [{
+            label: "Telepon / WhatsApp",
+            value: settings.phone || settings.whatsapp,
+            note: "Informasi dan konfirmasi pelayanan",
+            href: whatsapp ? whatsappUrl : settings.phone ? `tel:${settings.phone}` : "#",
+            type: "phone",
+          }]
+        : []),
+      ...(settings.address
+        ? [{
+            label: "Alamat Kantor",
+            value: settings.address,
+            note: `Kelurahan ${settings.villageName}`,
+            href: mapsSearchUrl,
+            type: "location",
+          }]
+        : []),
       ...serviceRows.slice(0, 2).map((row) => ({
         label: row.day,
         value: row.time,
@@ -124,7 +120,7 @@ export default function ContactPage() {
     ];
 
     return items.slice(0, 4);
-  }, [mapsSearchUrl, serviceRows, settings.address, settings.phone, settings.villageName, settings.whatsapp, whatsappUrl]);
+  }, [mapsSearchUrl, serviceRows, settings.address, settings.phone, settings.villageName, settings.whatsapp, whatsapp, whatsappUrl]);
 
   const [submitState, setSubmitState] = useState<
     "idle" | "saving" | "success" | "error"
@@ -133,13 +129,7 @@ export default function ContactPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!db || submitState === "saving") {
-      if (!db) {
-        setSubmitState("error");
-        setSubmitMessage("Firebase belum tersedia. Silakan gunakan WhatsApp kelurahan.");
-      }
-      return;
-    }
+    if (submitState === "saving") return;
 
     const form = event.currentTarget;
     const data = new FormData(form);
@@ -147,6 +137,7 @@ export default function ContactPage() {
     const contact = String(data.get("phone") ?? "").trim();
     const subject = String(data.get("subject") ?? "").trim();
     const message = String(data.get("message") ?? "").trim();
+    const website = String(data.get("website") ?? "").trim();
 
     if (!name || !contact || !subject || !message) return;
 
@@ -154,15 +145,14 @@ export default function ContactPage() {
     setSubmitMessage("");
 
     try {
-      await addDoc(collection(db, "messages"), {
-        name,
-        contact,
-        subject,
-        message,
-        status: "baru",
-        source: "website",
-        createdAt: serverTimestamp(),
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, contact, subject, message, website }),
       });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(result.error || "Pesan gagal dikirim.");
+
       form.reset();
       setSubmitState("success");
       setSubmitMessage("Pesan berhasil dikirim dan masuk ke dashboard admin kelurahan.");
@@ -201,21 +191,27 @@ export default function ContactPage() {
                   koreksi data, kebutuhan administrasi, dan informasi publik.
                 </p>
 
-                <div className={styles.heroActions}>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.primaryButton}
-                  >
-                    WhatsApp Kelurahan
-                    <ArrowIcon />
-                  </a>
+                {(whatsapp || settings.phone) ? (
+                  <div className={styles.heroActions}>
+                    {whatsapp ? (
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.primaryButton}
+                      >
+                        WhatsApp Kelurahan
+                        <ArrowIcon />
+                      </a>
+                    ) : null}
 
-                  <a href={`tel:${settings.phone}`} className={styles.secondaryButton}>
-                    Telepon
-                  </a>
-                </div>
+                    {settings.phone ? (
+                      <a href={`tel:${settings.phone}`} className={styles.secondaryButton}>
+                        Telepon
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </Reveal>
 
@@ -243,7 +239,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span>Hari kerja</span>
-                    <strong>{serviceRows[0]?.day || "Senin-Jumat"}</strong>
+                    <strong>{serviceRows[0]?.day || "Belum diatur"}</strong>
                   </div>
                 </div>
 
@@ -399,6 +395,15 @@ export default function ContactPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ position: "absolute", left: "-10000px", width: 1, height: 1 }}
+                  />
+
                   <div className={styles.formRow}>
                     <label>
                       <span>Nama</span>

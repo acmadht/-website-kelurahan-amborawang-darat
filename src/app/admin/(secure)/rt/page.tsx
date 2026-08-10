@@ -4,8 +4,8 @@ export default function Page() {
   return (
     <AdminCollectionManager
       collectionName="rts" publicHref="/data-rt"
-      title="Data 13 RT"
-      description="Kelola RT 01 sampai RT 13, ketua RT, data penduduk, komposisi warga, fasilitas, kontak, foto, dan informasi wilayah. Data yang disimpan akan tampil pada halaman publik Data RT."
+      title="Data RT"
+      description="Kelola seluruh data RT, ketua RT, data penduduk, komposisi warga, fasilitas, kontak, foto, dan informasi wilayah. Jumlah RT mengikuti data aktif yang tersimpan dan otomatis tampil pada halaman publik Data RT."
       defaults={{
         number: "",
         chairmanName: "",

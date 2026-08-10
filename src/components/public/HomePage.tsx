@@ -3,14 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { applyAmborawangPublicSettings } from "@/data/amborawang";
-import {
-  demoAgendas,
-  demoAnnouncements,
-  demoHeroSlides,
-  demoPosts,
-  demoServices,
-  demoSettings,
-} from "@/data/demo";
+import { demoSettings } from "@/data/demo";
 import { homeContentFallback, type HomeContent } from "@/data/siteContent";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { formatDate } from "@/lib/utils";
@@ -21,8 +14,10 @@ import type {
   PostItem,
   ServiceItem,
   SiteSettings,
+  RegionLeader,
 } from "@/types";
 import PublicShell from "./PublicShell";
+import { mergePublicPosts } from "./newsData";
 import Reveal from "./Reveal";
 import styles from "./HomePage.module.css";
 
@@ -51,7 +46,7 @@ const quickLinks = [
   {
     number: "04",
     label: "Data RT",
-    title: "Data 13 RT",
+    title: "Data RT",
     description: "Ketua RT, warga, kepala keluarga, fasilitas, dan wilayah.",
     href: "/data-rt",
   },
@@ -130,28 +125,30 @@ export default function HomePage() {
     "home",
     homeContentFallback,
   );
-  const { data: rawSlides } = useCollectionData<HeroSlide>(
-    "heroSlides",
-    demoHeroSlides,
-  );
-  const { data: rawServices } = useCollectionData<ServiceItem>(
-    "services",
-    demoServices,
-  );
-  const { data: rawPosts } = useCollectionData<PostItem>("posts", demoPosts);
+  const { data: rawSlides } = useCollectionData<HeroSlide>("heroSlides", []);
+  const { data: rawServices } = useCollectionData<ServiceItem>("services", []);
+  const { data: rawPosts } = useCollectionData<PostItem>("posts", []);
   const { data: rawAnnouncements } = useCollectionData<Announcement>(
     "announcements",
-    demoAnnouncements,
+    [],
   );
-  const { data: rawAgendas } = useCollectionData<AgendaItem>(
-    "agendas",
-    demoAgendas,
+  const { data: rawAgendas } = useCollectionData<AgendaItem>("agendas", []);
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
+
+  const activeRtCount = useMemo(
+    () =>
+      rawRts.filter((item) => {
+        if (item.isActive === false) return false;
+        const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+        return Number.isInteger(numeric) && numeric > 0;
+      }).length,
+    [rawRts],
   );
 
-  const slides = useMemo(() => {
-    const active = rawSlides.filter((item) => item.isActive !== false);
-    return active.length ? active : demoHeroSlides;
-  }, [rawSlides]);
+  const slides = useMemo(
+    () => rawSlides.filter((item) => item.isActive !== false),
+    [rawSlides],
+  );
 
   const [slideIndex, setSlideIndex] = useState(0);
 
@@ -169,29 +166,37 @@ export default function HomePage() {
     return () => window.clearInterval(timer);
   }, [settings.heroAutoplay, settings.heroInterval, slides.length]);
 
-  const activeSlide = slides[slideIndex] ?? demoHeroSlides[0];
+  const activeSlide: HeroSlide = slides[slideIndex] ?? {
+    id: "dynamic-home-fallback",
+    title: settings.siteName || `Kelurahan ${settings.villageName}`,
+    subtitle: settings.tagline || home.welcomeText,
+    imageUrl: settings.officeImageUrl || "",
+    primaryButtonText: "Lihat Layanan",
+    primaryButtonUrl: "/layanan",
+    secondaryButtonText: "Hubungi Kelurahan",
+    secondaryButtonUrl: "/kontak",
+    order: 0,
+    isActive: true,
+  };
 
   const featuredServices = useMemo(() => {
     const active = rawServices.filter((item) => item.isActive !== false);
     const featured = active.filter((item) => item.isFeatured !== false);
-    const source = featured.length ? featured : active;
-    return (source.length ? source : demoServices).slice(0, 4);
+    return (featured.length ? featured : active).slice(0, 4);
   }, [rawServices]);
 
-  const publishedPosts = useMemo(() => {
-    const items = rawPosts.filter((item) => item.status === "published");
-    return items.length ? items : demoPosts.filter((item) => item.status === "published");
-  }, [rawPosts]);
+  const publishedPosts = useMemo(
+    () => mergePublicPosts(rawPosts),
+    [rawPosts],
+  );
 
   const latestPost = publishedPosts[0];
   const importantAnnouncement =
     rawAnnouncements.find((item) => item.isActive && item.priority === "penting") ??
-    rawAnnouncements.find((item) => item.isActive) ??
-    demoAnnouncements[0];
-  const nextAgenda =
-    rawAgendas.find(
-      (item) => item.status === "akan-datang" || item.status === "berlangsung",
-    ) ?? demoAgendas[0];
+    rawAnnouncements.find((item) => item.isActive);
+  const nextAgenda = rawAgendas.find(
+    (item) => item.status === "akan-datang" || item.status === "berlangsung",
+  );
 
   const infoCards = [
     latestPost
@@ -201,29 +206,33 @@ export default function HomePage() {
           description: latestPost.summary,
           href: `/berita/${latestPost.slug}`,
         }
-      : {
-          category: "Berita",
-          title: "Berita dan kegiatan terbaru kelurahan",
-          description: "Ikuti pembaruan resmi Kelurahan Amborawang Darat.",
+      : null,
+    importantAnnouncement
+      ? {
+          category:
+            importantAnnouncement.priority === "penting"
+              ? "Pengumuman Penting"
+              : "Pengumuman",
+          title: importantAnnouncement.title,
+          description: importantAnnouncement.summary,
+          href: importantAnnouncement.attachmentUrl || "/kontak",
+        }
+      : null,
+    nextAgenda
+      ? {
+          category: "Agenda",
+          title: nextAgenda.title,
+          description: `${formatDate(nextAgenda.date)} • ${
+            nextAgenda.time || "Waktu belum diisi"
+          } • ${nextAgenda.location || `Kelurahan ${settings.villageName}`}`,
           href: "/berita",
-        },
-    {
-      category: importantAnnouncement?.priority === "penting" ? "Pengumuman Penting" : "Pengumuman",
-      title: importantAnnouncement?.title || "Informasi pelayanan kelurahan",
-      description:
-        importantAnnouncement?.summary ||
-        "Periksa informasi terbaru sebelum datang ke kantor kelurahan.",
-      href: "/kontak",
-    },
-    {
-      category: "Agenda",
-      title: nextAgenda?.title || "Agenda kegiatan kelurahan",
-      description: nextAgenda
-        ? `${formatDate(nextAgenda.date)} • ${nextAgenda.time || "Waktu menyesuaikan"} • ${nextAgenda.location || "Kelurahan Amborawang Darat"}`
-        : "Informasi agenda dan kegiatan masyarakat.",
-      href: "/berita",
-    },
-  ];
+        }
+      : null,
+  ].filter(
+    (item): item is { category: string; title: string; description: string; href: string } =>
+      item !== null,
+  );
+
 
   const mapsLink = buildMapsSearchUrl(settings.address);
 
@@ -281,9 +290,9 @@ export default function HomePage() {
                 <div className={styles.heroMeta}>
                   <span>
                     <i />
-                    Kecamatan Samboja Barat
+                    Kecamatan {settings.subdistrictName || "Samboja Barat"}
                   </span>
-                  <span>Kabupaten Kutai Kartanegara</span>
+                  <span>Kabupaten {settings.regencyName || "Kutai Kartanegara"}</span>
                 </div>
 
                 {slides.length > 1 ? (
@@ -333,7 +342,7 @@ export default function HomePage() {
 
                 <div className={styles.mapFooter}>
                   <div>
-                    <span>Samboja Barat</span>
+                    <span>{settings.subdistrictName || "Samboja Barat"}</span>
                     <strong>{settings.address}</strong>
                   </div>
 
@@ -369,7 +378,11 @@ export default function HomePage() {
                     </div>
 
                     <small>{item.label}</small>
-                    <strong>{item.title}</strong>
+                    <strong>
+                      {item.href === "/data-rt" && activeRtCount
+                        ? `Data ${activeRtCount} RT`
+                        : item.title}
+                    </strong>
                     <p>{item.description}</p>
                   </Link>
                 </Reveal>

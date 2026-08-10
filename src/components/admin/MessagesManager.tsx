@@ -35,6 +35,22 @@ function formatCreatedAt(value: unknown) {
   }
 }
 
+
+function createdAtMillis(value: unknown) {
+  if (!value) return 0;
+  try {
+    if (typeof value === "object" && value !== null) {
+      const candidate = value as { toDate?: () => Date; seconds?: number };
+      if (typeof candidate.toDate === "function") return candidate.toDate().getTime();
+      if (typeof candidate.seconds === "number") return candidate.seconds * 1000;
+    }
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+  } catch {
+    return 0;
+  }
+}
+
 export default function MessagesManager() {
   const [items, setItems] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +66,7 @@ export default function MessagesManager() {
       collection(db, "messages"),
       (snapshot) => {
         const rows = snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as MessageItem[];
-        rows.sort((a, b) => formatCreatedAt(b.createdAt).localeCompare(formatCreatedAt(a.createdAt)));
+        rows.sort((a, b) => createdAtMillis(b.createdAt) - createdAtMillis(a.createdAt));
         setItems(rows);
         setLoading(false);
       },

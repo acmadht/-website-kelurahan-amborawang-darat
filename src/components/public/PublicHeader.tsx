@@ -83,7 +83,7 @@ const staticSearchItems: SearchItem[] = [
   },
   {
     title: "Data RT Amborawang Darat",
-    description: "Ketua RT, jumlah warga, kepala keluarga, kontak, dan keterangan 13 RT.",
+    description: "Ketua RT, jumlah warga, kepala keluarga, kontak, dan keterangan wilayah RT.",
     category: "RT",
     href: "/data-rt",
   },
@@ -230,17 +230,30 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
     return () => window.removeEventListener("keydown", onShortcut);
   }, []);
 
+  const searchItems = useMemo(
+    () =>
+      staticSearchItems.map((item) => ({
+        ...item,
+        title: item.title.replaceAll("Amborawang Darat", settings.villageName),
+        description: item.description.replaceAll(
+          "Amborawang Darat",
+          settings.villageName,
+        ),
+      })),
+    [settings.villageName],
+  );
+
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
 
     if (!normalized) return [];
 
-    return staticSearchItems.filter((item) =>
+    return searchItems.filter((item) =>
       `${item.title} ${item.description} ${item.category}`
         .toLowerCase()
         .includes(normalized),
     );
-  }, [query]);
+  }, [query, searchItems]);
 
   function openSearch() {
     setMobileOpen(false);
@@ -287,7 +300,7 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
 
             <span className={styles.brandText}>
               <strong>{settings.villageName}</strong>
-              <small>Kecamatan Samboja Barat</small>
+              <small>Kecamatan {settings.subdistrictName || "Samboja Barat"}</small>
             </span>
           </Link>
 
@@ -390,7 +403,7 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
 
             <div className={styles.mobileContact}>
               <small>Kontak Kelurahan</small>
-              <strong>{settings.phone || settings.whatsapp || "Amborawang Darat"}</strong>
+              <strong>{settings.phone || settings.whatsapp || settings.villageName}</strong>
               {whatsapp ? (
                 <a
                   href={`https://wa.me/${whatsapp}`}
@@ -538,7 +551,7 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
 
             <div className={styles.searchFooter}>
               <span>ESC untuk menutup</span>
-              <span>Kelurahan Amborawang Darat</span>
+              <span>Kelurahan {settings.villageName}</span>
             </div>
           </section>
         </div>

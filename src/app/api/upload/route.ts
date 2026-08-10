@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
-import { verifyEditorToken } from "@/lib/firebase/admin";
+import { verifyUploadToken } from "@/lib/firebase/admin";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -57,15 +57,23 @@ export async function POST(request: Request) {
       );
     }
 
-    await verifyEditorToken(authorization.slice(7));
+    const uploader = await verifyUploadToken(authorization.slice(7));
     configureCloudinary();
 
     const formData = await request.formData();
     const file = formData.get("file");
-    const requestedFolder = String(formData.get("folder") || "konten").replace(
-      /[^a-zA-Z0-9/_-]/g,
-      "",
-    );
+    const requestedFolder =
+      String(formData.get("folder") || "konten").replace(
+        /[^a-zA-Z0-9/_-]/g,
+        "",
+      ) || "konten";
+
+    if (uploader.role === "operator_rt" && requestedFolder !== "rts") {
+      return NextResponse.json(
+        { error: "Operator RT hanya dapat mengunggah foto untuk Data RT.", requestId },
+        { status: 403 },
+      );
+    }
 
     if (!(file instanceof File)) {
       return NextResponse.json(

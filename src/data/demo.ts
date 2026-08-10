@@ -17,6 +17,9 @@ import type {
 export const demoSettings: SiteSettings = {
   siteName: "Website Resmi Kelurahan Amborawang Darat",
   villageName: "Amborawang Darat",
+  subdistrictName: "Samboja Barat",
+  regencyName: "Kutai Kartanegara",
+  provinceName: "Kalimantan Timur",
   tagline: "Berkarya, Berdaya, Berkelanjutan",
   logoUrl: "/images/logo-amborawang-darat.png",
   officeImageUrl: "/images/kantor-kelurahan-amborawang-darat.jpg",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { applyAmborawangPublicSettings } from "@/data/amborawang";
-import { demoServices, demoSettings } from "@/data/demo";
+import { demoSettings } from "@/data/demo";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { normalizeWhatsapp } from "@/lib/utils";
 import type { ServiceItem, SiteSettings } from "@/types";
@@ -97,13 +97,7 @@ function parseServiceHours(value: string) {
       return { day: "Jadwal", time: item };
     });
 
-  return rows.length
-    ? rows
-    : [
-        { day: "Senin-Kamis", time: "09.00-16.00 WITA" },
-        { day: "Jumat", time: "09.00-11.00 WITA" },
-        { day: "Sabtu-Minggu", time: "Tutup" },
-      ];
+  return rows;
 }
 
 export default function ServicesPage() {
@@ -115,36 +109,30 @@ export default function ServicesPage() {
   const settings = applyAmborawangPublicSettings(rawSettings);
   const { data: rawServices } = useCollectionData<ServiceItem>(
     "services",
-    demoServices,
+    [],
   );
 
-  const services = rawServices.filter((item) => item.isActive !== false);
-  const displayServices = services.length ? services : demoServices;
+  const displayServices = rawServices.filter((item) => item.isActive !== false);
   const serviceHours = parseServiceHours(settings.serviceHours);
   const whatsapp = normalizeWhatsapp(settings.whatsapp);
 
   const quickInfo = [
-    {
-      value: serviceHours[0]?.day || "Senin-Kamis",
-      label: "Jam layanan utama",
-      note: serviceHours[0]?.time || "09.00-16.00 WITA",
-    },
-    {
-      value: serviceHours[1]?.day || "Jumat",
-      label: "Jam layanan",
-      note: serviceHours[1]?.time || "09.00-11.00 WITA",
-    },
-    {
-      value: settings.villageName,
-      label: "Lokasi kantor",
-      note: settings.address,
-    },
-    {
-      value: settings.phone || settings.whatsapp,
-      label: "Kontak layanan",
-      note: "Informasi & konfirmasi",
-    },
-  ];
+    ...serviceHours.slice(0, 2).map((row, index) => ({
+      value: row.day,
+      label: index === 0 ? "Jam layanan utama" : "Jam layanan",
+      note: row.time,
+    })),
+    ...(settings.address
+      ? [{ value: settings.villageName, label: "Lokasi kantor", note: settings.address }]
+      : []),
+    ...(settings.phone || settings.whatsapp
+      ? [{
+          value: settings.phone || settings.whatsapp,
+          label: "Kontak layanan",
+          note: "Informasi & konfirmasi",
+        }]
+      : []),
+  ].slice(0, 4);
 
   return (
     <PublicShell>
@@ -281,8 +269,9 @@ export default function ServicesPage() {
               </div>
             </Reveal>
 
-            <div className={styles.servicesGrid}>
-              {displayServices.map((service, index) => (
+            {displayServices.length ? (
+              <div className={styles.servicesGrid}>
+                {displayServices.map((service, index) => (
                 <Reveal key={service.id ?? service.name} enabled={settings.animationEnabled} delay={index * 50}>
                   <article id={service.slug || undefined} className={styles.serviceCard}>
                     <div className={styles.serviceCardTop}>
@@ -339,8 +328,14 @@ export default function ServicesPage() {
                     </div>
                   </article>
                 </Reveal>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <strong>Belum ada layanan aktif.</strong>
+                <p>Tambahkan layanan melalui menu Layanan pada dashboard admin.</p>
+              </div>
+            )}
           </div>
         </section>
 

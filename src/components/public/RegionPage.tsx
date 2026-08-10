@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useDocumentData } from "@/hooks/useFirestoreData";
+import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { demoSettings } from "@/data/demo";
 import { applyAmborawangPublicSettings } from "@/data/amborawang";
 import { regionContentFallback, type RegionContent } from "@/data/siteContent";
-import type { SiteSettings } from "@/types";
+import type { RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./RegionPage.module.css";
@@ -48,14 +48,21 @@ export default function RegionPage() {
     "wilayah",
     regionContentFallback,
   );
+  const { data: rawRts } = useCollectionData<RegionLeader>("rts", []);
 
   const settings = applyAmborawangPublicSettings(rawSettings);
   const animationEnabled = settings.animationEnabled !== false;
+  const activeRtCount = rawRts.filter((item) => {
+    if (item.isActive === false) return false;
+    const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+    return Number.isInteger(numeric) && numeric > 0;
+  }).length;
+  const rtCountLabel = activeRtCount ? `${activeRtCount} RT` : "Belum ada data RT";
 
   const stats = [
     { value: region.area, label: "Luas wilayah", note: region.areaNote },
     { value: region.population, label: "Jumlah penduduk", note: region.populationNote },
-    { value: region.rtCount, label: "Wilayah RT", note: region.rtNote },
+    { value: rtCountLabel, label: "Wilayah RT", note: "Data RT aktif pada dashboard" },
     { value: region.districtDistance, label: "Ke ibu kota kecamatan", note: region.districtDistanceNote },
   ];
 
@@ -100,8 +107,8 @@ export default function RegionPage() {
                 </p>
 
                 <div className={styles.heroMeta}>
-                  <span><i />Kecamatan Samboja Barat</span>
-                  <span>Kabupaten Kutai Kartanegara</span>
+                  <span><i />Kecamatan {settings.subdistrictName || "Samboja Barat"}</span>
+                  <span>Kabupaten {settings.regencyName || "Kutai Kartanegara"}</span>
                 </div>
               </div>
             </Reveal>
@@ -169,7 +176,7 @@ export default function RegionPage() {
 
                 <div className={styles.overviewCallout}>
                   <span>Administrasi Wilayah</span>
-                  <strong>{settings.villageName} terdiri atas {region.rtCount}.</strong>
+                  <strong>{settings.villageName} terdiri atas {rtCountLabel}.</strong>
                 </div>
               </div>
             </Reveal>
@@ -182,7 +189,7 @@ export default function RegionPage() {
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>Batas Administratif</span>
                 <h2>Wilayah yang berbatasan langsung</h2>
-                <p>Batas administratif membantu memberikan gambaran posisi {settings.villageName} dalam wilayah Samboja Barat.</p>
+                <p>Batas administratif membantu memberikan gambaran posisi {settings.villageName} dalam wilayah {settings.subdistrictName || "Samboja Barat"}.</p>
               </div>
             </Reveal>
 
