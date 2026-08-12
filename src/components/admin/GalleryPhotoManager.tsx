@@ -15,6 +15,7 @@ import {
 import { db } from "@/lib/firebase/client";
 import type { GalleryAlbum, GalleryPhoto } from "@/types";
 import ImageUploader from "./ImageUploader";
+import visualStyles from "./AdminVisualEditor.module.css";
 
 function sortPhotos(items: GalleryPhoto[]) {
   return [...items].sort((a, b) => {
@@ -24,13 +25,14 @@ function sortPhotos(items: GalleryPhoto[]) {
   });
 }
 
-export default function GalleryPhotoManager() {
+export default function GalleryPhotoManager({ scope = "village" }: { scope?: "village" | "kkn" }) {
   const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [albumId, setAlbumId] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [savingPhotoId, setSavingPhotoId] = useState("");
+  const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
 
   async function loadAlbums() {
     if (!db) return;
@@ -38,7 +40,7 @@ export default function GalleryPhotoManager() {
       const snapshot = await getDocs(collection(db, "galleryAlbums"));
       const rows = snapshot.docs
         .map((item) => ({ id: item.id, ...item.data() }) as GalleryAlbum)
-        .filter((album) => album.category !== "KKN")
+        .filter((album) => scope === "kkn" ? String(album.category || "").toUpperCase() === "KKN" : String(album.category || "").toUpperCase() !== "KKN")
         .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
       setAlbums(rows);
 
@@ -84,7 +86,7 @@ export default function GalleryPhotoManager() {
   useEffect(() => {
     void loadAlbums();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [scope]);
 
   useEffect(() => {
     void loadPhotos(albumId);
@@ -138,12 +140,6 @@ export default function GalleryPhotoManager() {
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Gagal menambahkan foto.");
     }
-  }
-
-  function updateLocalPhoto(id: string, patch: Partial<GalleryPhoto>) {
-    setPhotos((current) =>
-      current.map((photo) => (photo.id === id ? { ...photo, ...patch } : photo)),
-    );
   }
 
   async function savePhoto(photo: GalleryPhoto) {
@@ -212,7 +208,7 @@ export default function GalleryPhotoManager() {
       <h2>Foto Album</h2>
       <p className="muted">
         Pilih album, unggah foto, lalu atur keterangan dan urutannya. Semua
-        perubahan langsung terhubung ke galeri publik. Konten KKN tetap dikunci.
+        perubahan langsung terhubung ke {scope === "kkn" ? "Galeri KKN" : "galeri publik kelurahan"}.
       </p>
 
       {status ? (
@@ -255,71 +251,82 @@ export default function GalleryPhotoManager() {
               Album ini belum memiliki foto.
             </div>
           ) : (
-            <div className="grid grid-4" style={{ marginTop: 20 }}>
-              {photos.map((photo) => (
-                <div className="card card-pad" key={photo.id}>
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.caption || "Foto galeri"}
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      aspectRatio: "4/3",
-                      objectFit: "cover",
-                      borderRadius: 10,
-                    }}
-                  />
-
-                  <div className="form-group" style={{ marginTop: 12 }}>
-                    <label>Keterangan Foto</label>
-                    <input
-                      className="form-control"
-                      value={photo.caption || ""}
-                      placeholder="Tulis keterangan foto"
-                      onChange={(event) =>
-                        photo.id &&
-                        updateLocalPhoto(photo.id, {
-                          caption: event.target.value,
-                        })
-                      }
-                    />
+            <div className={visualStyles.visualGrid} style={{ marginTop: 20 }}>
+              {photos.map((photo, index) => (
+                <article className={visualStyles.visualCard} key={photo.id}>
+                  <div className={visualStyles.cardMedia} style={{ aspectRatio: "4 / 3" }}>
+                    <img src={photo.imageUrl} alt={photo.caption || "Foto galeri"} loading="lazy" />
+                    <div className={visualStyles.cardMediaShade} />
+                    <div className={visualStyles.cardMediaTitle}>
+                      <small>Foto #{Number(photo.order) || index + 1}</small>
+                      <strong>{photo.caption || "Belum ada keterangan"}</strong>
+                    </div>
                   </div>
-
-                  <div className="form-group">
-                    <label>Urutan</label>
-                    <input
-                      className="form-control"
-                      type="number"
-                      min="0"
-                      value={Number(photo.order) || 0}
-                      onChange={(event) =>
-                        photo.id &&
-                        updateLocalPhoto(photo.id, {
-                          order: Number(event.target.value) || 0,
-                        })
-                      }
-                    />
+                  <div className={visualStyles.cardActions}>
+                    <span className={visualStyles.actionLeft}>Urutan {Number(photo.order) || index + 1}</span>
+                    <div className={visualStyles.actionButtons}>
+                      <button className={visualStyles.editButton} type="button" onClick={() => setEditingPhoto({ ...photo })}>✎ Edit</button>
+                      <button className={visualStyles.deleteButton} type="button" onClick={() => void remove(photo)}>Hapus</button>
+                    </div>
                   </div>
-
-                  <div className="flex gap-8" style={{ marginTop: 12 }}>
-                    <button
-                      className="btn btn-primary btn-small"
-                      onClick={() => void savePhoto(photo)}
-                      disabled={!photo.id || savingPhotoId === photo.id}
-                    >
-                      {savingPhotoId === photo.id ? "Menyimpan..." : "Simpan"}
-                    </button>
-                    <button
-                      className="btn btn-danger btn-small"
-                      onClick={() => void remove(photo)}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {editingPhoto ? (
+        <div className={visualStyles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Edit foto galeri">
+          <div className={visualStyles.modal} style={{ maxWidth: 620 }}>
+            <div className={visualStyles.modalHeader}>
+              <div>
+                <span>Edit Foto</span>
+                <h2>Keterangan dan Urutan</h2>
+              </div>
+              <button className={visualStyles.previewButton} type="button" onClick={() => setEditingPhoto(null)}>Tutup</button>
+            </div>
+            <div className={visualStyles.modalBody}>
+              <img
+                src={editingPhoto.imageUrl}
+                alt={editingPhoto.caption || "Foto galeri"}
+                style={{ width: "100%", maxHeight: 360, objectFit: "contain", borderRadius: 12, background: "#eef3f7" }}
+              />
+              <div className="form-group" style={{ marginTop: 16 }}>
+                <label>Keterangan Foto</label>
+                <input
+                  className="form-control"
+                  value={editingPhoto.caption || ""}
+                  placeholder="Tulis keterangan foto"
+                  onChange={(event) => setEditingPhoto({ ...editingPhoto, caption: event.target.value })}
+                />
+              </div>
+              <div className="form-group" style={{ marginTop: 12 }}>
+                <label>Urutan</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  min="0"
+                  value={Number(editingPhoto.order) || 0}
+                  onChange={(event) => setEditingPhoto({ ...editingPhoto, order: Number(event.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className={visualStyles.modalFooter}>
+              <button className={visualStyles.previewButton} type="button" onClick={() => setEditingPhoto(null)}>Batal</button>
+              <button
+                className={visualStyles.addButton}
+                type="button"
+                disabled={!editingPhoto.id || savingPhotoId === editingPhoto.id}
+                onClick={async () => {
+                  await savePhoto(editingPhoto);
+                  setEditingPhoto(null);
+                }}
+              >
+                {savingPhotoId === editingPhoto.id ? "Menyimpan…" : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </section>

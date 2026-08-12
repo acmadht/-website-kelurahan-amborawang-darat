@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
+import { AMBORAWANG_RT_TOTAL } from "@/data/amborawang";
+import { buildAmborawangRtSlots } from "@/lib/rtSlots";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { Official, RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
@@ -97,17 +99,6 @@ function GovernmentIcon() {
       <path d="M5 21V10h14v11" />
       <path d="M2 10h20L12 3 2 10Z" />
       <path d="M8 13v5M12 13v5M16 13v5" />
-    </svg>
-  );
-}
-
-function NetworkIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="5" r="2.5" />
-      <circle cx="5" cy="18" r="2.5" />
-      <circle cx="19" cy="18" r="2.5" />
-      <path d="M12 7.5v4.2M12 11.7 5.8 15.6M12 11.7l6.2 3.9" />
     </svg>
   );
 }
@@ -336,56 +327,21 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
 
   const rtList = useMemo<Person[]>(
     () =>
-      rawRts
-        .filter((item) => {
-          if (item.isActive === false) return false;
-          const numeric = Number(String(item.number || "").replace(/\D/g, ""));
-          return Number.isInteger(numeric) && numeric >= 1;
-        })
-        .map((item): Person => {
-          const numeric = Number(String(item.number || "").replace(/\D/g, ""));
-          const number = String(numeric).padStart(2, "0");
-          return {
-            name: item.chairmanName || "",
-            role: `Ketua RT ${number}`,
-            unit: item.area || `Kelurahan ${settings.villageName}`,
-            photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
-            description: item.description,
-            status: item.chairmanName?.trim() ? "aktif" : "verifikasi",
-          };
-        })
-        .sort((a, b) => {
-          const aNumber = Number(a.role.replace(/\D/g, ""));
-          const bNumber = Number(b.role.replace(/\D/g, ""));
-          return aNumber - bNumber;
-        }),
+      buildAmborawangRtSlots(rawRts).map((item): Person => ({
+        name: item.chairmanName || "",
+        role: `Ketua RT ${item.number}`,
+        unit: item.area || `Kelurahan ${settings.villageName}`,
+        photo: item.photoUrl || "/images/pemerintahan/placeholder.svg",
+        description: item.description,
+        status: item.chairmanName?.trim() ? "aktif" : "verifikasi",
+      })),
     [rawRts, settings.villageName],
   );
 
-  const rtRangeLabel = useMemo(
-    () => (rtList.length ? `Ketua RT (${rtList.length} RT aktif)` : "Data Ketua RT"),
-    [rtList.length],
-  );
-
-  const coordinationSteps = useMemo(
-    () => [
-      { number: "01", title: "Lurah", subtitle: "Pimpinan" },
-      { number: "02", title: "Perangkat", subtitle: "Pelayanan" },
-      { number: "03", title: "Lembaga", subtitle: "Kemitraan" },
-      {
-        number: "04",
-        title: rtList.length ? `${rtList.length} RT` : "Data RT",
-        subtitle: "Kewilayahan",
-      },
-    ],
-    [rtList.length],
-  );
+  const rtTotal = AMBORAWANG_RT_TOTAL;
+  const rtRangeLabel = `Ketua RT (${rtTotal} RT)`;
 
   const leader = structuralOfficials[0] ?? fallbackStructuralOfficials[0];
-  const institutionLabels = Array.from(
-    new Set(communityInstitutions.map((item) => item.unit).filter(Boolean)),
-  ).slice(0, 8);
-
   const structureUnits = useMemo(() => {
     const officialsWithoutLeader = structuralOfficials.filter(
       (person) => person !== leader && !(/^lurah\b/i.test(person.role) && !/sekretaris/i.test(person.role)),
@@ -430,16 +386,6 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
     return units;
   }, [leader, staff, structuralOfficials]);
 
-  const filledGovernmentCount = people.filter(
-    (person) => !institutionCategories.has(person.category || person.unit),
-  ).length;
-  const filledRtCount = rawRts.filter(
-    (item) => item.isActive !== false && Boolean(item.chairmanName?.trim()),
-  ).length;
-  const filledInstitutionCount = people.filter((person) =>
-    institutionCategories.has(person.category || person.unit),
-  ).length;
-
   return (
     <PublicShell>
       <main className={styles.page}>
@@ -465,69 +411,10 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
                   lembaga adat, serta data Ketua RT dalam satu halaman resmi.
                 </p>
 
-                <div className={styles.heroStats}>
-                  <div><strong>{String(filledGovernmentCount).padStart(2, "0")}</strong><span>Aparatur terisi</span></div>
-                  <div><strong>{String(filledRtCount).padStart(2, "0")}</strong><span>Ketua RT terisi</span></div>
-                  <div><strong>{String(filledInstitutionCount).padStart(2, "0")}</strong><span>Lembaga terisi</span></div>
-                </div>
+
               </div>
             </Reveal>
 
-            <Reveal enabled={settings.animationEnabled} delay={70}>
-              <div className={styles.commandPanel}>
-                <div className={styles.commandGlow} aria-hidden="true" />
-                <div className={styles.commandOrbit} aria-hidden="true" />
-
-                <div className={styles.commandTop}>
-                  <div className={styles.commandIcon}>
-                    <span className={styles.commandIconPulse} aria-hidden="true" />
-                    <NetworkIcon />
-                  </div>
-
-                  <div className={styles.commandTitleWrap}>
-                    <span>Struktur Koordinasi</span>
-                    <strong>Kelurahan → Lembaga → RT → Warga</strong>
-                  </div>
-
-                  <div className={styles.commandStatus}>
-                    <i />
-                    Aktif
-                  </div>
-                </div>
-
-                <div className={styles.commandRoute}>
-                  <div className={styles.commandRouteLine} aria-hidden="true">
-                    <span />
-                  </div>
-
-                  {coordinationSteps.map((step, index) => (
-                    <div
-                      key={step.number}
-                      className={styles.commandStep}
-                      style={{ animationDelay: `${index * 120}ms` }}
-                    >
-                      <div className={styles.commandNode}>
-                        <span>{step.number}</span>
-                      </div>
-                      <strong>{step.title}</strong>
-                      <small>{step.subtitle}</small>
-                    </div>
-                  ))}
-                </div>
-
-                <div className={styles.commandFooter}>
-                  <a href="#struktur" className={styles.commandLink}>
-                    Lihat Struktur Lengkap
-                    <ArrowIcon size={16} />
-                  </a>
-
-                  <div className={styles.commandMiniInfo}>
-                    <span />
-                    Koordinasi sampai tingkat warga
-                  </div>
-                </div>
-              </div>
-            </Reveal>
           </div>
         </section>
 
@@ -548,17 +435,12 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.fullStructureHeading}>
                 <div>
-                  <span>01</span>
                   <small>Bagan Organisasi Kelurahan</small>
                   <h2>Struktur Pemerintahan Lengkap</h2>
                   <p>
                     Susunan aparatur ditampilkan dari Lurah, pejabat struktural,
                     sampai staf pada masing-masing unit pelayanan.
                   </p>
-                </div>
-                <div className={styles.structureCountBox}>
-                  <strong>{filledGovernmentCount}</strong>
-                  <span>Aparatur terisi</span>
                 </div>
               </div>
             </Reveal>
@@ -647,14 +529,6 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
               </div>
             </div>
 
-            <Reveal enabled={settings.animationEnabled}>
-              <div className={styles.structureAdminNote}>
-                <div>
-                  <span>Data dinamis</span>
-                  <strong>Nama, jabatan, foto, dan unit dapat diperbarui melalui menu Pemerintahan di dashboard admin.</strong>
-                </div>
-              </div>
-            </Reveal>
           </div>
         </section>
 
@@ -664,24 +538,13 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.institutionHeading}>
                 <div>
-                  <span>02</span>
                   <small>Lembaga & Mitra Kelurahan</small>
                   <h2>Unsur masyarakat yang bekerja bersama pemerintah</h2>
                 </div>
 
-                <p>
-                  Nama dan foto pada bagian ini harus mengikuti SK atau daftar
-                  resmi Kelurahan {settings.villageName} agar tidak salah menampilkan
-                  pengurus.
-                </p>
               </div>
             </Reveal>
 
-            <div className={styles.institutionChips}>
-              {institutionLabels.map((label) => (
-                <span key={label}>{label}</span>
-              ))}
-            </div>
 
             <div className={styles.institutionGrid}>
               {communityInstitutions.map((person, index) => (
@@ -699,21 +562,15 @@ export default function GovernmentPage({ initialOfficials = [], initialRts = [],
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.rtHeading}>
                 <div>
-                  <span>03</span>
                   <small>Struktur Kewilayahan</small>
                   <h2>{rtRangeLabel}</h2>
                 </div>
 
-                <div className={styles.rtCount}>
-                  <small>Struktur Wilayah</small>
-                  <strong>{rtList.length}</strong>
-                  <span>RT Kelurahan {settings.villageName}</span>
-                </div>
               </div>
             </Reveal>
 
             <div className={styles.rtMetaStrip}>
-              <div><span>Jumlah</span><strong>{rtList.length} RT</strong></div>
+              <div><span>Jumlah</span><strong>{rtTotal} RT</strong></div>
               <div><span>Status</span><strong>Data terhubung dengan dashboard RT</strong></div>
               <div><span>Wilayah</span><strong>{settings.villageName}</strong></div>
             </div>

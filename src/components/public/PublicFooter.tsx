@@ -33,14 +33,11 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
               <div className="footer-title">Kontak</div>
               <div className="footer-list">
                 {contacts.map((item) => <span key={item}>{item}</span>)}
-                {settings.instagramUrl ? <a href={settings.instagramUrl} target="_blank" rel="noreferrer">Instagram</a> : null}
-                {settings.facebookUrl ? <a href={settings.facebookUrl} target="_blank" rel="noreferrer">Facebook</a> : null}
-                {settings.youtubeUrl ? <a href={settings.youtubeUrl} target="_blank" rel="noreferrer">YouTube</a> : null}
                 <Link href="/admin/login">Login admin</Link>
               </div>
             </div>
           </div>
-          <div className="footer-bottom"><span>© {new Date().getFullYear()} {settings.footerText}</span><span>Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</span></div>
+          <div className="footer-bottom"><span>© {new Date().getFullYear()} {settings.footerText || `Pemerintah Kelurahan ${settings.villageName}`}</span><span>Website Dibuat Oleh kelompok 2 KKN Reguler UINSI Samarinda</span></div>
         </div>
       </footer>
       {settings.whatsappEnabled && whatsapp ? <a className="whatsapp-float" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" aria-label={`Hubungi Kelurahan ${settings.villageName} melalui WhatsApp`}>WA</a> : null}

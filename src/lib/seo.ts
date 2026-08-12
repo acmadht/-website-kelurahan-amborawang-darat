@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { demoSettings } from "@/data/demo";
-import { staticKknPosts } from "@/components/public/newsData";
+import { staticKknPosts } from "@/data/kknStatic";
 import type { PostItem, SiteSettings } from "@/types";
 
 export const SITE_URL = (
@@ -28,7 +28,12 @@ export async function getServerSettings(): Promise<SiteSettings> {
     const { getAdminDb } = await import("@/lib/firebase/admin");
     const snapshot = await getAdminDb().collection("siteSettings").doc("main").get();
     if (!snapshot.exists) return demoSettings;
-    return { ...demoSettings, ...(snapshot.data() as Partial<SiteSettings>) };
+
+    // Firestore dapat mengembalikan nilai seperti Timestamp yang merupakan
+    // instance class. Props dari Server Component ke Client Component harus
+    // berupa data serializable/plain, jadi normalkan seluruh isi dokumen dulu.
+    const remote = toSerializableValue(snapshot.data()) as Partial<SiteSettings>;
+    return { ...demoSettings, ...remote };
   } catch {
     return demoSettings;
   }
@@ -408,8 +413,8 @@ export function modifiedDateIso(post: PostItem): string | undefined {
   return timestampToIso(post.updatedAt) || publishedDateIso(post);
 }
 
-export function articleJsonLd(post: PostItem, settings: SiteSettings) {
-  const url = absoluteUrl(`/berita/${post.slug}`);
+export function articleJsonLd(post: PostItem, settings: SiteSettings, basePath = "/berita") {
+  const url = absoluteUrl(`${basePath}/${post.slug}`);
   const image = absoluteUrl(post.coverImageUrl || settings.officeImageUrl || "/icon.png");
   const author = clean(post.authorName, governmentLabel(settings));
   const datePublished = publishedDateIso(post);
@@ -465,10 +470,12 @@ export async function getDynamicPublishedPostsServer(): Promise<PostItem[]> {
   }
 }
 
-export async function getPublicPostBySlugServer(slug: string): Promise<PostItem | undefined> {
-  const staticPost = staticKknPosts.find((post) => post.slug === slug);
-  if (staticPost) return serializePost(staticPost);
+export async function getDynamicKknPublishedPostsServer(): Promise<PostItem[]> {
+  // Kompatibilitas untuk pemanggil lama. KKN tidak lagi membaca Firestore.
+  return staticKknPosts.map(serializePost);
+}
 
+export async function getPublicPostBySlugServer(slug: string): Promise<PostItem | undefined> {
   try {
     const { getAdminDb } = await import("@/lib/firebase/admin");
     const snapshot = await getAdminDb()
@@ -490,3 +497,11 @@ export async function getPublicPostBySlugServer(slug: string): Promise<PostItem 
     return undefined;
   }
 }
+
+export async function getKknPostBySlugServer(slug: string): Promise<PostItem | undefined> {
+  const staticPost = staticKknPosts.find(
+    (post) => post.status === "published" && post.slug === slug,
+  );
+  return staticPost ? serializePost(staticPost) : undefined;
+}
+

@@ -20,12 +20,21 @@ type ExpandableMenu = {
   items: MenuItem[];
 };
 
-const mainItems: MenuItem[] = [
-  { label: "Beranda", href: "/admin/beranda", code: "BD" },
-  { label: "Profil", href: "/admin/profil", code: "PR" },
-  { label: "Pemerintahan", href: "/admin/aparatur", code: "PM" },
+const directPublicItems: MenuItem[] = [
   { label: "Layanan", href: "/admin/layanan", code: "LY" },
   { label: "Berita", href: "/admin/berita", code: "BR" },
+];
+
+const homeItems: MenuItem[] = [
+  { label: "Isi Beranda", href: "/admin/beranda", code: "BD" },
+  { label: "Hero Banner", href: "/admin/hero", code: "HB" },
+  { label: "Pengumuman", href: "/admin/pengumuman", code: "PG" },
+  { label: "Agenda", href: "/admin/agenda", code: "AG" },
+];
+
+const profileItems: MenuItem[] = [
+  { label: "Profil Kelurahan", href: "/admin/profil", code: "PR" },
+  { label: "Pemerintahan / Aparatur", href: "/admin/aparatur", code: "PM" },
 ];
 
 const informationItems: MenuItem[] = [
@@ -34,12 +43,6 @@ const informationItems: MenuItem[] = [
   { label: "Galeri", href: "/admin/galeri", code: "GL" },
   { label: "Dokumen", href: "/admin/dokumen", code: "DK" },
   { label: "Kontak & Jam Layanan", href: "/admin/kontak", code: "KT" },
-];
-
-const homeSupportItems: MenuItem[] = [
-  { label: "Hero Banner", href: "/admin/hero", code: "HB" },
-  { label: "Pengumuman", href: "/admin/pengumuman", code: "PG" },
-  { label: "Agenda", href: "/admin/agenda", code: "AG" },
 ];
 
 const systemBaseItems: MenuItem[] = [
@@ -59,9 +62,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    home: false,
+    profile: false,
     information: false,
-    homeSupport: false,
-    system: false,
   });
 
   const systemItems = useMemo(() => {
@@ -69,28 +72,28 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     return systemBaseItems.filter((item) => item.href !== "/admin/pengguna");
   }, [profile?.role]);
 
-  const expandableMenus = useMemo<ExpandableMenu[]>(
+  const publicExpandableMenus = useMemo<ExpandableMenu[]>(
     () => [
       {
+        id: "home",
+        label: "Beranda",
+        code: "BD",
+        items: homeItems,
+      },
+      {
+        id: "profile",
+        label: "Profil",
+        code: "PR",
+        items: profileItems,
+      },
+      {
         id: "information",
-        label: "Informasi Publik",
+        label: "Informasi",
         code: "IN",
         items: informationItems,
       },
-      {
-        id: "homeSupport",
-        label: "Konten Beranda",
-        code: "KB",
-        items: homeSupportItems,
-      },
-      {
-        id: "system",
-        label: "Pengaturan",
-        code: "ST",
-        items: systemItems,
-      },
     ],
-    [systemItems],
+    [],
   );
 
   useEffect(() => {
@@ -113,7 +116,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     if (profile?.role === "operator_rt") return;
 
     const nextState: Record<string, boolean> = {};
-    for (const group of expandableMenus) {
+    for (const group of publicExpandableMenus) {
       if (group.items.some((item) => isItemActive(pathname, item.href))) {
         nextState[group.id] = true;
       }
@@ -122,7 +125,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     if (Object.keys(nextState).length) {
       setExpanded((current) => ({ ...current, ...nextState }));
     }
-  }, [pathname, profile?.role, expandableMenus]);
+  }, [pathname, profile?.role, publicExpandableMenus]);
 
   if (loading) {
     return (
@@ -191,25 +194,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           ) : (
             <nav className={styles.nav}>
               <section className={styles.navGroup}>
-                <span className={styles.groupTitle}>Menu Website</span>
-                {mainItems.map((item) => {
-                  const active = isItemActive(pathname, item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={`${styles.navItem} ${
-                        active ? styles.navItemActive : ""
-                      }`}
-                    >
-                      <span className={styles.navCode}>{item.code}</span>
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
+                <span className={styles.groupTitle}>Menu Website · Sesuai Publik</span>
 
-                {expandableMenus.map((group) => {
+                {publicExpandableMenus.slice(0, 2).map((group) => {
                   const groupActive = group.items.some((item) =>
                     isItemActive(pathname, item.href),
                   );
@@ -262,6 +249,107 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                         </div>
                       ) : null}
                     </div>
+                  );
+                })}
+
+                {directPublicItems.map((item) => {
+                  const active = isItemActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`${styles.navItem} ${
+                        active ? styles.navItemActive : ""
+                      }`}
+                    >
+                      <span className={styles.navCode}>{item.code}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                <div className={`${styles.navItem} ${styles.navStatic}`}>
+                  <span className={styles.navCode}>KN</span>
+                  <span className={styles.navLabelWrap}>
+                    <strong>KKN</strong>
+                    <small>Statis · tidak diedit dari Admin</small>
+                  </span>
+                </div>
+
+                {publicExpandableMenus.slice(2).map((group) => {
+                  const groupActive = group.items.some((item) =>
+                    isItemActive(pathname, item.href),
+                  );
+                  const isExpanded = expanded[group.id] || groupActive;
+
+                  return (
+                    <div className={styles.expandable} key={group.id}>
+                      <button
+                        type="button"
+                        className={`${styles.navItem} ${styles.navButton} ${
+                          groupActive ? styles.navItemActive : ""
+                        }`}
+                        aria-expanded={isExpanded}
+                        onClick={() =>
+                          setExpanded((current) => ({
+                            ...current,
+                            [group.id]: !isExpanded,
+                          }))
+                        }
+                      >
+                        <span className={styles.navCode}>{group.code}</span>
+                        <span>{group.label}</span>
+                        <span
+                          className={`${styles.chevron} ${
+                            isExpanded ? styles.chevronOpen : ""
+                          }`}
+                          aria-hidden="true"
+                        >
+                          ▾
+                        </span>
+                      </button>
+
+                      {isExpanded ? (
+                        <div className={styles.subnav}>
+                          {group.items.map((item) => {
+                            const active = isItemActive(pathname, item.href);
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className={`${styles.subnavItem} ${
+                                  active ? styles.subnavItemActive : ""
+                                }`}
+                              >
+                                <span>{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </section>
+
+              <section className={`${styles.navGroup} ${styles.secondaryGroup}`}>
+                <span className={styles.groupTitle}>Administrasi</span>
+                {systemItems.map((item) => {
+                  const active = isItemActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`${styles.navItem} ${
+                        active ? styles.navItemActive : ""
+                      }`}
+                    >
+                      <span className={styles.navCode}>{item.code}</span>
+                      <span>{item.label}</span>
+                    </Link>
                   );
                 })}
               </section>

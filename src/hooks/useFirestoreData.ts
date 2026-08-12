@@ -23,6 +23,7 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
   collectionName: string,
   fallback: T[],
   filters: Filter[] = [],
+  enabled = true,
 ) {
   const [data, setData] = useState<T[]>(fallback);
   const [loading, setLoading] = useState(isFirebaseConfigured && fallback.length === 0);
@@ -31,6 +32,13 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
 
   useEffect(() => {
+    if (!enabled) {
+      setData(fallback);
+      setLoading(false);
+      setUsingDemo(false);
+      return;
+    }
+
     if (!db) {
       setData(fallback);
       setLoading(false);
@@ -72,7 +80,7 @@ export function useCollectionData<T extends { id?: string; order?: number }>(
     return unsubscribe;
     // filterKey dipakai agar listener dibuat ulang hanya jika isi filter berubah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionName, filterKey]);
+  }, [collectionName, filterKey, enabled]);
 
   return { data, loading, usingDemo };
 }

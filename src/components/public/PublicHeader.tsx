@@ -45,14 +45,42 @@ const moreMenu = [
     description: "Arsip dan dokumen publik kelurahan",
   },
   {
-    label: "Tim KKN",
-    href: "/tim-kkn",
-    description: "Profil Tim KKN Reguler Amborawang Darat",
-  },
-  {
     label: "Kontak",
     href: "/kontak",
     description: "Alamat, jam pelayanan, WhatsApp, dan lokasi kantor",
+  },
+];
+
+const kknMenu = [
+  {
+    label: "Tim KKN",
+    href: "/tim-kkn",
+    description: "Profil dan struktur Tim KKN Reguler Amborawang Darat",
+  },
+  {
+    label: "Program Kerja",
+    href: "/kkn/program-kerja",
+    description: "Daftar dan dokumentasi program kerja Tim KKN",
+  },
+  {
+    label: "Berita KKN",
+    href: "/kkn/berita",
+    description: "Berita dan perkembangan kegiatan Tim KKN",
+  },
+  {
+    label: "Galeri KKN",
+    href: "/kkn/galeri",
+    description: "Dokumentasi foto khusus kegiatan Tim KKN",
+  },
+  {
+    label: "Book Chapter",
+    href: "/kkn/book-chapter",
+    description: "Luaran tulisan dan Book Chapter kegiatan KKN",
+  },
+  {
+    label: "Luaran KKN",
+    href: "/kkn/luaran",
+    description: "Hasil digital, publikasi, dan dokumentasi luaran KKN",
   },
 ];
 
@@ -116,6 +144,36 @@ const staticSearchItems: SearchItem[] = [
     description: "Struktur dan profil Tim KKN Reguler Amborawang Darat.",
     category: "KKN",
     href: "/tim-kkn",
+  },
+  {
+    title: "Program Kerja KKN",
+    description: "Program kerja dan pengembangan website oleh Tim KKN Reguler.",
+    category: "KKN",
+    href: "/kkn/program-kerja",
+  },
+  {
+    title: "Berita KKN",
+    description: "Berita dan perkembangan kegiatan Tim KKN.",
+    category: "KKN",
+    href: "/kkn/berita",
+  },
+  {
+    title: "Galeri KKN",
+    description: "Dokumentasi foto khusus kegiatan Tim KKN Reguler.",
+    category: "KKN",
+    href: "/kkn/galeri",
+  },
+  {
+    title: "Book Chapter KKN",
+    description: "Luaran tulisan dan Book Chapter kegiatan Tim KKN.",
+    category: "KKN",
+    href: "/kkn/book-chapter",
+  },
+  {
+    title: "Luaran KKN",
+    description: "Hasil digital, publikasi, dan dokumentasi luaran Tim KKN.",
+    category: "KKN",
+    href: "/kkn/luaran",
   },
   {
     title: "Kontak Kelurahan",
@@ -273,6 +331,7 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
     if (event.key === "Escape") closeSearch();
   }
 
+  const kknActive = kknMenu.some((item) => isCurrent(pathname, item.href));
   const moreActive = moreMenu.some((item) => isCurrent(pathname, item.href));
   const whatsapp = (settings.whatsapp || "").replace(/\D/g, "").replace(/^0/, "62");
   const logo = settings.logoUrl || AMBORAWANG_LOGO;
@@ -315,6 +374,35 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
                 {item.label}
               </Link>
             ))}
+
+            <div className={styles.dropdown}>
+              <button
+                type="button"
+                className={`${styles.navLink} ${styles.dropdownButton} ${kknActive ? styles.navLinkActive : ""
+                  }`}
+                aria-haspopup="true"
+              >
+                KKN
+                <ChevronDown />
+              </button>
+
+              <div className={styles.dropdownMenu}>
+                <div className={styles.dropdownHeader}>
+                  <span>Ruang KKN</span>
+                  <small>Tim, program kerja, publikasi, dokumentasi, dan luaran KKN</small>
+                </div>
+
+                {kknMenu.map((item) => (
+                  <Link key={item.href} href={item.href} className={styles.dropdownItem}>
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.description}</small>
+                    </span>
+                    <ArrowIcon />
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             <div className={styles.dropdown}>
               <button
@@ -386,19 +474,44 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
             </button>
 
             <nav className={styles.mobileMenuList} aria-label="Navigasi mobile">
-              {[...mainMenu, ...moreMenu].map((item) => (
+              {mainMenu.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`${styles.mobileNavLink} ${isCurrent(pathname, item.href)
-                    ? styles.mobileNavLinkActive
-                    : ""
-                    }`}
+                  className={`${styles.mobileNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
                 >
                   <span>{item.label}</span>
                   <ArrowIcon />
                 </Link>
               ))}
+
+              <div className={styles.mobileMenuGroup}>
+                <div className={styles.mobileMenuGroupTitle}>KKN</div>
+                {kknMenu.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                  >
+                    <span>{item.label}</span>
+                    <ArrowIcon />
+                  </Link>
+                ))}
+              </div>
+
+              <div className={styles.mobileMenuGroup}>
+                <div className={styles.mobileMenuGroupTitle}>Informasi</div>
+                {moreMenu.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                  >
+                    <span>{item.label}</span>
+                    <ArrowIcon />
+                  </Link>
+                ))}
+              </div>
             </nav>
 
             <div className={styles.mobileContact}>

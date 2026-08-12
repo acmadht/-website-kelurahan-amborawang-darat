@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { staticKknGalleryItems } from "@/data/kknStatic";
 import type { GalleryAlbum, GalleryPhoto, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
@@ -19,10 +20,6 @@ type GalleryItem = {
   size?: "wide" | "tall" | "normal";
 };
 
-const staticKknItems: GalleryItem[] = [
-  { id: "static-kkn-1", title: "Koordinasi Program Kerja KKN", category: "KKN", date: "6 Agustus 2026", image: "/images/galeri/koordinasi-kkn.jpg", caption: "Koordinasi program kerja bersama pihak Kelurahan Amborawang Darat.", size: "normal" },
-  { id: "static-kkn-2", title: "Dokumentasi KKN", category: "KKN", date: "Agustus 2026", image: "/images/galeri/dokumentasi-kkn.jpg", caption: "Dokumentasi kegiatan Kelompok KKN di Kelurahan Amborawang Darat.", size: "normal" },
-];
 const sizes: GalleryItem["size"][] = ["wide", "normal", "tall", "normal", "wide", "normal"];
 
 function displayDate(value?: string) {
@@ -71,15 +68,26 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function GalleryPage({ initialAlbums = [], initialPhotos = [], initialSettings }: { initialAlbums?: GalleryAlbum[]; initialPhotos?: GalleryPhoto[]; initialSettings?: SiteSettings }) {
-  const { data: albums } = useCollectionData<GalleryAlbum>("galleryAlbums", initialAlbums);
-  const { data: photos } = useCollectionData<GalleryPhoto>("galleryPhotos", initialPhotos);
+export default function GalleryPage({ initialAlbums = [], initialPhotos = [], initialSettings, scope = "village" }: { initialAlbums?: GalleryAlbum[]; initialPhotos?: GalleryPhoto[]; initialSettings?: SiteSettings; scope?: "village" | "kkn" }) {
+  const isKkn = scope === "kkn";
+  const { data: albums } = useCollectionData<GalleryAlbum>(
+    "galleryAlbums",
+    initialAlbums,
+    [],
+    !isKkn,
+  );
+  const { data: photos } = useCollectionData<GalleryPhoto>(
+    "galleryPhotos",
+    initialPhotos,
+    [],
+    !isKkn,
+  );
   const { settings } = usePublicSettings(initialSettings);
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [selected, setSelected] = useState<GalleryItem | null>(null);
 
   const galleryItems = useMemo(() => {
-    const publishedAlbums = albums.filter((album) => album.status === "published" && album.category !== "KKN");
+    const publishedAlbums = albums.filter((album) => album.status === "published" && (isKkn ? String(album.category || "").toUpperCase() === "KKN" : String(album.category || "").toUpperCase() !== "KKN"));
     const remoteItems: GalleryItem[] = [];
 
     publishedAlbums.forEach((album, albumIndex) => {
@@ -109,8 +117,8 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
       }
     });
 
-    return [...remoteItems, ...staticKknItems];
-  }, [albums, photos]);
+    return isKkn ? staticKknGalleryItems : remoteItems;
+  }, [albums, photos, isKkn]);
 
   const categories = useMemo(() => ["Semua", ...Array.from(new Set(galleryItems.map((item) => item.category)))], [galleryItems]);
 
@@ -131,10 +139,10 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
           <div className={`container ${styles.heroGrid}`}>
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.heroCopy}>
-                <div className={styles.heroBadge}><GalleryIcon /><span>Dokumentasi Kelurahan</span></div>
-                <h1>Galeri<strong>{settings.villageName}</strong></h1>
-                <p>Dokumentasi kegiatan pemerintahan, masyarakat, lingkungan, dan program KKN di Kelurahan {settings.villageName}.</p>
-                <div className={styles.heroMeta}><span><i />Dokumentasi kegiatan</span><span>Arsip visual kelurahan</span></div>
+                <div className={styles.heroBadge}><GalleryIcon /><span>{isKkn ? "Dokumentasi KKN" : "Dokumentasi Kelurahan"}</span></div>
+                <h1>Galeri<strong>{isKkn ? "KKN Amborawang Darat" : settings.villageName}</strong></h1>
+                <p>{isKkn ? "Dokumentasi khusus kegiatan, program kerja, dan aktivitas Tim KKN Reguler di Kelurahan Amborawang Darat." : `Dokumentasi kegiatan pemerintahan, masyarakat, dan lingkungan di Kelurahan ${settings.villageName}.`}</p>
+                <div className={styles.heroMeta}><span><i />{isKkn ? "Dokumentasi kegiatan KKN" : "Dokumentasi kegiatan"}</span><span>{isKkn ? "Arsip visual KKN" : "Arsip visual kelurahan"}</span></div>
               </div>
             </Reveal>
 
@@ -168,7 +176,7 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
 
         <section className={styles.featuredSection}>
           <div className="container">
-            <Reveal enabled={settings.animationEnabled}><div className={styles.sectionHeading}><span className={styles.sectionNumber}>01</span><div><span className={styles.eyebrow}>Dokumentasi Pilihan</span><h2>Momen dan aktivitas kelurahan</h2></div></div></Reveal>
+            <Reveal enabled={settings.animationEnabled}><div className={styles.sectionHeading}><span className={styles.sectionNumber}>01</span><div><span className={styles.eyebrow}>Dokumentasi Pilihan</span><h2>{isKkn ? "Momen dan aktivitas Tim KKN" : "Momen dan aktivitas kelurahan"}</h2></div></div></Reveal>
             <div className={styles.featuredGrid}>
               <Reveal enabled={settings.animationEnabled}>
                 <button type="button" className={styles.featuredMain} onClick={() => setSelected(featured)}>
@@ -215,8 +223,8 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
           <div className="container">
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.infoPanel}>
-                <div><span>Dokumentasi Publik</span><h2>Galeri menjadi arsip visual kegiatan kelurahan.</h2><p>Foto kegiatan dapat diperbarui secara berkala sebagai bagian dari dokumentasi dan keterbukaan informasi publik.</p></div>
-                <div className={styles.infoLinks}><Link href="/berita">Lihat Berita <ArrowIcon size={15} /></Link><Link href="/kontak">Kirim Dokumentasi <ArrowIcon size={15} /></Link></div>
+                <div><span>{isKkn ? "Ruang KKN" : "Dokumentasi Publik"}</span><h2>{isKkn ? "Galeri KKN dipisahkan dari galeri resmi kelurahan." : "Galeri menjadi arsip visual kegiatan kelurahan."}</h2><p>{isKkn ? "Dokumentasi KKN memiliki ruang tersendiri agar publikasi kegiatan mahasiswa tidak bercampur dengan dokumentasi pemerintahan kelurahan." : "Foto kegiatan dapat diperbarui secara berkala sebagai bagian dari dokumentasi dan keterbukaan informasi publik."}</p></div>
+                <div className={styles.infoLinks}>{isKkn ? <><Link href="/kkn/berita">Berita KKN <ArrowIcon size={15} /></Link><Link href="/tim-kkn">Tim KKN <ArrowIcon size={15} /></Link><Link href="/kkn/book-chapter">Book Chapter <ArrowIcon size={15} /></Link></> : <><Link href="/berita">Lihat Berita <ArrowIcon size={15} /></Link><Link href="/kontak">Kirim Dokumentasi <ArrowIcon size={15} /></Link></>}</div>
               </div>
             </Reveal>
           </div>
@@ -226,8 +234,8 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
           <div className="container">
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.cta}>
-                <div><span>Punya Dokumentasi?</span><h2>Sampaikan foto kegiatan kepada kelurahan.</h2><p>Dokumentasi dapat diverifikasi terlebih dahulu sebelum ditampilkan pada galeri publik.</p></div>
-                <div className={styles.ctaActions}><Link href="/kontak" className={styles.ctaPrimary}>Hubungi Kelurahan <ArrowIcon /></Link><Link href="/berita" className={styles.ctaSecondary}>Lihat Berita</Link></div>
+                <div><span>{isKkn ? "Dokumentasi KKN" : "Punya Dokumentasi?"}</span><h2>{isKkn ? "Lihat berita dan profil Tim KKN." : "Sampaikan foto kegiatan kepada kelurahan."}</h2><p>{isKkn ? "Tim, program kerja, berita, galeri, Book Chapter, dan luaran KKN kini dikelompokkan dalam menu khusus KKN." : "Dokumentasi dapat diverifikasi terlebih dahulu sebelum ditampilkan pada galeri publik."}</p></div>
+                <div className={styles.ctaActions}>{isKkn ? <><Link href="/kkn/berita" className={styles.ctaPrimary}>Berita KKN <ArrowIcon /></Link><Link href="/tim-kkn" className={styles.ctaSecondary}>Tim KKN</Link></> : <><Link href="/kontak" className={styles.ctaPrimary}>Hubungi Kelurahan <ArrowIcon /></Link><Link href="/berita" className={styles.ctaSecondary}>Lihat Berita</Link></>}</div>
               </div>
             </Reveal>
           </div>

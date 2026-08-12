@@ -21,8 +21,9 @@ export default function Page() {
         order: 1,
       }}
       displayFields={["title", "category", "publishedDate", "publishedTime", "status"]}
-      lockedField="category"
-      lockedValues={["KKN"]}
+      filterField="category"
+      filterValue="KKN"
+      filterMode="exclude"
       fields={[
         { key: "title", label: "Judul", type: "text", required: true, full: true },
         { key: "slug", label: "Slug, boleh kosong agar otomatis", type: "text", full: true },

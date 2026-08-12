@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import { AMBORAWANG_RT_TOTAL, applyAmborawangPublicSettings } from "@/data/amborawang";
 import { demoSettings } from "@/data/demo";
 import { homeContentFallback, type HomeContent } from "@/data/siteContent";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
@@ -155,11 +155,14 @@ export default function HomePage({
 
   const activeRtCount = useMemo(
     () =>
-      rawRts.filter((item) => {
-        if (item.isActive === false) return false;
-        const numeric = Number(String(item.number || "").replace(/\D/g, ""));
-        return Number.isInteger(numeric) && numeric > 0;
-      }).length,
+      Math.max(
+        AMBORAWANG_RT_TOTAL,
+        rawRts.filter((item) => {
+          if (item.isActive === false) return false;
+          const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+          return Number.isInteger(numeric) && numeric > 0;
+        }).length,
+      ),
     [rawRts],
   );
 

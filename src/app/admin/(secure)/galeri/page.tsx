@@ -7,7 +7,7 @@ export default function Page() {
       <AdminCollectionManager
         collectionName="galleryAlbums" publicHref="/galeri"
         title="Galeri"
-        description="Buat album dokumentasi kelurahan lalu unggah foto. Konten khusus Tim KKN tidak dikelola dari admin."
+        description="Buat album dokumentasi kelurahan lalu unggah foto. Galeri KKN bersifat statis dan tidak dikelola dari dashboard admin."
         defaults={{
           title: "",
           slug: "",
@@ -22,8 +22,9 @@ export default function Page() {
           order: 1,
         }}
         displayFields={["title", "category", "photoCount", "status"]}
-        lockedField="category"
-        lockedValues={["KKN"]}
+        filterField="category"
+        filterValue="KKN"
+        filterMode="exclude"
         fields={[
           { key: "title", label: "Judul Album", type: "text", required: true, full: true },
           { key: "slug", label: "Slug, boleh kosong", type: "text", full: true },
@@ -37,7 +38,7 @@ export default function Page() {
           { key: "order", label: "Urutan", type: "number" },
         ]}
       />
-      <GalleryPhotoManager />
+      <GalleryPhotoManager scope="village" />
     </>
   );
 }

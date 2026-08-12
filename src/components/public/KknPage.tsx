@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./KknPage.module.css";
+import kknLogoWatermark from "@/assets/kkn-logo-watermark.webp";
+import type { KknMember, KknTeam } from "@/types";
 
 type Member = {
   name: string;
@@ -137,6 +139,33 @@ const divisions: { title: string; members: Member[] }[] = [
     ],
   },
 ];
+
+const fallbackTeam: KknTeam = {
+  universityName: "Universitas Islam Negeri Sultan Aji Muhammad Idris Samarinda",
+  groupName: "Kelompok 2 KKN Reguler",
+  year: "2026",
+  location: "Kelurahan Amborawang Darat",
+  supervisorName: "Dr. Nur Kholik Afandi, S.Ag., M.Pd",
+  supervisorPhotoUrl: "/images/kkn/01-dosen-pembimbing.jpg",
+  supervisorDescription: "Mendampingi pelaksanaan program KKN, memberikan arahan akademik, serta memastikan kegiatan pengabdian berjalan terarah dan sesuai tujuan program.",
+  description: "Kolaborasi mahasiswa, dosen pembimbing, dan pemerintah kelurahan dalam mendukung program pengabdian dan pengembangan informasi publik di Amborawang Darat.",
+  structureImageUrl: "/images/kkn/struktur-organisasi-kkn.png",
+};
+
+const fallbackMembers = [...coreTeam, ...divisions.flatMap((item) => item.members)];
+
+function inferDivision(member: Partial<KknMember>) {
+  const explicit = String(member.division || "").trim();
+  if (explicit) return explicit;
+  const role = String(member.role || "").toLowerCase();
+  if (role.includes("ketua")) return "Pimpinan Tim";
+  if (role.includes("sekretaris")) return "Administrasi";
+  if (role.includes("bendahara")) return "Keuangan";
+  if (role.includes("media")) return "Media";
+  if (role.includes("humas")) return "Humas";
+  if (role.includes("logistik")) return "Logistik";
+  return "Anggota";
+}
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -329,6 +358,10 @@ function MemberCard({ member }: { member: Member }) {
         <span className={`${styles.flipFace} ${styles.flipBack}`}>
           <span className={styles.backDecor} aria-hidden="true">
             <span className={styles.backDecorRing} />
+            <span
+              className={styles.backLogoWatermark}
+              style={{ backgroundImage: `url(${kknLogoWatermark.src})` }}
+            />
             <span className={styles.backWatermark}>{initials}</span>
           </span>
 
@@ -390,7 +423,55 @@ function MemberCard({ member }: { member: Member }) {
   );
 }
 
-export default function KknPage() {
+export default function KknPage({
+  initialTeam = fallbackTeam,
+  initialMembers = [],
+}: {
+  initialTeam?: KknTeam;
+  initialMembers?: KknMember[];
+}) {
+  const team = { ...fallbackTeam, ...initialTeam };
+
+  const displayedMembers = useMemo(() => {
+    const fallbackByName = new Map(fallbackMembers.map((member) => [member.name.toLowerCase(), member]));
+    const source = initialMembers.length ? initialMembers : fallbackMembers.map((member, index) => ({
+      ...member,
+      photoUrl: member.image,
+      order: index + 1,
+      isActive: true,
+    }));
+
+    return source
+      .filter((member) => member.isActive !== false)
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+      .map((member) => {
+        const base = fallbackByName.get(String(member.name || "").toLowerCase());
+        return {
+          name: String(member.name || base?.name || "Anggota KKN"),
+          role: String(member.role || base?.role || "Anggota"),
+          division: inferDivision(member) || base?.division || "Anggota",
+          image: String(member.photoUrl || base?.image || "/images/kkn/placeholder-kkn.svg"),
+          studyProgram: String(member.studyProgram || base?.studyProgram || "Belum diisi"),
+          nim: String(member.nim || base?.nim || "Belum diisi"),
+          quote: String(member.quote || base?.quote || "Bersama mengabdi untuk masyarakat."),
+        } satisfies Member;
+      });
+  }, [initialMembers]);
+
+  const coreRoles = new Set(["ketua", "sekretaris", "bendahara"]);
+  const coreTeamItems = displayedMembers.filter((member) => coreRoles.has(member.role.toLowerCase()));
+  const divisionMembers = displayedMembers.filter((member) => !coreRoles.has(member.role.toLowerCase()));
+  const divisionItems = Array.from(
+    divisionMembers.reduce((map, member) => {
+      const key = member.division || "Anggota";
+      if (!map.has(key)) map.set(key, [] as Member[]);
+      map.get(key)!.push(member);
+      return map;
+    }, new Map<string, Member[]>()),
+  ).map(([title, members]) => ({ title, members }));
+
+  const divisionCount = divisionItems.length;
+
   return (
     <PublicShell>
       <main className={styles.page}>
@@ -412,14 +493,12 @@ export default function KknPage() {
                 </h1>
 
                 <p>
-                  Kolaborasi mahasiswa, dosen pembimbing, dan pemerintah
-                  kelurahan dalam mendukung program pengabdian dan pengembangan
-                  informasi publik di Amborawang Darat.
+                  {team.description}
                 </p>
 
                 <div className={styles.heroStats}>
                   <div>
-                    <strong>10</strong>
+                    <strong>{String(displayedMembers.length).padStart(2, "0")}</strong>
                     <span>Mahasiswa</span>
                   </div>
                   <div>
@@ -427,7 +506,7 @@ export default function KknPage() {
                     <span>Dosen Pembimbing</span>
                   </div>
                   <div>
-                    <strong>03</strong>
+                    <strong>{String(divisionCount).padStart(2, "0")}</strong>
                     <span>Divisi</span>
                   </div>
                 </div>
@@ -496,19 +575,15 @@ export default function KknPage() {
               <article className={styles.advisorCard}>
                 <div className={styles.advisorPhoto}>
                   <Photo
-                    src="/images/kkn/01-dosen-pembimbing.jpg"
-                    alt="Foto Dr. Nur Kholik Afandi, S.Ag., M.Pd"
+                    src={team.supervisorPhotoUrl || "/images/kkn/01-dosen-pembimbing.jpg"}
+                    alt={`Foto ${team.supervisorName}`}
                   />
                 </div>
 
                 <div className={styles.advisorBody}>
                   <span>Dosen Pembimbing Lapangan</span>
-                  <h3>Dr. Nur Kholik Afandi, S.Ag., M.Pd</h3>
-                  <p>
-                    Mendampingi pelaksanaan program KKN, memberikan arahan
-                    akademik, serta memastikan kegiatan pengabdian berjalan
-                    terarah dan sesuai tujuan program.
-                  </p>
+                  <h3>{team.supervisorName}</h3>
+                  <p>{team.supervisorDescription || fallbackTeam.supervisorDescription}</p>
 
                   <div className={styles.advisorMeta}>
                     <div>
@@ -517,7 +592,7 @@ export default function KknPage() {
                     </div>
                     <div>
                       <small>Lokasi</small>
-                      <strong>Amborawang Darat</strong>
+                      <strong>{team.location.replace(/^Kelurahan\s+/i, "")}</strong>
                     </div>
                   </div>
                 </div>
@@ -540,7 +615,7 @@ export default function KknPage() {
             </Reveal>
 
             <div className={styles.coreGrid}>
-              {coreTeam.map((member, index) => (
+              {coreTeamItems.map((member, index) => (
                 <Reveal key={member.name} enabled delay={index * 45}>
                   <MemberCard
                     member={member}
@@ -570,7 +645,7 @@ export default function KknPage() {
               </div>
             </Reveal>
 
-            {divisions.map((division, divisionIndex) => {
+            {divisionItems.map((division, divisionIndex) => {
               return (
                 <section key={division.title} className={styles.divisionBlock}>
                   <div className={styles.divisionLabel}>
@@ -618,11 +693,11 @@ export default function KknPage() {
                     <span>Pembimbing</span>
                   </div>
                   <div>
-                    <strong>03</strong>
+                    <strong>{String(coreTeamItems.length).padStart(2, "0")}</strong>
                     <span>Tim Inti</span>
                   </div>
                   <div>
-                    <strong>03</strong>
+                    <strong>{String(divisionCount).padStart(2, "0")}</strong>
                     <span>Divisi</span>
                   </div>
                 </div>
@@ -638,7 +713,7 @@ export default function KknPage() {
                   </span>
 
                   <span className={styles.structureBoardMeta}>
-                    KKN Amborawang Darat • 2026
+                    {team.groupName} • {team.year}
                   </span>
                 </div>
 
@@ -647,8 +722,8 @@ export default function KknPage() {
                     <article className={`${styles.structurePersonCard} ${styles.structureAdvisorCard}`}>
                       <span className={styles.structureAvatar}>
                         <img
-                          src="/images/kkn/01-dosen-pembimbing.jpg"
-                          alt="Foto Dr. Nur Kholik Afandi, S.Ag., M.Pd"
+                          src={team.supervisorPhotoUrl || "/images/kkn/01-dosen-pembimbing.jpg"}
+                          alt={`Foto ${team.supervisorName}`}
                           onError={(event) => {
                             event.currentTarget.onerror = null;
                             event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
@@ -658,7 +733,7 @@ export default function KknPage() {
 
                       <span className={styles.structurePersonText}>
                         <small>Dosen Pembimbing Lapangan</small>
-                        <strong>Dr. Nur Kholik Afandi, S.Ag., M.Pd</strong>
+                        <strong>{team.supervisorName}</strong>
                         <span>Pendamping akademik dan arah program</span>
                       </span>
 
@@ -677,7 +752,7 @@ export default function KknPage() {
                     </div>
 
                     <div className={styles.structureCoreGrid}>
-                      {coreTeam.map((member, index) => (
+                      {coreTeamItems.map((member, index) => (
                         <article
                           key={member.name}
                           className={styles.structurePersonCard}
@@ -715,7 +790,7 @@ export default function KknPage() {
                     </div>
 
                     <div className={styles.structureDivisionGrid}>
-                      {divisions.map((division, divisionIndex) => (
+                      {divisionItems.map((division, divisionIndex) => (
                         <article
                           key={division.title}
                           className={styles.structureDivisionCard}
@@ -769,7 +844,7 @@ export default function KknPage() {
                   </div>
 
                   <a
-                    href="/images/kkn/struktur-organisasi-kkn.png"
+                    href={team.structureImageUrl || "/images/kkn/struktur-organisasi-kkn.png"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.structureImageLink}
@@ -792,19 +867,19 @@ export default function KknPage() {
                   <span>Program KKN</span>
                   <h2>Kolaborasi untuk Amborawang Darat.</h2>
                   <p>
-                    Dokumentasi program dan kegiatan KKN dapat dilihat melalui
-                    halaman berita dan galeri.
+                    Program kerja, dokumentasi kegiatan, dan luaran KKN kini
+                    dikelompokkan dalam ruang KKN agar lebih mudah ditelusuri.
                   </p>
                 </div>
 
                 <div className={styles.ctaActions}>
-                  <Link href="/berita" className={styles.ctaPrimary}>
-                    Lihat Berita
+                  <Link href="/kkn/program-kerja" className={styles.ctaPrimary}>
+                    Program Kerja
                     <ArrowIcon />
                   </Link>
 
-                  <Link href="/galeri" className={styles.ctaSecondary}>
-                    Lihat Galeri
+                  <Link href="/kkn/luaran" className={styles.ctaSecondary}>
+                    Luaran KKN
                   </Link>
                 </div>
               </div>

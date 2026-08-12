@@ -7,7 +7,7 @@ import { usePublicSettings } from "@/hooks/usePublicSettings";
 import type { PostItem, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
-import { displayPostDate, mergePublicPosts, postParagraphs } from "./newsData";
+import { displayPostDate, mergeKknPosts, mergePublicPosts, postParagraphs } from "./newsData";
 import styles from "./NewsDetailPage.module.css";
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
@@ -52,11 +52,33 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function NewsDetailPage({ slug, initialArticle, initialSettings }: { slug: string; initialArticle?: PostItem; initialSettings?: SiteSettings }) {
+type NewsScope = "village" | "kkn";
+
+export default function NewsDetailPage({
+  slug,
+  initialArticle,
+  initialSettings,
+  scope = "village",
+}: {
+  slug: string;
+  initialArticle?: PostItem;
+  initialSettings?: SiteSettings;
+  scope?: NewsScope;
+}) {
   const [copied, setCopied] = useState(false);
+  const isKkn = scope === "kkn";
   const { settings } = usePublicSettings(initialSettings);
-  const { data: remotePosts, loading } = useCollectionData<PostItem>("posts", initialArticle ? [initialArticle] : []);
-  const posts = useMemo(() => mergePublicPosts(remotePosts), [remotePosts]);
+  const { data: remotePosts, loading } = useCollectionData<PostItem>(
+    "posts",
+    initialArticle ? [initialArticle] : [],
+    [],
+    !isKkn,
+  );
+  const articleBase = isKkn ? "/kkn/berita" : "/berita";
+  const posts = useMemo(
+    () => (isKkn ? mergeKknPosts(remotePosts) : mergePublicPosts(remotePosts)),
+    [isKkn, remotePosts],
+  );
   const article = posts.find((item) => item.slug === slug);
 
   const getUrl = () => (typeof window !== "undefined" ? window.location.href : "");
@@ -84,7 +106,7 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
           <section className={styles.hero}>
             <div className={styles.heroPattern} aria-hidden="true" />
             <div className={`container ${styles.heroInner}`}>
-              <span className={styles.category}>Berita</span>
+              <span className={styles.category}>{isKkn ? "Berita KKN" : "Berita"}</span>
               <h1>Berita tidak ditemukan</h1>
               <p className={styles.heroExcerpt}>Artikel mungkin belum dipublikasikan atau sudah diarsipkan.</p>
             </div>
@@ -94,7 +116,7 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
               <div className={styles.footerPanel}>
                 <div><span>Kembali</span><h2>Lihat berita yang tersedia</h2></div>
                 <div className={styles.footerActions}>
-                  <Link href="/berita" className={styles.primaryLink}>Daftar Berita <ArrowIcon /></Link>
+                  <Link href={articleBase} className={styles.primaryLink}>{isKkn ? "Daftar Berita KKN" : "Daftar Berita"} <ArrowIcon /></Link>
                 </div>
               </div>
             </div>
@@ -138,7 +160,9 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
           <div className={`container ${styles.heroInner}`}>
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.breadcrumb}>
-                <Link href="/">Beranda</Link><span>/</span><Link href="/berita">Berita</Link><span>/</span><span>{article.category}</span>
+                <Link href="/">Beranda</Link><span>/</span>
+                {isKkn && <><Link href="/tim-kkn">KKN</Link><span>/</span></>}
+                <Link href={articleBase}>{isKkn ? "Berita KKN" : "Berita"}</Link><span>/</span><span>{article.category}</span>
               </div>
               <span className={styles.category}>{article.category}</span>
               <h1>{article.title}</h1>
@@ -152,7 +176,7 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
             <Reveal enabled={settings.animationEnabled}>
               <figure className={styles.figure}>
                 <div className={styles.mainImage}><Photo src={article.coverImageUrl} alt={article.title} /></div>
-                <figcaption>Dokumentasi berita Kelurahan {settings.villageName}.</figcaption>
+                <figcaption>{isKkn ? `Dokumentasi kegiatan KKN di Kelurahan ${settings.villageName}.` : `Dokumentasi berita Kelurahan ${settings.villageName}.`}</figcaption>
               </figure>
 
               <div className={styles.meta}>
@@ -177,7 +201,7 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
 
             <article className={styles.article}>
               <Reveal enabled={settings.animationEnabled}>
-                <div className={styles.articleIntro}><span>{settings.villageName}</span><p>{article.summary}</p></div>
+                <div className={styles.articleIntro}><span>{isKkn ? "KKN Amborawang Darat" : settings.villageName}</span><p>{article.summary}</p></div>
               </Reveal>
 
               {(paragraphs.length ? paragraphs : [article.summary]).map((paragraph, index) => (
@@ -185,7 +209,10 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
               ))}
 
               <Reveal enabled={settings.animationEnabled}>
-                <div className={styles.articleNote}><span>Informasi Publik</span><strong>Berita ini dipublikasikan melalui Website Resmi Kelurahan {settings.villageName}.</strong></div>
+                <div className={styles.articleNote}>
+                  <span>{isKkn ? "Publikasi KKN" : "Informasi Publik"}</span>
+                  <strong>{isKkn ? `Berita ini merupakan dokumentasi kegiatan KKN di Kelurahan ${settings.villageName}.` : `Berita ini dipublikasikan melalui Website Resmi Kelurahan ${settings.villageName}.`}</strong>
+                </div>
               </Reveal>
 
               <div className={styles.mobileShare}>
@@ -203,10 +230,10 @@ export default function NewsDetailPage({ slug, initialArticle, initialSettings }
           <div className="container">
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.footerPanel}>
-                <div><span>Selesai Membaca</span><h2>Lihat informasi kelurahan lainnya</h2></div>
+                <div><span>Selesai Membaca</span><h2>{isKkn ? "Lihat publikasi KKN lainnya" : "Lihat informasi kelurahan lainnya"}</h2></div>
                 <div className={styles.footerActions}>
-                  <Link href="/berita" className={styles.primaryLink}>Berita Lainnya <ArrowIcon /></Link>
-                  <Link href="/kontak" className={styles.secondaryLink}>Hubungi Kelurahan</Link>
+                  <Link href={articleBase} className={styles.primaryLink}>{isKkn ? "Berita KKN Lainnya" : "Berita Lainnya"} <ArrowIcon /></Link>
+                  <Link href={isKkn ? "/kkn/galeri" : "/kontak"} className={styles.secondaryLink}>{isKkn ? "Galeri KKN" : "Hubungi Kelurahan"}</Link>
                 </div>
               </div>
             </Reveal>

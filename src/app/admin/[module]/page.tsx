@@ -23,6 +23,6 @@ export default async function Page({
 
   if (target) redirect(target);
 
-  // Tim KKN dan modul lain yang tidak dikenal tidak pernah membuka editor lama.
+  // Modul KKN bersifat statis; modul yang tidak dikenal tidak membuka editor lama.
   notFound();
 }

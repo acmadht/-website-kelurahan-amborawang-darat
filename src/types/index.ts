@@ -126,6 +126,8 @@ export interface Announcement {
   validUntil?: string;
   isActive: boolean;
   order: number;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }
 
 export interface AgendaItem {
@@ -174,18 +176,82 @@ export interface KknTeam {
   year: string;
   location: string;
   supervisorName: string;
+  supervisorPhotoUrl?: string;
+  supervisorDescription?: string;
   description: string;
   logoUrl?: string;
   groupPhotoUrl?: string;
+  structureImageUrl?: string;
+  updatedAt?: unknown;
 }
 
 export interface KknMember {
   id?: string;
   name: string;
   role: string;
+  division: string;
+  studyProgram?: string;
+  nim?: string;
+  quote?: string;
+  description?: string;
   photoUrl?: string;
   order: number;
   isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface KknProgram {
+  id?: string;
+  code: string;
+  title: string;
+  category: string;
+  description: string;
+  objective?: string;
+  target?: string;
+  schedule?: string;
+  personInCharge?: string;
+  status: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  linkLabel?: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface KknBookChapter {
+  id?: string;
+  title: string;
+  authors: string[];
+  abstract: string;
+  coverImageUrl?: string;
+  isbn?: string;
+  doi?: string;
+  year?: string;
+  publisher?: string;
+  fileUrl?: string;
+  status: "draft" | "published";
+  order: number;
+  isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface KknOutput {
+  id?: string;
+  code: string;
+  type: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  href?: string;
+  linkLabel?: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }
 
 export interface PublicDocument {

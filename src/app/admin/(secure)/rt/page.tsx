@@ -5,7 +5,7 @@ export default function Page() {
     <AdminCollectionManager
       collectionName="rts" publicHref="/data-rt"
       title="Data RT"
-      description="Kelola seluruh data RT, ketua RT, data penduduk, komposisi warga, fasilitas, kontak, foto, dan informasi wilayah. Jumlah RT mengikuti data aktif yang tersimpan dan otomatis tampil pada halaman publik Data RT."
+      description="Kelola data untuk 13 RT Kelurahan Amborawang Darat. Halaman publik selalu menampilkan RT 01 sampai RT 13; data yang belum diisi akan tampil sebagai belum dilengkapi sampai admin menambah atau memperbaruinya."
       defaults={{
         number: "",
         chairmanName: "",

@@ -16,6 +16,7 @@ import {
   type ProfileTimelineItem,
 } from "@/data/amborawangProfile";
 import styles from "./ProfileAdminEditor.module.css";
+import visualStyles from "./AdminVisualEditor.module.css";
 
 const sectionLinks = [
   ["hero", "Hero & Foto"],
@@ -106,6 +107,7 @@ export default function ProfileAdminEditor() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState("");
   const [activeSection, setActiveSection] = useState("hero");
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -210,6 +212,7 @@ export default function ProfileAdminEditor() {
       );
       setForm(cleaned);
       setStatus("Perubahan profil berhasil disimpan dan siap tampil di website.");
+      setEditMode(false);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Gagal menyimpan profil.");
     } finally {
@@ -240,6 +243,45 @@ export default function ProfileAdminEditor() {
     );
   }
 
+  if (!editMode) {
+    return (
+      <>
+        <div className="admin-title">
+          <h1>Profil Kelurahan</h1>
+          <p>Tampilan admin mengikuti halaman Profil publik. Klik Edit Profil hanya saat ingin mengubah isinya.</p>
+        </div>
+
+        {status ? (
+          <div className={`${/berhasil/i.test(status) ? "success-box" : "error-box"}`} style={{ marginTop: 14 }}>
+            {status}
+          </div>
+        ) : null}
+
+        <section className={visualStyles.previewShell}>
+          <div className={visualStyles.previewTopbar}>
+            <div className={visualStyles.previewTopbarCopy}>
+              <strong>Tampilan yang dilihat masyarakat</strong>
+              <span>Pratinjau langsung halaman /profil.</span>
+            </div>
+            <div className={visualStyles.previewActions}>
+              <Link href="/profil" target="_blank" className={visualStyles.previewButton}>Lihat Website ↗</Link>
+              <button type="button" className={visualStyles.editButton} onClick={() => setEditMode(true)}>✎ Edit Profil</button>
+            </div>
+          </div>
+          <div className={visualStyles.previewCanvas}>
+            <div className={visualStyles.liveFrameWrap}>
+              <div className={visualStyles.liveFrameBar}>
+                <span className={visualStyles.browserDots} aria-hidden="true"><i /><i /><i /></span>
+                <span className={visualStyles.liveFrameUrl}>Website publik: /profil</span>
+              </div>
+              <iframe className={visualStyles.liveIframe} src="/profil" title="Pratinjau Profil Kelurahan" />
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -253,6 +295,9 @@ export default function ProfileAdminEditor() {
         </div>
 
         <div className={styles.headerActions}>
+          <button type="button" className={styles.resetButton} onClick={() => setEditMode(false)}>
+            ← Kembali ke Tampilan
+          </button>
           <Link href="/profil" target="_blank" className={styles.previewButton}>
             Lihat Halaman Profil ↗
           </Link>

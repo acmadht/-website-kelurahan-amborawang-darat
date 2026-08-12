@@ -391,6 +391,16 @@
   background: #56bd86;
 }
 
+.pendingBadge {
+  color: #6d7480;
+  background: #f4f6f8;
+  border-color: #e3e7eb;
+}
+
+.pendingBadge i {
+  background: #aab2bc;
+}
+
 .chairmanBlock {
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);

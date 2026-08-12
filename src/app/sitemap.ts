@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { staticKknPosts } from "@/components/public/newsData";
+import { staticKknPosts } from "@/data/kknStatic";
 import {
   SITE_URL,
   getDynamicPublishedPostsServer,
@@ -20,29 +20,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/galeri`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/dokumen`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/kontak`, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${SITE_URL}/tim-kkn`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/tim-kkn`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/kkn/program-kerja`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/kkn/berita`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/kkn/galeri`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/kkn/book-chapter`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/kkn/luaran`, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   const dynamicPosts = await getDynamicPublishedPostsServer();
-  const posts = [...dynamicPosts, ...staticKknPosts];
-  const seen = new Set<string>();
 
-  const articleRoutes: MetadataRoute.Sitemap = posts
-    .filter((post) => {
-      const slug = String(post.slug || "").trim();
-      if (!slug || seen.has(slug)) return false;
-      seen.add(slug);
-      return true;
-    })
-    .map((post) => {
-      const modified = modifiedDateIso(post);
-      return {
-        url: `${SITE_URL}/berita/${post.slug}`,
-        ...(modified ? { lastModified: new Date(modified) } : {}),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      };
-    });
+  const villageArticleRoutes: MetadataRoute.Sitemap = dynamicPosts.map((post) => {
+    const modified = modifiedDateIso(post);
+    return {
+      url: `${SITE_URL}/berita/${post.slug}`,
+      ...(modified ? { lastModified: new Date(modified) } : {}),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    };
+  });
 
-  return [...staticRoutes, ...articleRoutes];
+  const kknArticleRoutes: MetadataRoute.Sitemap = staticKknPosts
+    .filter((post) => post.status === "published")
+    .map((post) => ({
+      url: `${SITE_URL}/kkn/berita/${post.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
+
+  return [...staticRoutes, ...villageArticleRoutes, ...kknArticleRoutes];
 }

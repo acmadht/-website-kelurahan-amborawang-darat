@@ -3,16 +3,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { AMBORAWANG_RT_TOTAL } from "@/data/amborawang";
+import { buildAmborawangRtSlots } from "@/lib/rtSlots";
 import type { RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./RtPage.module.css";
-
-function normalizeRtNumber(value: string | number | undefined) {
-  const numeric = Number(String(value ?? "").replace(/\D/g, ""));
-  if (!Number.isInteger(numeric) || numeric < 1) return "";
-  return String(numeric).padStart(2, "0");
-}
 
 function displayNumber(value?: number) {
   if (!value || value <= 0) return "Belum diisi";
@@ -245,16 +241,7 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
   const [selectedRt, setSelectedRt] = useState<RegionLeader | null>(null);
 
   const rts = useMemo(
-    () =>
-      rawRts
-        .filter((item) => item.isActive !== false)
-        .map((item) => ({
-          ...item,
-          number: normalizeRtNumber(item.number),
-          facilities: Array.isArray(item.facilities) ? item.facilities : [],
-        }))
-        .filter((item) => Boolean(item.number))
-        .sort((a, b) => Number(a.number) - Number(b.number)),
+    () => buildAmborawangRtSlots(rawRts),
     [rawRts],
   );
 
@@ -271,14 +258,11 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
     return {
       population,
       families,
-      rt: rts.length,
+      rt: AMBORAWANG_RT_TOTAL,
     };
   }, [rts]);
 
-  const rtRangeLabel = useMemo(
-    () => (rts.length ? `${rts.length} RT aktif` : "Daftar RT"),
-    [rts.length],
-  );
+  const rtRangeLabel = `${totals.rt} RT`;
 
   useEffect(() => {
     if (!selectedRt) return;
@@ -367,8 +351,8 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
                 </div>
 
                 <p>
-                  Angka total dihitung otomatis dari data RT aktif yang tersimpan
-                  pada dashboard admin.
+                  Kelurahan memiliki 13 RT. Data warga dan KK mengikuti data
+                  yang telah diisi melalui dashboard admin.
                 </p>
               </div>
             </Reveal>
@@ -440,8 +424,8 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
                             <strong>{rt.number}</strong>
                           </div>
 
-                          <span className={styles.activeBadge}>
-                            <i /> Aktif
+                          <span className={`${styles.activeBadge} ${!rt.chairmanName?.trim() ? styles.pendingBadge : ""}`}>
+                            <i /> {rt.chairmanName?.trim() ? "Aktif" : "Belum diisi"}
                           </span>
                         </div>
 

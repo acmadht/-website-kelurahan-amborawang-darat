@@ -1693,6 +1693,29 @@
   animation: backRingFloat 6s ease-in-out infinite;
 }
 
+.backLogoWatermark {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(78%, 285px);
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: .075;
+  transform: translate(-50%, -50%);
+  filter: saturate(.85) contrast(.95);
+  pointer-events: none;
+}
+
+.backLogoWatermark::after {
+  position: absolute;
+  inset: 9%;
+  content: "";
+  border-radius: 50%;
+  box-shadow: 0 0 70px rgba(125,204,255,.08);
+}
+
 .backWatermark {
   position: absolute;
   right: 17px;

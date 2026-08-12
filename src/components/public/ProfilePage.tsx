@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { AMBORAWANG_RT_TOTAL } from "@/data/amborawang";
 import {
   amborawangProfileFallback,
   resolveAmborawangProfile,
@@ -60,11 +61,14 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
   );
   const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
   const profile = resolveAmborawangProfile(data);
-  const activeRtCount = rawRts.filter((item) => {
-    if (item.isActive === false) return false;
-    const numeric = Number(String(item.number || "").replace(/\D/g, ""));
-    return Number.isInteger(numeric) && numeric > 0;
-  }).length;
+  const activeRtCount = Math.max(
+    AMBORAWANG_RT_TOTAL,
+    rawRts.filter((item) => {
+      if (item.isActive === false) return false;
+      const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+      return Number.isInteger(numeric) && numeric > 0;
+    }).length,
+  );
   const profileStats = profile.stats.map((item) =>
     /(?:wilayah|jumlah)\s*rt|\brt\b/i.test(item.label)
       ? {

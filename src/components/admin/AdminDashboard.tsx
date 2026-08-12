@@ -8,11 +8,11 @@ import { usePublicSettings } from "@/hooks/usePublicSettings";
 import styles from "./AdminDashboard.module.css";
 
 const statsConfig = [
-  { collection: "posts", label: "Berita", href: "/admin/berita", code: "BR" },
+  { collection: "posts", label: "Berita", href: "/admin/berita", code: "BR", excludeKkn: true },
   { collection: "services", label: "Layanan", href: "/admin/layanan", code: "LY" },
   { collection: "announcements", label: "Pengumuman", href: "/admin/pengumuman", code: "PG" },
   { collection: "agendas", label: "Agenda", href: "/admin/agenda", code: "AG" },
-  { collection: "galleryPhotos", label: "Foto Galeri", href: "/admin/galeri", code: "GL" },
+  { collection: "galleryAlbums", label: "Album Galeri", href: "/admin/galeri", code: "GL", excludeKkn: true },
   { collection: "documents", label: "Dokumen", href: "/admin/dokumen", code: "DK" },
   { collection: "officials", label: "Aparatur", href: "/admin/aparatur", code: "PM" },
   { collection: "rts", label: "RT", href: "/admin/rt", code: "RT" },
@@ -38,9 +38,14 @@ export default function AdminDashboard() {
       }
       try {
         const pairs = await Promise.all(
-          statsConfig.map(async ({ collection: name }) => {
+          statsConfig.map(async ({ collection: name, ...config }) => {
             const snap = await getDocs(collection(db!, name));
-            return [name, snap.size] as const;
+            const size = "excludeKkn" in config && config.excludeKkn
+              ? snap.docs.filter(
+                  (item) => String(item.data().category || "").toUpperCase() !== "KKN",
+                ).length
+              : snap.size;
+            return [name, size] as const;
           }),
         );
         setCounts(Object.fromEntries(pairs));
@@ -135,8 +140,8 @@ export default function AdminDashboard() {
           <span>Prinsip Akses</span>
           <h2>Admin fokus pada kebutuhan kelurahan.</h2>
           <p>
-            Seluruh modul operasional dapat diperbarui tanpa edit kode, sedangkan
-            halaman Tim KKN sengaja tidak memiliki menu pengelolaan.
+            Seluruh konten operasional kelurahan dapat diperbarui melalui dashboard dan Firestore.
+            Konten KKN sengaja dibuat statis sehingga tidak dapat diubah dari akun admin kelurahan.
           </p>
           <Link href="/admin/pengaturan">Buka Pengaturan Website →</Link>
         </article>

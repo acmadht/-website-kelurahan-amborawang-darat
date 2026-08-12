@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { demoSettings } from "@/data/demo";
-import { applyAmborawangPublicSettings } from "@/data/amborawang";
+import { AMBORAWANG_RT_TOTAL, applyAmborawangPublicSettings } from "@/data/amborawang";
 import { regionContentFallback, type RegionContent } from "@/data/siteContent";
 import type { RegionLeader, SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
@@ -52,11 +52,14 @@ export default function RegionPage({ initialSettings = demoSettings, initialRegi
 
   const settings = applyAmborawangPublicSettings(rawSettings);
   const animationEnabled = settings.animationEnabled !== false;
-  const activeRtCount = rawRts.filter((item) => {
-    if (item.isActive === false) return false;
-    const numeric = Number(String(item.number || "").replace(/\D/g, ""));
-    return Number.isInteger(numeric) && numeric > 0;
-  }).length;
+  const activeRtCount = Math.max(
+    AMBORAWANG_RT_TOTAL,
+    rawRts.filter((item) => {
+      if (item.isActive === false) return false;
+      const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+      return Number.isInteger(numeric) && numeric > 0;
+    }).length,
+  );
   const rtCountLabel = activeRtCount ? `${activeRtCount} RT` : "Belum ada data RT";
 
   const stats = [

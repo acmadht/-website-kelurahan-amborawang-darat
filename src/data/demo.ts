@@ -4,8 +4,6 @@ import type {
   GalleryAlbum,
   GalleryPhoto,
   HeroSlide,
-  KknMember,
-  KknTeam,
   Official,
   PostItem,
   PublicDocument,
@@ -32,7 +30,7 @@ export const demoSettings: SiteSettings = {
   instagramUrl: "https://www.instagram.com/kecamatan_sambojabarat/",
   facebookUrl: "",
   youtubeUrl: "",
-  footerText: "Pemerintah Kelurahan Amborawang Darat",
+  footerText: "Pemerintah Kelurahan Amborawwang Darat",
   seoTitle: "Website Resmi Kelurahan Amborawang Darat",
   seoDescription: "Informasi layanan publik, pemerintahan, berita, agenda, dan kegiatan Kelurahan Amborawang Darat, Kecamatan Samboja Barat.",
   googleSiteVerification: "q5ReWo_LtIesXBuf1nT7-ETCqNrgxzzg_XSFq6m7er4",
@@ -180,11 +178,18 @@ export const demoRws: RegionLeader[] = [
   { id: "rw-02", number: "02", chairmanName: "Ketua RW 02", populationCount: 840, familyCount: 220, order: 2, isActive: true },
 ];
 
-export const demoRts: RegionLeader[] = [
-  { id: "rt-01", rwId: "rw-01", number: "01", chairmanName: "Ketua RT 01", populationCount: 300, familyCount: 80, order: 1, isActive: true },
-  { id: "rt-02", rwId: "rw-01", number: "02", chairmanName: "Ketua RT 02", populationCount: 310, familyCount: 82, order: 2, isActive: true },
-  { id: "rt-03", rwId: "rw-02", number: "03", chairmanName: "Ketua RT 03", populationCount: 290, familyCount: 76, order: 3, isActive: true },
-];
+export const demoRts: RegionLeader[] = Array.from({ length: 13 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0");
+  return {
+    id: `rt-${number}`,
+    number,
+    chairmanName: "",
+    populationCount: 0,
+    familyCount: 0,
+    order: index + 1,
+    isActive: true,
+  };
+});
 
 export const demoPosts: PostItem[] = [
   {
@@ -209,17 +214,7 @@ export const demoPosts: PostItem[] = [
     status: "published",
     isFeatured: false,
   },
-  {
-    id: "post-3",
-    title: "Koordinasi Program Kerja Kelompok KKN",
-    slug: "koordinasi-program-kerja-kelompok-kkn",
-    summary: "Kelompok KKN memaparkan program kerja dan rencana pengembangan website kelurahan.",
-    content: "Kelompok KKN berkoordinasi dengan lurah dan perangkat kelurahan untuk menyelaraskan program kerja dengan kebutuhan masyarakat.",
-    coverImageUrl: "/images/news-3.svg",
-    category: "KKN",
-    status: "published",
-    isFeatured: false,
-  },
+
 ];
 
 export const demoAnnouncements: Announcement[] = [
@@ -281,19 +276,6 @@ export const demoAlbums: GalleryAlbum[] = [
     order: 1,
   },
   {
-    id: "album-2",
-    title: "Program Kerja Kelompok KKN",
-    slug: "program-kerja-kelompok-kkn",
-    category: "KKN",
-    description: "Dokumentasi program kerja, pendataan, dan pembuatan website.",
-    coverImageUrl: "/images/gallery-2.svg",
-    eventDate: "2026-07-25",
-    photoCount: 3,
-    isFeatured: true,
-    status: "published",
-    order: 2,
-  },
-  {
     id: "album-3",
     title: "Kerja Bakti Lingkungan",
     slug: "kerja-bakti-lingkungan",
@@ -311,27 +293,7 @@ export const demoAlbums: GalleryAlbum[] = [
 export const demoPhotos: GalleryPhoto[] = [
   { id: "photo-1", albumId: "album-1", imageUrl: "/images/gallery-1.svg", publicId: "demo-1", caption: "Pelayanan masyarakat", order: 1 },
   { id: "photo-2", albumId: "album-1", imageUrl: "/images/news-1.svg", publicId: "demo-2", caption: "Koordinasi petugas", order: 2 },
-  { id: "photo-3", albumId: "album-2", imageUrl: "/images/gallery-2.svg", publicId: "demo-3", caption: "Kelompok KKN", order: 1 },
-  { id: "photo-4", albumId: "album-2", imageUrl: "/images/news-3.svg", publicId: "demo-4", caption: "Pengembangan website", order: 2 },
   { id: "photo-5", albumId: "album-3", imageUrl: "/images/gallery-3.svg", publicId: "demo-5", caption: "Kerja bakti", order: 1 },
-];
-
-export const demoKknTeam: KknTeam = {
-  universityName: "Perguruan Tinggi Pelaksana KKN",
-  groupName: "Kelompok 2 KKN Reguler",
-  year: "2026",
-  location: "Kelurahan Amborawang Darat",
-  supervisorName: "Dosen Pembimbing Lapangan",
-  description: "Website ini dikembangkan sebagai program kerja digitalisasi informasi dan pelayanan publik kelurahan. Tim KKN mendampingi pengumpulan data, perancangan sistem, pelatihan admin, dan penyerahan website.",
-  logoUrl: "/images/logo-kkn.svg",
-  groupPhotoUrl: "/images/kkn-team.svg",
-};
-
-export const demoKknMembers: KknMember[] = [
-  { id: "member-1", name: "Nama Ketua", role: "Ketua", order: 1, isActive: true },
-  { id: "member-2", name: "Nama Sekretaris", role: "Sekretaris", order: 2, isActive: true },
-  { id: "member-3", name: "Nama Bendahara", role: "Bendahara", order: 3, isActive: true },
-  { id: "member-4", name: "Nama Divisi Media", role: "Media dan Dokumentasi", order: 4, isActive: true },
 ];
 
 export const demoDocuments: PublicDocument[] = [

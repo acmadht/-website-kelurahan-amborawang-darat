@@ -1,6 +1,7 @@
 import type { SiteSettings } from "@/types";
 
 export const AMBORAWANG_LOGO = "/images/logo-amborawang-darat.png";
+export const AMBORAWANG_RT_TOTAL = 13;
 export const AMBORAWANG_OFFICE_IMAGE =
   "/images/kantor-kelurahan-amborawang-darat.jpg";
 
@@ -47,10 +48,10 @@ export function applyAmborawangPublicSettings(
       settings.mapsEmbedUrl,
       "https://www.google.com/maps?q=Kantor+Kelurahan+Amborawang+Darat,+Samboja+Barat,+Kutai+Kartanegara&output=embed",
     ),
-    footerText: cleanText(
-      settings.footerText,
-      "Pemerintah Kelurahan Amborawang Darat",
-    ),
+    footerText:
+      !settings.footerText || /contoh/i.test(settings.footerText)
+        ? "Pemerintah Kelurahan Amborawwang Darat"
+        : settings.footerText.trim(),
     seoTitle: cleanText(
       settings.seoTitle,
       "Website Resmi Kelurahan Amborawang Darat",
