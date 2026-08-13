@@ -238,12 +238,16 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileKknOpen, setMobileKknOpen] = useState(false);
+  const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     setMobileOpen(false);
+    setMobileKknOpen(false);
+    setMobileInfoOpen(false);
     setSearchOpen(false);
   }, [pathname]);
 
@@ -486,31 +490,77 @@ export default function PublicHeader({ settings }: { settings: SiteSettings }) {
               ))}
 
               <div className={styles.mobileMenuGroup}>
-                <div className={styles.mobileMenuGroupTitle}>KKN</div>
-                {kknMenu.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                <button
+                  type="button"
+                  className={`${styles.mobileNavLink} ${styles.mobileGroupButton} ${kknActive ? styles.mobileNavLinkActive : ""}`}
+                  onClick={() => {
+                    setMobileKknOpen((value) => !value);
+                    setMobileInfoOpen(false);
+                  }}
+                  aria-expanded={mobileKknOpen}
+                  aria-controls="mobile-kkn-submenu"
+                >
+                  <span>KKN</span>
+                  <span
+                    className={`${styles.mobileGroupChevron} ${mobileKknOpen ? styles.mobileGroupChevronOpen : ""}`}
+                    aria-hidden="true"
                   >
-                    <span>{item.label}</span>
-                    <ArrowIcon />
-                  </Link>
-                ))}
+                    <ChevronDown />
+                  </span>
+                </button>
+
+                <div
+                  id="mobile-kkn-submenu"
+                  className={`${styles.mobileSubMenu} ${mobileKknOpen ? styles.mobileSubMenuOpen : ""}`}
+                >
+                  {kknMenu.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                    >
+                      <span>{item.label}</span>
+                      <ArrowIcon />
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.mobileMenuGroup}>
-                <div className={styles.mobileMenuGroupTitle}>Informasi</div>
-                {moreMenu.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                <button
+                  type="button"
+                  className={`${styles.mobileNavLink} ${styles.mobileGroupButton} ${moreActive ? styles.mobileNavLinkActive : ""}`}
+                  onClick={() => {
+                    setMobileInfoOpen((value) => !value);
+                    setMobileKknOpen(false);
+                  }}
+                  aria-expanded={mobileInfoOpen}
+                  aria-controls="mobile-info-submenu"
+                >
+                  <span>Informasi</span>
+                  <span
+                    className={`${styles.mobileGroupChevron} ${mobileInfoOpen ? styles.mobileGroupChevronOpen : ""}`}
+                    aria-hidden="true"
                   >
-                    <span>{item.label}</span>
-                    <ArrowIcon />
-                  </Link>
-                ))}
+                    <ChevronDown />
+                  </span>
+                </button>
+
+                <div
+                  id="mobile-info-submenu"
+                  className={`${styles.mobileSubMenu} ${mobileInfoOpen ? styles.mobileSubMenuOpen : ""}`}
+                >
+                  {moreMenu.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`${styles.mobileNavLink} ${styles.mobileSubNavLink} ${isCurrent(pathname, item.href) ? styles.mobileNavLinkActive : ""}`}
+                    >
+                      <span>{item.label}</span>
+                      <ArrowIcon />
+                    </Link>
+                  ))}
+                </div>
               </div>
             </nav>
 

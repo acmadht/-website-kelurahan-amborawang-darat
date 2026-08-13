@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { applyAmborawangPublicSettings } from "@/data/amborawang";
 import { demoSettings } from "@/data/demo";
@@ -60,6 +61,14 @@ function ArrowIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function ChevronIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -113,6 +122,7 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
   );
 
   const displayServices = rawServices.filter((item) => item.isActive !== false);
+  const [openService, setOpenService] = useState<string | null>(null);
   const serviceHours = parseServiceHours(settings.serviceHours);
   const whatsapp = normalizeWhatsapp(settings.whatsapp);
 
@@ -271,64 +281,87 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
 
             {displayServices.length ? (
               <div className={styles.servicesGrid}>
-                {displayServices.map((service, index) => (
-                <Reveal key={service.id ?? service.name} enabled={settings.animationEnabled} delay={index * 50}>
-                  <article id={service.slug || undefined} className={styles.serviceCard}>
-                    <div className={styles.serviceCardTop}>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <small>{service.category}</small>
-                    </div>
+                {displayServices.map((service, index) => {
+                  const serviceKey = service.id ?? service.slug ?? service.name;
+                  const isOpen = openService === serviceKey;
 
-                    <h3>{service.name}</h3>
-                    <p>{service.summary}</p>
+                  return (
+                    <Reveal key={serviceKey} enabled={settings.animationEnabled} delay={index * 50}>
+                      <article
+                        id={service.slug || undefined}
+                        className={`${styles.serviceCard} ${isOpen ? styles.serviceCardOpen : ""}`}
+                      >
+                        <div className={styles.serviceToggle}>
+                          <div className={styles.serviceCardTop}>
+                            <span>{String(index + 1).padStart(2, "0")}</span>
+                            <small>{service.category}</small>
+                          </div>
 
-                    <span className={styles.serviceSubheading}>Persyaratan</span>
-                    <div className={styles.requirements}>
-                      {(service.requirements?.length
-                        ? service.requirements
-                        : ["Konfirmasi persyaratan kepada petugas kelurahan"]
-                      ).map((item) => (
-                        <div key={item}>
-                          <span><CheckIcon /></span>
-                          <p>{item}</p>
+                          <h3>{service.name}</h3>
+                          <p>{service.summary}</p>
+
+                          <button
+                            type="button"
+                            className={styles.serviceToggleHint}
+                            onClick={() => setOpenService(isOpen ? null : serviceKey)}
+                            aria-expanded={isOpen}
+                            aria-controls={`service-detail-${index}`}
+                          >
+                            {isOpen ? "Tutup detail" : "Lihat detail"}
+                            <ChevronIcon />
+                          </button>
                         </div>
-                      ))}
-                    </div>
 
-                    {service.procedures?.length ? (
-                      <>
-                        <span className={styles.serviceSubheading}>Prosedur</span>
-                        <div className={styles.procedureList}>
-                          {service.procedures.map((item, procedureIndex) => (
-                            <div key={`${item}-${procedureIndex}`}>
-                              <span>{String(procedureIndex + 1).padStart(2, "0")}</span>
-                              <p>{item}</p>
-                            </div>
-                          ))}
+                        <div id={`service-detail-${index}`} className={styles.serviceBody}>
+                          <span className={styles.serviceSubheading}>Persyaratan</span>
+                          <div className={styles.requirements}>
+                            {(service.requirements?.length
+                              ? service.requirements
+                              : ["Konfirmasi persyaratan kepada petugas kelurahan"]
+                            ).map((item) => (
+                              <div key={item}>
+                                <span><CheckIcon /></span>
+                                <p>{item}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          {service.procedures?.length ? (
+                            <>
+                              <span className={styles.serviceSubheading}>Prosedur</span>
+                              <div className={styles.procedureList}>
+                                {service.procedures.map((item, procedureIndex) => (
+                                  <div key={`${item}-${procedureIndex}`}>
+                                    <span>{String(procedureIndex + 1).padStart(2, "0")}</span>
+                                    <p>{item}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          ) : null}
+
+                          <div className={styles.serviceMetaLine}>
+                            <span><small>Waktu</small><strong>{service.duration || "Konfirmasi petugas"}</strong></span>
+                            <span><small>Biaya</small><strong>{service.cost || "Konfirmasi petugas"}</strong></span>
+                          </div>
+
+                          <div className={styles.serviceActions}>
+                            <Link href="/kontak" className={styles.serviceLink}>
+                              {service.contact ? `Kontak: ${service.contact}` : "Konfirmasi Layanan"}
+                              <ArrowIcon size={16} />
+                            </Link>
+                            {service.documentUrl ? (
+                              <a href={service.documentUrl} target="_blank" rel="noopener noreferrer" className={styles.serviceDocumentLink}>
+                                Dokumen
+                                <ArrowIcon size={15} />
+                              </a>
+                            ) : null}
+                          </div>
                         </div>
-                      </>
-                    ) : null}
-
-                    <div className={styles.serviceMetaLine}>
-                      <span><small>Waktu</small><strong>{service.duration || "Konfirmasi petugas"}</strong></span>
-                      <span><small>Biaya</small><strong>{service.cost || "Konfirmasi petugas"}</strong></span>
-                    </div>
-
-                    <div className={styles.serviceActions}>
-                      <Link href="/kontak" className={styles.serviceLink}>
-                        {service.contact ? `Kontak: ${service.contact}` : "Konfirmasi Layanan"}
-                        <ArrowIcon size={16} />
-                      </Link>
-                      {service.documentUrl ? (
-                        <a href={service.documentUrl} target="_blank" rel="noopener noreferrer" className={styles.serviceDocumentLink}>
-                          Dokumen
-                          <ArrowIcon size={15} />
-                        </a>
-                      ) : null}
-                    </div>
-                  </article>
-                </Reveal>
-                ))}
+                      </article>
+                    </Reveal>
+                  );
+                })}
               </div>
             ) : (
               <div className={styles.emptyState}>

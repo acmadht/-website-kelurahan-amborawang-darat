@@ -2134,3 +2134,627 @@
     transform: none;
   }
 }
+
+/* =========================================================
+   MOBILE GOVERNMENT REFRESH
+   Ringkas, swipe-friendly, dan lebih dinamis di layar HP
+========================================================= */
+
+@media (max-width: 760px) {
+  .page {
+    background:
+      radial-gradient(circle at 100% 14%, rgba(36, 145, 224, .06), transparent 18%),
+      linear-gradient(180deg, #f5f8fb 0%, #ffffff 38%, #f4f7fa 100%);
+  }
+
+  .hero {
+    padding: 36px 0 40px;
+    background:
+      radial-gradient(circle at 90% 12%, rgba(89, 190, 255, .24), transparent 28%),
+      radial-gradient(circle at 0% 100%, rgba(30, 107, 199, .18), transparent 32%),
+      linear-gradient(145deg, #06152f 0%, #082a59 58%, #0b4a88 100%);
+  }
+
+  .hero::before {
+    top: -120px;
+    right: -155px;
+    width: 310px;
+    height: 310px;
+  }
+
+  .hero::after {
+    right: -110px;
+    bottom: -180px;
+    width: 330px;
+    height: 330px;
+  }
+
+  .heroGridTexture {
+    background-size: 34px 34px;
+    opacity: .065;
+  }
+
+  .govSeal {
+    gap: 7px;
+    padding: 7px 10px;
+    font-size: .54rem;
+  }
+
+  .govSeal svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .hero h1 {
+    max-width: 340px;
+    margin: 13px 0 12px;
+    font-size: clamp(2.15rem, 10.5vw, 3rem);
+    line-height: .98;
+    letter-spacing: -.042em;
+  }
+
+  .hero h1 strong {
+    margin-top: 4px;
+  }
+
+  .heroCopy > p {
+    max-width: 520px;
+    color: rgba(255,255,255,.7);
+    font-size: .76rem;
+    line-height: 1.58;
+  }
+
+  .navSection {
+    box-shadow: 0 7px 20px rgba(9, 38, 73, .055);
+  }
+
+  .sectionNav {
+    gap: 7px;
+    padding: 8px 0;
+  }
+
+  .sectionNav a {
+    padding: 8px 11px;
+    color: #34536e;
+    background: #f3f8fc;
+    border: 1px solid #e3edf5;
+    font-size: .64rem;
+  }
+
+  .sectionNav a:active {
+    color: #075f9f;
+    background: #e8f5fe;
+    transform: scale(.98);
+  }
+
+  .fullStructureSection,
+  .institutionSection,
+  .rtSection {
+    padding: 38px 0 42px;
+  }
+
+  .fullStructureSection {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(22,128,216,.085), transparent 26%),
+      linear-gradient(180deg, #f7fafe, #f4f7fb);
+  }
+
+  .fullStructureHeading {
+    margin-bottom: 18px;
+  }
+
+  .fullStructureHeading small,
+  .institutionHeading small,
+  .rtHeading small {
+    font-size: .55rem;
+    letter-spacing: .08em;
+  }
+
+  .fullStructureHeading h2,
+  .institutionHeading h2,
+  .rtHeading h2 {
+    margin-top: 6px;
+    font-size: clamp(1.38rem, 7vw, 1.78rem);
+    line-height: 1.13;
+    letter-spacing: -.028em;
+  }
+
+  .fullStructureHeading p,
+  .institutionHeading p {
+    margin-top: 8px;
+    font-size: .71rem;
+    line-height: 1.55;
+  }
+
+  .orgLeaderCard {
+    grid-template-columns: 112px minmax(0,1fr);
+    border-radius: 18px;
+    box-shadow: 0 16px 34px rgba(7,39,82,.14);
+  }
+
+  .orgLeaderPhoto,
+  .orgLeaderPhoto img {
+    min-height: 176px;
+    max-height: none;
+  }
+
+  .orgLeaderInfo {
+    padding: 17px 15px;
+  }
+
+  .orgLeaderInfo > span {
+    font-size: .51rem;
+  }
+
+  .orgLeaderInfo h3 {
+    margin: 6px 0 3px;
+    font-size: 1.2rem;
+  }
+
+  .orgLeaderInfo > strong {
+    font-size: .66rem;
+  }
+
+  .orgLeaderInfo p {
+    margin-top: 9px;
+    font-size: .64rem;
+    line-height: 1.48;
+  }
+
+  .orgConnector {
+    width: 2px;
+    height: 24px;
+    margin: 0 auto;
+    background: linear-gradient(#b9d4e8, rgba(185,212,232,.15));
+  }
+
+  .orgConnector::before,
+  .orgConnector::after,
+  .orgConnector span {
+    display: none;
+  }
+
+  .orgUnitGrid {
+    display: grid;
+    grid-template-columns: none;
+    grid-template-rows: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(278px, 84vw);
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 2px 2px 12px;
+    scroll-padding-inline: 2px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .orgUnitGrid::-webkit-scrollbar,
+  .institutionGrid::-webkit-scrollbar,
+  .rtGrid::-webkit-scrollbar,
+  .rtMetaStrip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .orgUnitGrid > * {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .orgUnitCard {
+    border-radius: 16px;
+    box-shadow: 0 9px 24px rgba(7,26,61,.055);
+  }
+
+  .orgUnitHeader {
+    gap: 10px;
+    padding: 12px 13px;
+  }
+
+  .orgUnitHeader > div {
+    gap: 9px;
+  }
+
+  .orgUnitHeader > div > span {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: .55rem;
+  }
+
+  .orgUnitHeader h3 {
+    font-size: .8rem;
+  }
+
+  .orgUnitHeader p {
+    font-size: .54rem;
+  }
+
+  .orgUnitHeader > strong {
+    font-size: 1.12rem;
+  }
+
+  .orgHeadPerson {
+    grid-template-columns: 70px minmax(0,1fr);
+    gap: 11px;
+    padding: 13px;
+  }
+
+  .orgHeadPhoto {
+    width: 70px;
+    height: 78px;
+    border-radius: 10px;
+  }
+
+  .orgHeadPerson small {
+    font-size: .5rem;
+  }
+
+  .orgHeadPerson h4 {
+    margin: 5px 0 2px;
+    font-size: .86rem;
+  }
+
+  .orgHeadPerson span {
+    font-size: .6rem;
+  }
+
+  .orgVacantHead {
+    padding: 13px;
+  }
+
+  .orgVacantHead span {
+    padding: 10px 11px;
+    font-size: .61rem;
+  }
+
+  .orgStaffBlock {
+    padding: 12px 13px 13px;
+  }
+
+  .orgStaffTitle {
+    margin-bottom: 8px;
+  }
+
+  .orgStaffTitle span {
+    font-size: .52rem;
+  }
+
+  .orgStaffItem {
+    grid-template-columns: 38px minmax(0,1fr);
+    gap: 9px;
+    padding: 7px 8px;
+    border-radius: 10px;
+  }
+
+  .orgStaffAvatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .orgStaffItem strong {
+    font-size: .66rem;
+  }
+
+  .orgStaffItem span {
+    font-size: .54rem;
+  }
+
+  .institutionSection {
+    background:
+      radial-gradient(circle at 0% 18%, rgba(42,147,221,.055), transparent 22%),
+      #fff;
+  }
+
+  .institutionHeading {
+    margin-bottom: 16px;
+  }
+
+  .institutionHeading::after {
+    content: "Geser untuk melihat →";
+    display: inline-flex;
+    margin-top: 10px;
+    padding: 5px 8px;
+    color: #167bd0;
+    background: #edf7ff;
+    border: 1px solid #d9ecfa;
+    border-radius: 999px;
+    font-size: .52rem;
+    font-weight: 800;
+  }
+
+  .institutionGrid {
+    display: grid;
+    grid-template-columns: none;
+    grid-template-rows: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(246px, 76vw);
+    gap: 11px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 1px 2px 12px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .institutionGrid > * {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .institutionGrid .personCard {
+    display: grid;
+    grid-template-columns: 96px minmax(0,1fr);
+    min-height: 132px;
+    border-radius: 15px;
+  }
+
+  .institutionGrid .personPhoto {
+    min-height: 132px;
+    aspect-ratio: auto;
+  }
+
+  .institutionGrid .personBody {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .institutionGrid .personMetaRow > span {
+    font-size: .48rem;
+  }
+
+  .institutionGrid .personBody h3 {
+    margin-top: 5px;
+    font-size: .78rem;
+  }
+
+  .institutionGrid .personBody > strong {
+    font-size: .59rem;
+  }
+
+  .emptyBadge,
+  .verifyBadge {
+    top: 7px;
+    left: 7px;
+    max-width: calc(100% - 14px);
+    padding: 4px 6px;
+    font-size: .43rem;
+  }
+
+  .rtSection {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(77,181,255,.16), transparent 24%),
+      radial-gradient(circle at 0% 100%, rgba(22,99,188,.12), transparent 28%),
+      #071a38;
+  }
+
+  .rtHeading {
+    gap: 7px;
+    margin-bottom: 13px;
+  }
+
+  .rtHeading::after {
+    content: "Geser data RT →";
+    display: inline-flex;
+    margin-top: 2px;
+    padding: 5px 8px;
+    color: #8bd5ff;
+    background: rgba(125,204,255,.075);
+    border: 1px solid rgba(125,204,255,.12);
+    border-radius: 999px;
+    font-size: .52rem;
+    font-weight: 800;
+  }
+
+  .rtMetaStrip {
+    display: grid;
+    grid-template-columns: none;
+    grid-template-rows: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(182px, 64vw);
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 -2px 14px;
+    padding: 1px 2px 7px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rtMetaStrip > div {
+    min-height: 59px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.085) !important;
+    border-radius: 12px;
+    scroll-snap-align: start;
+  }
+
+  .rtMetaStrip span {
+    font-size: .49rem;
+  }
+
+  .rtMetaStrip strong {
+    margin-top: 3px;
+    font-size: .66rem;
+  }
+
+  .rtGrid {
+    display: grid;
+    grid-template-columns: none;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(142px, 44vw);
+    gap: 9px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 1px 2px 12px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rtGrid > * {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .rtGrid .personCard {
+    height: 100%;
+    border-radius: 14px;
+  }
+
+  .rtGrid .personPhoto {
+    aspect-ratio: 1.18 / 1;
+  }
+
+  .rtGrid .personBody,
+  .rtGrid .personCardCompact .personBody {
+    min-height: 88px;
+    padding: 10px;
+  }
+
+  .rtGrid .personMetaRow > span {
+    font-size: .46rem;
+  }
+
+  .rtGrid .personBody h3 {
+    margin: 5px 0 2px;
+    font-size: .72rem;
+  }
+
+  .rtGrid .personBody > strong {
+    font-size: .55rem;
+  }
+
+  .dataNotice {
+    gap: 12px;
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 13px;
+  }
+
+  .dataNotice span {
+    font-size: .5rem;
+  }
+
+  .dataNotice strong {
+    font-size: .64rem;
+    line-height: 1.48;
+  }
+
+  .noticeLink {
+    min-height: 36px;
+    padding: 0 11px;
+    color: #071d3d;
+    background: #fff;
+    border-radius: 9px;
+    font-size: .62rem;
+  }
+
+  .ctaSection {
+    padding: 34px 0 48px;
+  }
+
+  .cta {
+    gap: 17px;
+    padding: 20px 18px;
+    border-radius: 17px;
+    box-shadow: 0 14px 32px rgba(7,26,61,.09);
+  }
+
+  .cta small {
+    font-size: .54rem;
+  }
+
+  .cta h2 {
+    margin: 5px 0 6px;
+    font-size: 1.34rem;
+    line-height: 1.16;
+  }
+
+  .cta p {
+    font-size: .68rem;
+    line-height: 1.5;
+  }
+
+  .ctaActions {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,.82fr);
+    gap: 7px;
+  }
+
+  .ctaPrimary,
+  .ctaSecondary {
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: .61rem;
+    white-space: nowrap;
+  }
+
+  .orgUnitCard:active,
+  .institutionGrid .personCard:active,
+  .rtGrid .personCard:active {
+    transform: scale(.992);
+  }
+}
+
+@media (max-width: 430px) {
+  .hero {
+    padding: 31px 0 35px;
+  }
+
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .heroCopy > p {
+    font-size: .72rem;
+  }
+
+  .orgLeaderCard {
+    grid-template-columns: 100px minmax(0,1fr);
+  }
+
+  .orgLeaderPhoto,
+  .orgLeaderPhoto img {
+    min-height: 168px;
+  }
+
+  .orgLeaderInfo {
+    padding: 15px 13px;
+  }
+
+  .orgLeaderInfo h3 {
+    font-size: 1.08rem;
+  }
+
+  .orgLeaderInfo p {
+    font-size: .61rem;
+  }
+
+  .orgUnitGrid {
+    grid-auto-columns: minmax(270px, 86vw);
+  }
+
+  .institutionGrid {
+    grid-auto-columns: minmax(238px, 78vw);
+  }
+
+  .rtGrid {
+    grid-auto-columns: minmax(136px, 44vw);
+  }
+
+  .ctaActions {
+    grid-template-columns: 1fr;
+  }
+}

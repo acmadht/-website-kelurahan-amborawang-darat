@@ -1369,3 +1369,701 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   MOBILE PROFILE EXPERIENCE
+   Lebih ringkas, hidup, dan tidak menumpuk panjang di HP.
+   Desktop/tablet tetap mengikuti layout utama di atas.
+========================================================= */
+@media (max-width: 760px) {
+  .page {
+    background:
+      radial-gradient(circle at 100% 18%, rgba(52, 153, 235, .08), transparent 18rem),
+      #f4f7fb;
+  }
+
+  /* Hero lebih ringkas dan editorial */
+  .hero {
+    padding: 34px 0 46px;
+    background:
+      radial-gradient(circle at 92% 5%, rgba(83, 184, 255, .22), transparent 34%),
+      linear-gradient(145deg, #06152f 0%, #082a59 58%, #0a3f7b 100%);
+  }
+
+  .heroInner {
+    gap: 22px;
+  }
+
+  .heroCopy {
+    padding-right: 8px;
+  }
+
+  .heroCopy h1 {
+    margin: 12px 0 12px;
+    max-width: 92%;
+    font-size: clamp(2.18rem, 10.3vw, 3.05rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+
+  .heroCopy p {
+    display: -webkit-box;
+    overflow: hidden;
+    max-width: 94%;
+    font-size: .84rem;
+    line-height: 1.62;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .eyebrowLight,
+  .eyebrow {
+    gap: 7px;
+    font-size: .58rem;
+    letter-spacing: .1em;
+  }
+
+  .eyebrowLight::before,
+  .eyebrow::before {
+    width: 18px;
+    flex-basis: 18px;
+  }
+
+  .heroPhotoCard {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    transform: none;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, .21);
+  }
+
+  .heroPhoto {
+    aspect-ratio: 16 / 8.9;
+  }
+
+  .heroPhotoMeta {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    gap: 2px;
+    padding: 30px 14px 12px;
+    background: linear-gradient(transparent, rgba(3, 16, 37, .86));
+  }
+
+  .heroPhotoMeta span {
+    font-size: .74rem;
+  }
+
+  .heroPhotoMeta small {
+    font-size: .58rem;
+  }
+
+  /* Ringkasan menjadi rail swipe, tidak 4 kartu menumpuk */
+  .quickBand {
+    margin-top: -18px;
+    padding-bottom: 36px;
+  }
+
+  .quickBandGrid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(155px, 73vw);
+    grid-template-columns: none;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-right: -16px;
+    padding: 0 16px 8px 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .quickBandGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quickBandGrid > div,
+  .quickBandGrid > div + div,
+  .quickBandGrid > div:nth-child(even),
+  .quickBandGrid > div:nth-child(n+3) {
+    min-width: 0;
+    border: 0;
+    scroll-snap-align: start;
+  }
+
+  .quickBandIntro,
+  .quickBandItem {
+    min-height: 104px;
+    height: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, .96);
+    border: 1px solid #dfe8f1;
+    border-radius: 17px;
+    box-shadow: 0 10px 26px rgba(8, 33, 69, .07);
+  }
+
+  .quickBandIntro {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(46, 146, 228, .13), transparent 46%),
+      #fff;
+  }
+
+  .quickBandIntro strong {
+    font-size: .95rem;
+  }
+
+  .quickBandIntro p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .66rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .quickBandItem strong {
+    font-size: 1.3rem;
+  }
+
+  /* Semua section dipadatkan */
+  .historyIntro,
+  .visionSection,
+  .potentialSection,
+  .facilitySection,
+  .timelineSection,
+  .regionSection,
+  .prioritySection {
+    padding: 48px 0;
+  }
+
+  .statsSection {
+    padding-bottom: 48px;
+  }
+
+  .sectionHeading,
+  .sectionHeadingDark {
+    margin-bottom: 22px;
+  }
+
+  .sectionHeading h2,
+  .sectionHeadingDark h2,
+  .facilityHeading h2,
+  .missionHeading h2,
+  .article h2 {
+    font-size: clamp(1.75rem, 8.2vw, 2.25rem);
+    line-height: 1.08;
+    letter-spacing: -.035em;
+  }
+
+  .sectionHeading p,
+  .sectionHeadingDark p,
+  .facilityHeading > p {
+    font-size: .78rem;
+    line-height: 1.62;
+  }
+
+  /* Sejarah: label kecil seperti chip, teks lebih rapat */
+  .twoCol {
+    gap: 16px;
+  }
+
+  .sectionLabelBlock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sectionIndex {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: #1679c9;
+    background: #e9f4fd;
+    border-radius: 10px;
+    font-size: .6rem;
+  }
+
+  .article h2 {
+    margin-bottom: 14px;
+  }
+
+  .article p {
+    margin-bottom: 13px;
+    color: #607083;
+    font-size: .82rem;
+    line-height: 1.68;
+  }
+
+  .factCallout {
+    margin-top: 18px;
+    padding: 14px 15px;
+    border-left-width: 3px;
+    border-radius: 0 12px 12px 0;
+    font-size: .75rem;
+    line-height: 1.55;
+  }
+
+  /* Statistik jadi 2x2, lebih visual namun tetap pendek */
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .statsGrid > div,
+  .statsGrid > div + div,
+  .statsGrid > div:nth-child(even),
+  .statsGrid > div:nth-child(n+3) {
+    border: 0;
+  }
+
+  .statItem {
+    min-height: 108px;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #dfe7ef;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(7, 26, 61, .05);
+  }
+
+  .statItem strong {
+    font-size: 1.45rem;
+  }
+
+  .statItem span {
+    margin-top: 7px;
+    font-size: .68rem;
+  }
+
+  .statItem small {
+    font-size: .56rem;
+    line-height: 1.35;
+  }
+
+  /* Timeline menjadi swipe cards */
+  .timeline {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(240px, 78vw);
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-right: -16px;
+    padding: 2px 16px 8px 0;
+    border-top: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .timeline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .timeline > div {
+    scroll-snap-align: start;
+  }
+
+  .timelineItem {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 184px;
+    height: 100%;
+    padding: 18px;
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 17px;
+  }
+
+  .timelineItem::before,
+  .timelineMarker::after {
+    display: none;
+  }
+
+  .timelineMarker span {
+    display: inline-flex;
+    width: fit-content;
+    padding: 6px 9px;
+    color: #8dd4ff;
+    background: rgba(125, 204, 255, .08);
+    border-radius: 8px;
+    font-size: .64rem;
+  }
+
+  .timelineContent h3 {
+    margin-bottom: 7px;
+    font-size: 1rem;
+  }
+
+  .timelineContent p {
+    font-size: .75rem;
+    line-height: 1.58;
+  }
+
+  /* Visi + misi: kartu kuat, misi swipe */
+  .visionGrid {
+    gap: 24px;
+  }
+
+  .visionCard {
+    padding: 22px 19px;
+    border-radius: 19px;
+  }
+
+  .visionCard blockquote {
+    margin: 15px 0 13px;
+    font-size: 1.42rem;
+    line-height: 1.33;
+  }
+
+  .visionCard p {
+    font-size: .72rem;
+  }
+
+  .missionHeading {
+    margin-bottom: 16px;
+  }
+
+  .missionList {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(230px, 78vw);
+    grid-template-columns: none;
+    gap: 10px;
+    overflow-x: auto;
+    margin-right: -16px;
+    padding: 0 16px 7px 0;
+    border-top: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .missionList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .missionList > div {
+    scroll-snap-align: start;
+  }
+
+  .missionItem {
+    display: block;
+    min-height: 132px;
+    height: 100%;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #dfe7ef;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(8, 31, 67, .045);
+  }
+
+  .missionItem span {
+    display: inline-grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    margin-bottom: 13px;
+    background: #eaf5fd;
+    border-radius: 9px;
+  }
+
+  .missionItem p {
+    font-size: .76rem;
+    line-height: 1.58;
+  }
+
+  /* Wilayah: fakta swipe, batas 2x2 */
+  .regionFacts {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(135px, 43vw);
+    grid-template-columns: none;
+    gap: 9px;
+    overflow-x: auto;
+    margin: -4px -16px 18px 0;
+    padding: 0 16px 6px 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .regionFacts::-webkit-scrollbar {
+    display: none;
+  }
+
+  .regionFacts > div {
+    scroll-snap-align: start;
+  }
+
+  .regionFact {
+    min-height: 78px;
+    padding: 13px 14px;
+    border-radius: 14px;
+  }
+
+  .regionFact span {
+    font-size: 1rem;
+  }
+
+  .regionFact small {
+    font-size: .62rem;
+  }
+
+  .mapCard {
+    border-radius: 18px;
+  }
+
+  .mapTop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 13px;
+  }
+
+  .mapTop a {
+    font-size: .59rem;
+  }
+
+  .mapImageWrap {
+    min-height: 0;
+  }
+
+  .boundaryList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    gap: 1px;
+    background: rgba(255, 255, 255, .09);
+    border-radius: 17px;
+  }
+
+  .boundaryList > div,
+  .boundaryList > div + div {
+    border: 0;
+  }
+
+  .boundaryItem {
+    min-height: 92px;
+    padding: 14px;
+    background: #0b2448;
+  }
+
+  .boundaryItem strong {
+    margin-top: 5px;
+    font-size: .74rem;
+  }
+
+  .regionNote {
+    margin-top: 18px;
+    font-size: .7rem;
+    line-height: 1.55;
+  }
+
+  /* Potensi menjadi carousel */
+  .potentialGrid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(230px, 77vw);
+    grid-template-columns: none;
+    gap: 11px;
+    overflow-x: auto;
+    margin-right: -16px;
+    padding: 1px 16px 8px 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .potentialGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .potentialGrid > div {
+    scroll-snap-align: start;
+  }
+
+  .potentialCard {
+    min-height: 180px;
+    height: 100%;
+    padding: 18px;
+    border-radius: 17px;
+  }
+
+  .potentialCard h3 {
+    font-size: .98rem;
+  }
+
+  .potentialCard p {
+    font-size: .73rem;
+    line-height: 1.55;
+  }
+
+  /* Fasilitas: 2 kolom compact */
+  .facilityHeading {
+    margin-bottom: 17px;
+  }
+
+  .facilityLead {
+    gap: 8px;
+    padding: 14px;
+    margin-bottom: 13px;
+    border-radius: 14px;
+  }
+
+  .facilityLead span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .facilityLead strong {
+    font-size: .78rem;
+  }
+
+  .facilityLead p {
+    font-size: .68rem;
+  }
+
+  .facilityList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    border: 0;
+  }
+
+  .facilityList > div {
+    border: 0;
+  }
+
+  .facilityItem {
+    display: block;
+    min-height: 104px;
+    padding: 13px;
+    background: #f8fbfe;
+    border: 1px solid #dfe7ef;
+    border-radius: 14px;
+  }
+
+  .facilityItem span {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .facilityItem strong {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .74rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Prioritas juga swipe agar tidak panjang */
+  .priorityGrid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 74vw);
+    grid-template-columns: none;
+    gap: 10px;
+    overflow-x: auto;
+    margin-right: -16px;
+    padding: 1px 16px 8px 0;
+    border: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .priorityGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .priorityGrid > div {
+    scroll-snap-align: start;
+  }
+
+  .priorityItem {
+    min-height: 126px;
+    height: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 15px;
+  }
+
+  .priorityItem strong {
+    font-size: .82rem;
+  }
+
+  /* CTA terakhir ringkas */
+  .updateSection {
+    padding: 38px 0 54px;
+  }
+
+  .updatePanel {
+    position: relative;
+    overflow: hidden;
+    gap: 13px;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .updateIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .updateCopy h2 {
+    margin: 5px 0 6px;
+    font-size: 1.3rem;
+  }
+
+  .updateCopy p {
+    font-size: .72rem;
+    line-height: 1.5;
+  }
+
+  .updateActions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    min-height: 43px;
+    padding: 0 11px;
+    border-radius: 10px;
+    font-size: .67rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .heroCopy h1 {
+    font-size: 2.15rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .statItem {
+    min-height: 102px;
+    padding: 13px;
+  }
+
+  .facilityList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .updateActions {
+    grid-template-columns: 1fr;
+  }
+}

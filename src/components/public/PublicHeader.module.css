@@ -216,13 +216,17 @@
   position: absolute;
   top: calc(100% + 4px);
   right: -8px;
-  width: 320px;
+  width: min(540px, calc(100vw - 32px));
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   visibility: hidden;
   overflow: hidden;
+  padding: 8px;
   color: #18304e;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.98);
   border: 1px solid #e4eaf1;
-  border-radius: 17px;
+  border-radius: 19px;
   opacity: 0;
   box-shadow: 0 24px 65px rgba(7, 26, 61, 0.2);
   transform: translateY(9px);
@@ -240,6 +244,8 @@
 }
 
 .dropdownHeader {
+  grid-column: 1 / -1;
+  margin: -8px -8px 0;
   padding: 16px 17px 13px;
   background: linear-gradient(135deg, #f1f8ff, #ffffff);
   border-bottom: 1px solid #e9eef4;
@@ -262,21 +268,22 @@
 }
 
 .dropdownItem {
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 11px 15px;
+  gap: 12px;
+  padding: 12px 13px;
   color: #213a58;
+  background: #f8fbff;
+  border: 1px solid #e9f0f7;
+  border-radius: 13px;
   text-decoration: none;
-  border-bottom: 1px solid #eef2f6;
   transition:
     background-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.dropdownItem:last-child {
-  border-bottom: 0;
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .dropdownItem > span {
@@ -290,18 +297,21 @@
 }
 
 .dropdownItem small {
-  display: block;
-  margin-top: 3px;
+  display: -webkit-box;
+  margin-top: 4px;
   overflow: hidden;
   color: #8090a2;
-  font-size: 0.69rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.67rem;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .dropdownItem:hover {
   background: #f1f8ff;
-  transform: translateX(2px);
+  border-color: #d9eaf8;
+  box-shadow: 0 8px 18px rgba(12, 67, 114, 0.07);
+  transform: translateY(-1px);
 }
 
 /* =========================================================
@@ -941,6 +951,8 @@
   .dropdownItem,
   .searchButton,
   .mobileNavigation,
+  .mobileGroupChevron,
+  .mobileSubMenu,
   .searchResultItem {
     transition: none;
   }
@@ -948,21 +960,91 @@
 
 /* Kelompok menu pada navigasi mobile */
 .mobileMenuGroup {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 5px;
 }
 
-.mobileMenuGroupTitle {
-  padding: 8px 12px 5px;
-  color: #72c6ff;
-  font-size: 0.66rem;
-  font-weight: 850;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+.mobileGroupButton {
+  width: 100%;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobileGroupChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.mobileGroupChevronOpen {
+  transform: rotate(180deg);
+}
+
+.mobileSubMenu {
+  max-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  visibility: hidden;
+  overflow: hidden;
+  padding: 0 4px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    max-height 0.28s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.28s ease,
+    padding 0.2s ease;
+}
+
+.mobileSubMenuOpen {
+  max-height: 260px;
+  visibility: visible;
+  padding: 8px 4px 4px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .mobileSubNavLink {
-  margin-left: 8px;
-  padding-left: 14px;
+  min-width: 0;
+  min-height: 58px;
+  margin-left: 0;
+  padding: 9px 10px;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 11px;
+  font-size: 0.76rem;
+  line-height: 1.22;
 }
+
+.mobileSubNavLink > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileSubNavLink svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  opacity: 0.72;
+}
+
+.mobileSubNavLink:hover,
+.mobileSubNavLink:focus-visible {
+  background: rgba(75, 171, 255, 0.12);
+  border-color: rgba(104, 194, 255, 0.2);
+}
+
+.mobileSubNavLink.mobileNavLinkActive {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(52, 150, 255, 0.24), rgba(255, 255, 255, 0.08));
+  border-color: rgba(103, 193, 255, 0.24);
+}
+
+
