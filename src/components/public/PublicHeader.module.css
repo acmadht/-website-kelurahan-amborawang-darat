@@ -9,12 +9,10 @@
   width: 100%;
   color: #ffffff;
   background:
-    linear-gradient(
-      90deg,
+    linear-gradient(90deg,
       #0a1d42 0%,
       #102a5f 55%,
-      #0d224c 100%
-    );
+      #0d224c 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 6px 24px rgba(5, 20, 45, 0.12);
   backdrop-filter: blur(16px);
@@ -26,11 +24,9 @@
 
 .siteHeader.scrolled {
   background:
-    linear-gradient(
-      90deg,
+    linear-gradient(90deg,
       rgba(8, 25, 58, 0.98),
-      rgba(14, 42, 92, 0.98)
-    );
+      rgba(14, 42, 92, 0.98));
   box-shadow: 0 10px 30px rgba(5, 20, 45, 0.2);
 }
 
@@ -181,11 +177,9 @@
 .navLinkActive {
   color: #ffffff;
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       rgba(54, 154, 255, 0.18),
-      rgba(255, 255, 255, 0.07)
-    );
+      rgba(255, 255, 255, 0.07));
 }
 
 .navLinkActive::after {
@@ -286,7 +280,7 @@
     box-shadow 0.15s ease;
 }
 
-.dropdownItem > span {
+.dropdownItem>span {
   min-width: 0;
 }
 
@@ -349,11 +343,9 @@
 .searchButton:hover,
 .searchButton:focus-visible {
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       rgba(42, 144, 244, 0.24),
-      rgba(255, 255, 255, 0.1)
-    );
+      rgba(255, 255, 255, 0.1));
   border-color: rgba(85, 182, 255, 0.44);
   box-shadow: 0 8px 24px rgba(3, 18, 42, 0.17);
   transform: translateY(-1px);
@@ -623,7 +615,7 @@
   font-size: 0.74rem;
 }
 
-.quickSearch > span {
+.quickSearch>span {
   display: block;
   margin-bottom: 9px;
   color: #718196;
@@ -715,7 +707,7 @@
   text-transform: uppercase;
 }
 
-.resultBody > strong {
+.resultBody>strong {
   display: block;
   margin-top: 3px;
   color: #173652;
@@ -944,6 +936,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .siteHeader,
   .navLink,
   .dropdownMenu,
@@ -1022,7 +1015,7 @@
   line-height: 1.22;
 }
 
-.mobileSubNavLink > span:first-child {
+.mobileSubNavLink>span:first-child {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1046,5 +1039,3 @@
   background: linear-gradient(135deg, rgba(52, 150, 255, 0.24), rgba(255, 255, 255, 0.08));
   border-color: rgba(103, 193, 255, 0.24);
 }
-
-
