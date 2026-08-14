@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { setDocument } from "@/lib/firebase/firestore-rest-admin";
 
 export const runtime = "nodejs";
 
@@ -35,7 +34,8 @@ export async function POST(request: Request) {
     }
 
     const id = ticket("SR");
-    await getAdminDb().collection("serviceRequests").doc(id).set({
+    const now = new Date().toISOString();
+    await setDocument("serviceRequests", id, {
       ticketId: id,
       name,
       nik,
@@ -46,13 +46,13 @@ export async function POST(request: Request) {
       purpose,
       status: "Baru",
       source: "website",
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
+      createdAt: now,
+      updatedAt: now,
+    }, false);
 
     return NextResponse.json({ ok: true, ticketId: id });
   } catch (error) {
     console.error("[layanan-surat]", error);
-    return NextResponse.json({ error: "Permohonan belum dapat dikirim." }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Permohonan belum dapat dikirim." }, { status: 500 });
   }
 }

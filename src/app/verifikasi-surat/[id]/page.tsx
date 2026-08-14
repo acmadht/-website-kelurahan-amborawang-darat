@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin-db";
 import styles from "@/components/public/PublicServicePortal.module.css";
 
 export const runtime = "nodejs";

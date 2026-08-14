@@ -1,29 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { listDocuments } from "@/lib/firebase/firestore-rest-admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function safeDate(value: unknown) {
-  if (!value || typeof value !== "object") return "";
-  const maybe = value as { toDate?: () => Date };
-  try { return maybe.toDate?.().toISOString().slice(0, 10) ?? ""; } catch { return ""; }
+  if (typeof value !== "string") return "";
+  return value.slice(0, 10);
 }
 
 export async function GET(request: NextRequest) {
-  const expected = process.env.SPREADSHEET_SYNC_SECRET?.trim();
-  if (!expected || request.headers.get("x-sync-secret") !== expected) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-  const type = request.nextUrl.searchParams.get("type");
-  const db = getAdminDb();
+  try {
+    const expected = process.env.SPREADSHEET_SYNC_SECRET?.trim();
+    if (!expected || request.headers.get("x-sync-secret") !== expected) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const type = request.nextUrl.searchParams.get("type");
 
-  if (type === "surat") {
-    const snap = await db.collection("serviceRequests").where("source", "==", "website").limit(500).get();
-    const rows = snap.docs.map((doc) => {
-      const d = doc.data();
-      return {
-        "ID Surat": doc.id,
+    if (type === "surat") {
+      const docs = (await listDocuments("serviceRequests", 500)).filter((d) => d.source === "website");
+      const rows = docs.map((d) => ({
+        "ID Surat": d.id,
         "Tanggal Permohonan": safeDate(d.createdAt),
         "Nama Pemohon": String(d.name ?? ""),
         "NIK": String(d.nik ?? ""),
@@ -36,17 +33,14 @@ export async function GET(request: NextRequest) {
         "Tanggal Selesai": String(d.completedDate ?? ""),
         "Link Dokumen": String(d.documentUrl ?? ""),
         "Keterangan": String(d.publicNote ?? ""),
-      };
-    });
-    return NextResponse.json({ ok: true, rows });
-  }
+      }));
+      return NextResponse.json({ ok: true, rows });
+    }
 
-  if (type === "pengaduan") {
-    const snap = await db.collection("complaints").where("source", "==", "website").limit(500).get();
-    const rows = snap.docs.map((doc) => {
-      const d = doc.data();
-      return {
-        "ID Pengaduan": doc.id,
+    if (type === "pengaduan") {
+      const docs = (await listDocuments("complaints", 500)).filter((d) => d.source === "website");
+      const rows = docs.map((d) => ({
+        "ID Pengaduan": d.id,
         "Tanggal": safeDate(d.createdAt),
         "Nama Pelapor": String(d.name ?? ""),
         "Kontak": String(d.phone ?? ""),
@@ -59,10 +53,13 @@ export async function GET(request: NextRequest) {
         "Petugas": String(d.staff ?? ""),
         "Tanggal Selesai": String(d.completedDate ?? ""),
         "Keterangan": String(d.publicNote ?? ""),
-      };
-    });
-    return NextResponse.json({ ok: true, rows });
-  }
+      }));
+      return NextResponse.json({ ok: true, rows });
+    }
 
-  return NextResponse.json({ ok: false, error: "Jenis inbox tidak valid." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Jenis inbox tidak valid." }, { status: 400 });
+  } catch (error) {
+    console.error("[spreadsheet-inbox]", error);
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Gagal membaca inbox." }, { status: 500 });
+  }
 }

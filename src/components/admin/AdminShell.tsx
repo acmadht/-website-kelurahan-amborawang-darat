@@ -40,12 +40,16 @@ const profileItems: MenuItem[] = [
 const informationItems: MenuItem[] = [
   { label: "Wilayah", href: "/admin/wilayah", code: "WL" },
   { label: "Data RT", href: "/admin/rt", code: "RT" },
+  { label: "UMKM", href: "/admin/umkm", code: "UM" },
+  { label: "Fasilitas", href: "/admin/fasilitas", code: "FS" },
   { label: "Galeri", href: "/admin/galeri", code: "GL" },
   { label: "Dokumen", href: "/admin/dokumen", code: "DK" },
   { label: "Kontak & Jam Layanan", href: "/admin/kontak", code: "KT" },
 ];
 
 const systemBaseItems: MenuItem[] = [
+  { label: "Permohonan Surat", href: "/admin/surat", code: "SR" },
+  { label: "Pengaduan", href: "/admin/pengaduan", code: "AD" },
   { label: "Pesan Masuk", href: "/admin/pesan", code: "PS" },
   { label: "Pengaturan Website", href: "/admin/pengaturan", code: "ST" },
   { label: "Pengguna Admin", href: "/admin/pengguna", code: "US" },

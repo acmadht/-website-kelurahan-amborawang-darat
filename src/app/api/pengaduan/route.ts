@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { setDocument } from "@/lib/firebase/firestore-rest-admin";
 
 export const runtime = "nodejs";
 function clean(value: unknown, max = 1000) { return String(value ?? "").trim().slice(0, max); }
@@ -24,14 +23,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nama, kontak, kategori, dan isi pengaduan wajib diisi." }, { status: 400 });
     }
     const id = ticket("PG");
-    await getAdminDb().collection("complaints").doc(id).set({
+    const now = new Date().toISOString();
+    await setDocument("complaints", id, {
       ticketId: id, name, phone, rt, category, location, message,
-      status: "Baru", source: "website",
-      createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
-    });
+      status: "Baru", source: "website", createdAt: now, updatedAt: now,
+    }, false);
     return NextResponse.json({ ok: true, ticketId: id });
   } catch (error) {
     console.error("[pengaduan]", error);
-    return NextResponse.json({ error: "Pengaduan belum dapat dikirim." }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Pengaduan belum dapat dikirim." }, { status: 500 });
   }
 }

@@ -16,6 +16,10 @@ const statsConfig = [
   { collection: "documents", label: "Dokumen", href: "/admin/dokumen", code: "DK" },
   { collection: "officials", label: "Aparatur", href: "/admin/aparatur", code: "PM" },
   { collection: "rts", label: "RT", href: "/admin/rt", code: "RT" },
+  { collection: "umkm", label: "UMKM", href: "/admin/umkm", code: "UM" },
+  { collection: "facilities", label: "Fasilitas", href: "/admin/fasilitas", code: "FS" },
+  { collection: "serviceRequests", label: "Surat", href: "/admin/surat", code: "SR" },
+  { collection: "complaints", label: "Pengaduan", href: "/admin/pengaduan", code: "AD" },
 ] as const;
 
 const quickActions = [

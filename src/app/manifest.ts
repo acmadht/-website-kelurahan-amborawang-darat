@@ -4,7 +4,7 @@ import type { SiteSettings } from "@/types";
 
 async function getPublicSettings(): Promise<SiteSettings> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb().collection("siteSettings").doc("main").get();
     if (!snapshot.exists) return demoSettings;
     return { ...demoSettings, ...(snapshot.data() as Partial<SiteSettings>) };

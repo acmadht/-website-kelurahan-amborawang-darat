@@ -25,7 +25,7 @@ export function absoluteUrl(value?: string) {
 
 export async function getServerSettings(): Promise<SiteSettings> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb().collection("siteSettings").doc("main").get();
     if (!snapshot.exists) return demoSettings;
 
@@ -67,7 +67,7 @@ export async function getServerDocument<T>(
   fallback: T,
 ): Promise<T> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb().collection(collectionName).doc(documentId).get();
     if (!snapshot.exists) return fallback;
     const remote = toSerializableValue(snapshot.data()) as Partial<T>;
@@ -82,7 +82,7 @@ export async function getServerDocument<T>(
 
 export async function getServerCollection<T>(collectionName: string): Promise<T[]> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb().collection(collectionName).get();
     return snapshot.docs.map((doc) =>
       toSerializableValue({ id: doc.id, ...doc.data() }),
@@ -456,7 +456,7 @@ export function serializePost(post: PostItem): PostItem {
 
 export async function getDynamicPublishedPostsServer(): Promise<PostItem[]> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb()
       .collection("posts")
       .where("status", "==", "published")
@@ -477,7 +477,7 @@ export async function getDynamicKknPublishedPostsServer(): Promise<PostItem[]> {
 
 export async function getPublicPostBySlugServer(slug: string): Promise<PostItem | undefined> {
   try {
-    const { getAdminDb } = await import("@/lib/firebase/admin");
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
     const snapshot = await getAdminDb()
       .collection("posts")
       .where("slug", "==", slug)

@@ -3,20 +3,39 @@
  * Header tabel harus berada pada baris 4, sesuai master spreadsheet.
  */
 
-const SYNC_SHEETS = [
-  "Data RT",
-  "Pemerintahan",
-  "Kegiatan",
-  "Agenda",
-  "UMKM",
-  "Fasilitas",
-  "Surat",
-  "Pengaduan",
-];
+const SHEET_SCHEMAS = {
+  "Data RT": ["No","RT","Nama Ketua RT","Foto Ketua RT","No. HP","Alamat/Pos RT","Status","Jumlah KK","Jumlah Penduduk","Laki-laki","Perempuan","Jumlah Rumah","Jumlah Balita","Jumlah Lansia","Fasilitas Utama RT","Keterangan","Urutan","Tampil Website","Firestore ID"],
+  "Pemerintahan": ["No","Nama","Jabatan","Kategori","Unit / Bagian Penempatan","Status","Mulai Menjabat","Akhir Menjabat","Kontak","Foto/Link","Urutan Website","Tampil Website","Keterangan","Firestore ID"],
+  "Berita": ["No","Judul","Slug","Ringkasan","Isi Berita","Gambar Utama","Kategori","Nama Penulis","Tanggal Publikasi","Waktu Publikasi (WITA)","Status","Berita Unggulan","Urutan","Firestore ID"],
+  "Pengumuman": ["No","Judul","Isi Singkat","URL Lampiran","Prioritas","Berlaku Sampai","Urutan","Status Aktif","Firestore ID"],
+  "Agenda": ["No","Nama Kegiatan","Tanggal","Waktu","Lokasi","Penyelenggara","Deskripsi","Status","Gambar","Urutan","Tampil Website","Firestore ID"],
+  "Layanan": ["No","Nama Layanan","Slug","Kategori","Singkatan Ikon","Deskripsi Singkat","Persyaratan","Prosedur","Waktu Penyelesaian","Biaya","Kontak","URL Dokumen","Urutan","Tampil di Beranda","Layanan Aktif","Firestore ID"],
+  "Dokumen": ["No","Judul Dokumen","Kategori","Tahun","Deskripsi","URL File","Jenis File","Status Aktif","Urutan","Firestore ID"],
+  "Hero": ["No","Judul","Deskripsi","Gambar Banner","Teks Tombol Utama","Tautan Tombol Utama","Teks Tombol Kedua","Tautan Tombol Kedua","Urutan","Status","Firestore ID"],
+  "Galeri Album": ["No","Judul Album","Slug","Kategori","Deskripsi","Foto Sampul","Lokasi","Tanggal Kegiatan","Tampil di Beranda","Status","Urutan","Firestore ID"],
+  "UMKM": ["No","ID UMKM","Nama Usaha","Nama Pemilik","NIK Pemilik","Jenis Usaha","Produk Utama","Alamat","RT","Kontak","Link Maps","Foto/Link","Status","Tampil Website","Urutan","Keterangan","Firestore ID"],
+  "Fasilitas": ["No","ID Fasilitas","Kategori","Nama Fasilitas","Alamat","RT","Link Maps/Koordinat","Kondisi","Pengelola","Status","Foto/Link","Tampil Website","Urutan","Keterangan","Firestore ID"],
+  "Surat": ["No","ID Surat","Tanggal Permohonan","Nama Pemohon","NIK","RT","Jenis Surat","Keperluan","Nomor Surat","Status","Petugas","Tanggal Selesai","Link Dokumen","URL Verifikasi","Keterangan","Tampil Cek Publik","Firestore ID"],
+  "Pengaduan": ["No","ID Pengaduan","Tanggal","Nama Pelapor","Kontak","RT","Kategori","Isi Ringkas","Lokasi","Status","Tindak Lanjut","Petugas","Target Selesai","Tanggal Selesai","Keterangan","Tampil Statistik Publik","Firestore ID"],
+  "Beranda": ["Label Status Portal","Label Kecil Hero","Label Sambutan / Profil Singkat","Judul Sambutan","Paragraf Sambutan","Paragraf Pendukung","Teks Aspirasi / Pengaduan","Label Bagian Layanan","Judul Bagian Layanan","Label Informasi Terkini","Judul Informasi Terkini","Label Panel Bantuan","Judul Panel Bantuan","Deskripsi Panel Bantuan","Firestore ID"],
+  "Wilayah": ["Luas Wilayah","Sumber / Catatan Luas","Jumlah Penduduk","Sumber / Catatan Penduduk","Jarak ke Ibu Kota Kecamatan","Sumber / Catatan Jarak","Batas Utara","Batas Timur","Batas Selatan","Batas Barat","Gambaran Wilayah","Detail Geografi / Luas","Konektivitas Wilayah","Catatan Dasar Batas Wilayah","Judul Karakter 1","Isi Karakter 1","Judul Karakter 2","Isi Karakter 2","Judul Karakter 3","Isi Karakter 3","Peta Administratif","Firestore ID"],
+  "Pengaturan Website": ["Nama Website","Nama Kelurahan","Nama Kecamatan","Nama Kabupaten / Kota","Nama Provinsi","Slogan","Logo","Favicon / Ikon Browser","Instagram","Facebook","YouTube","Teks Footer","Judul SEO","Deskripsi SEO","Kode Verifikasi Google Search Console","Animasi Aktif","Slider Otomatis","Interval Slider (ms)","Firestore ID"],
+  "Kontak": ["Alamat Kantor","Telepon","WhatsApp","Email","Jam Pelayanan","URL Embed Google Maps","Foto Kantor","Tombol WhatsApp Aktif","Firestore ID"],
+  "Profil Website": ["Label Hero","Judul Hero","Deskripsi Hero","Foto Utama","Judul Foto","Caption Foto","Kredit Foto","Label Ringkasan","Nama Ringkasan","Deskripsi Ringkasan","Judul Sejarah","Sejarah","Catatan Sejarah","Label Timeline","Judul Timeline","Deskripsi Timeline","Visi","Catatan Visi","Judul Misi","Misi","Label Wilayah","Judul Wilayah","Geografi","Peta Profil","Judul Peta","Ringkasan Batas","Label Potensi","Judul Potensi","Narasi Potensi","Label Fasilitas","Judul Fasilitas","Pengantar Fasilitas","Teks Utama Fasilitas","Daftar Fasilitas","Label Prioritas","Judul Prioritas","Pengantar Prioritas","Daftar Prioritas","Label Pembaruan","Judul Pembaruan","Teks Pembaruan","Firestore ID"],
+  "Profil Statistik": ["No","Nilai","Label","Catatan","Firestore ID"],
+  "Profil Timeline": ["No","Tahun","Judul","Isi","Firestore ID"],
+  "Profil Fakta Wilayah": ["No","Nilai","Label","Firestore ID"],
+  "Profil Batas": ["No","Arah","Wilayah Berbatasan","Firestore ID"],
+  "Profil Potensi": ["No","Judul","Deskripsi","Firestore ID"],
+};
+
+const SYNC_SHEETS = Object.keys(SHEET_SCHEMAS);
 
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Website Kelurahan")
+    .addItem("Siapkan / samakan struktur Spreadsheet", "setupOrRepairSpreadsheet")
+    .addItem("Samakan data awal dari Admin (buat backup)", "alignInitialDataFromAdmin")
     .addItem("Sinkronkan sheet aktif", "syncActiveSheet")
     .addItem("Sinkronkan semua data", "syncAllPublicSheets")
     .addItem("Tarik semua perubahan dari Admin", "pullAllFromWebsite")
@@ -35,6 +54,85 @@ function onOpen() {
     .addItem("Tes koneksi dua arah", "testTwoWayConnection")
     .addItem("Atur koneksi", "showConnectionInfo")
     .addToUi();
+}
+
+
+function setupOrRepairSpreadsheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const created = [];
+  const repaired = [];
+  Object.keys(SHEET_SCHEMAS).forEach(function(name) {
+    let sheet = ss.getSheetByName(name);
+    if (!sheet) {
+      sheet = ss.insertSheet(name);
+      created.push(name);
+    }
+    const wanted = SHEET_SCHEMAS[name];
+    const currentLast = Math.max(sheet.getLastColumn(), 1);
+    let current = sheet.getRange(4, 1, 1, currentLast).getDisplayValues()[0].map(function(v){ return String(v || "").trim(); });
+    if (!current.some(function(v){ return v; })) current = [];
+    let nextCol = current.length + 1;
+    wanted.forEach(function(header) {
+      if (current.indexOf(header) === -1) {
+        sheet.getRange(4, nextCol).setValue(header);
+        current.push(header);
+        nextCol++;
+        repaired.push(name + " → " + header);
+      }
+    });
+    const lastCol = sheet.getLastColumn();
+    sheet.getRange(4, 1, 1, lastCol).setBackground("#1F4E78").setFontColor("#FFFFFF").setFontWeight("bold").setWrap(true);
+    if (!sheet.getRange("A1").getDisplayValue()) sheet.getRange("A1").setValue(name.toUpperCase());
+    if (!sheet.getRange("A2").getDisplayValue()) sheet.getRange("A2").setValue("Terhubung ke Admin/Firestore. Jangan mengubah nama header pada baris 4.");
+    sheet.setFrozenRows(4);
+    const fid = current.indexOf("Firestore ID") + 1;
+    if (fid > 0) {
+      sheet.getRange(2, fid).setValue("OTOMATIS - jangan diubah");
+      try { sheet.hideColumns(fid); } catch (_) {}
+    }
+    if (sheet.getMaxRows() < 200) sheet.insertRowsAfter(sheet.getMaxRows(), 200 - sheet.getMaxRows());
+  });
+  const legacy = ss.getSheetByName("Kegiatan");
+  if (legacy) legacy.getRange("A2").setValue("LEGACY: data lama tetap aman. Gunakan sheet Berita dan Pengumuman untuk sinkronisasi baru.");
+  SpreadsheetApp.getUi().alert(
+    "Struktur Spreadsheet siap",
+    "Sheet baru: " + (created.length ? created.join(", ") : "tidak ada") +
+      "\nKolom ditambahkan: " + repaired.length +
+      "\n\nData lama tidak dihapus. Selanjutnya pilih 'Tarik semua perubahan dari Admin' agar isi Google Sheet mengikuti data website.",
+    SpreadsheetApp.getUi().ButtonSet.OK
+  );
+}
+
+
+function alignInitialDataFromAdmin() {
+  const ui = SpreadsheetApp.getUi();
+  const answer = ui.alert(
+    "Samakan data awal?",
+    "Sistem akan membuat salinan BACKUP spreadsheet ini, lalu mengosongkan HANYA sheet yang terhubung ke website dan menarik ulang data dari Admin/Firestore. Sheet internal seperti Penduduk, Keluarga, Mutasi, Bansos, Inventaris, dan lainnya tidak disentuh.",
+    ui.ButtonSet.YES_NO
+  );
+  if (answer !== ui.Button.YES) return;
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || "Asia/Makassar", "yyyyMMdd-HHmmss");
+  const backup = DriveApp.getFileById(ss.getId()).makeCopy(ss.getName() + " - BACKUP " + stamp);
+  setupOrRepairSpreadsheet();
+
+  SYNC_SHEETS.forEach(function(name) {
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    const lastCol = Math.max(sheet.getLastColumn(), 1);
+    const maxRows = sheet.getMaxRows();
+    if (maxRows >= 5) sheet.getRange(5, 1, maxRows - 4, lastCol).clearContent();
+  });
+
+  const messages = pullAllFromWebsite_(false);
+  ui.alert(
+    "Penyamaan awal selesai",
+    "Backup: " + backup.getName() + "\n\n" + messages.join("\n") +
+      "\n\nJika semua data sudah benar, baru aktifkan sinkron otomatis.",
+    ui.ButtonSet.OK
+  );
 }
 
 function showConnectionInfo() {
@@ -442,12 +540,27 @@ function generateLetterPdfForRow_(sheet, row) {
 const MIRROR_KEY_HEADERS = {
   "Data RT": "RT",
   "Pemerintahan": "Nama",
-  "Kegiatan": "ID Konten",
-  "Agenda": "ID Agenda",
+  "Berita": "Judul",
+  "Pengumuman": "Judul",
+  "Agenda": "Nama Kegiatan",
+  "Layanan": "Nama Layanan",
+  "Dokumen": "Judul Dokumen",
+  "Hero": "Judul",
+  "Galeri Album": "Judul Album",
   "UMKM": "ID UMKM",
   "Fasilitas": "ID Fasilitas",
   "Surat": "ID Surat",
   "Pengaduan": "ID Pengaduan",
+  "Beranda": "Label Status Portal",
+  "Wilayah": "Luas Wilayah",
+  "Pengaturan Website": "Nama Website",
+  "Kontak": "Alamat Kantor",
+  "Profil Website": "Judul Hero",
+  "Profil Statistik": "Label",
+  "Profil Timeline": "Judul",
+  "Profil Fakta Wilayah": "Label",
+  "Profil Batas": "Arah",
+  "Profil Potensi": "Judul",
 };
 
 function mirrorEndpoint_() {
@@ -558,7 +671,17 @@ function pullSheetFromWebsite_(sheetName, showToast) {
     headers: { "x-sync-secret": secret },
     muteHttpExceptions: true,
   });
-  if (response.getResponseCode() !== 200) throw new Error("HTTP " + response.getResponseCode() + " - " + response.getContentText());
+  if (response.getResponseCode() !== 200) {
+    const body = response.getContentText();
+    let detail = body;
+    try {
+      const parsed = JSON.parse(body);
+      detail = parsed.error || body;
+    } catch (_) {
+      detail = body.slice(0, 800);
+    }
+    throw new Error("HTTP " + response.getResponseCode() + " - " + detail);
+  }
   const json = JSON.parse(response.getContentText());
   if (!json.ok) throw new Error(json.error || "Mirror ditolak server.");
   const incoming = json.rows || [];
@@ -598,6 +721,10 @@ function pullSheetFromWebsite_(sheetName, showToast) {
     if (natural) keyToRow[natural] = row;
   });
 
+  const noCol = headers.indexOf("No") + 1;
+  if (noCol > 0 && incoming.length) {
+    for (let i = 0; i < incoming.length; i++) sheet.getRange(5 + i, noCol).setValue(i + 1);
+  }
   const msg = sheetName + ": " + updated + " diperbarui, " + inserted + " ditambahkan";
   if (showToast) SpreadsheetApp.getActive().toast(msg, "Dua arah", 4);
   return msg;
@@ -619,10 +746,19 @@ function findFirstEmptyMirrorRow_(sheet, idCol, keyCol) {
 function testTwoWayConnection() {
   const endpoint = getRequiredProperty_("SYNC_ENDPOINT");
   const secret = getRequiredProperty_("SYNC_SECRET");
-  const response = UrlFetchApp.fetch(mirrorEndpoint_() + "?sheet=" + encodeURIComponent("Data RT"), {
+  const healthUrl = endpoint.replace(/\/api\/spreadsheet-sync\/?$/, "/api/spreadsheet-health");
+  const response = UrlFetchApp.fetch(healthUrl, {
     method: "get", headers: { "x-sync-secret": secret }, muteHttpExceptions: true,
   });
-  if (response.getResponseCode() !== 200) throw new Error("Tes gagal: HTTP " + response.getResponseCode() + " - " + response.getContentText());
-  const data = JSON.parse(response.getContentText());
-  SpreadsheetApp.getUi().alert("Koneksi berhasil. Endpoint aktif dan Firestore dapat dibaca. Data RT ditemukan: " + (data.rows || []).length + ".\n\nEndpoint: " + endpoint);
+  const body = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(body); } catch (_) {}
+  if (response.getResponseCode() !== 200 || !data.ok) {
+    throw new Error("Tes gagal: HTTP " + response.getResponseCode() + " - " + (data.error || body.slice(0, 800)));
+  }
+  SpreadsheetApp.getUi().alert(
+    "Koneksi berhasil.\n\n" + (data.message || "Firestore dapat diakses.") +
+    "\nProject: " + (data.projectId || "-") +
+    "\n\nEndpoint: " + endpoint
+  );
 }
