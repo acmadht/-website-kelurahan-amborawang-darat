@@ -1,0 +1,12 @@
+
+/* Tambahkan pada CSS global/admin bila belum ada */
+.upload-preview {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 18px;
+  padding: 8px;
+  display: block;
+  margin-bottom: 12px;
+}
