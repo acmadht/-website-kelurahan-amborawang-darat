@@ -35,6 +35,26 @@ const moreMenu = [
     description: "Ketua RT, jumlah warga, KK, kontak, dan keterangan wilayah",
   },
   {
+    label: "UMKM",
+    href: "/umkm",
+    description: "Direktori UMKM dan potensi usaha masyarakat",
+  },
+  {
+    label: "Fasilitas",
+    href: "/fasilitas",
+    description: "Fasilitas dan sarana prasarana kelurahan",
+  },
+  {
+    label: "Permohonan Surat",
+    href: "/permohonan-surat",
+    description: "Ajukan permohonan surat dan cek proses pelayanan",
+  },
+  {
+    label: "Pengaduan",
+    href: "/pengaduan",
+    description: "Kirim pengaduan dan cek status tindak lanjut",
+  },
+  {
     label: "Galeri",
     href: "/galeri",
     description: "Dokumentasi kegiatan kelurahan dan masyarakat",
@@ -116,10 +136,46 @@ const staticSearchItems: SearchItem[] = [
     href: "/data-rt",
   },
   {
+    title: "UMKM Amborawang Darat",
+    description: "Direktori UMKM dan potensi usaha masyarakat kelurahan.",
+    category: "Ekonomi",
+    href: "/umkm",
+  },
+  {
+    title: "Fasilitas Amborawang Darat",
+    description: "Daftar fasilitas dan sarana prasarana kelurahan.",
+    category: "Wilayah",
+    href: "/fasilitas",
+  },
+  {
     title: "Layanan Kelurahan",
     description: "Informasi pelayanan administrasi masyarakat.",
     category: "Layanan",
     href: "/layanan",
+  },
+  {
+    title: "Permohonan Surat Online",
+    description: "Ajukan surat dan dapatkan nomor permohonan untuk cek status.",
+    category: "Layanan",
+    href: "/permohonan-surat",
+  },
+  {
+    title: "Cek Status Surat",
+    description: "Periksa perkembangan permohonan surat dengan nomor tiket.",
+    category: "Layanan",
+    href: "/cek-surat",
+  },
+  {
+    title: "Pengaduan Masyarakat",
+    description: "Sampaikan pengaduan kepada Kelurahan Amborawang Darat.",
+    category: "Layanan",
+    href: "/pengaduan",
+  },
+  {
+    title: "Cek Status Pengaduan",
+    description: "Periksa tindak lanjut pengaduan menggunakan nomor tiket.",
+    category: "Layanan",
+    href: "/cek-pengaduan",
   },
   {
     title: "Berita Kelurahan",

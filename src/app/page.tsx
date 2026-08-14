@@ -17,6 +17,7 @@ import type {
   PostItem,
   RegionLeader,
   ServiceItem,
+  VillageStats,
 } from "@/types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const [settings, home, slides, services, posts, announcements, agendas, rts] =
+  const [settings, home, slides, services, posts, announcements, agendas, rts, stats] =
     await Promise.all([
       getServerSettings(),
       getServerDocument<HomeContent>("pages", "home", homeContentFallback),
@@ -42,6 +43,7 @@ export default async function Page() {
       getServerCollection<Announcement>("announcements"),
       getServerCollection<AgendaItem>("agendas"),
       getServerCollection<RegionLeader>("rts"),
+      getServerDocument<VillageStats>("villageStats", "main", { population: 0, families: 0, male: 0, female: 0, rtCount: 0 }),
     ]);
 
   return (
@@ -56,6 +58,7 @@ export default async function Page() {
         initialAnnouncements={announcements}
         initialAgendas={agendas}
         initialRts={rts}
+        initialStats={stats}
       />
     </>
   );

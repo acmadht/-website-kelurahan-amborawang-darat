@@ -15,6 +15,7 @@ import type {
   ServiceItem,
   SiteSettings,
   RegionLeader,
+  VillageStats,
 } from "@/types";
 import PublicShell from "./PublicShell";
 import { mergePublicPosts } from "./newsData";
@@ -122,6 +123,7 @@ export default function HomePage({
   initialAnnouncements = [],
   initialAgendas = [],
   initialRts = [],
+  initialStats = { population: 0, families: 0, male: 0, female: 0, rtCount: 0 },
 }: {
   initialSettings?: SiteSettings;
   initialHome?: HomeContent;
@@ -131,6 +133,7 @@ export default function HomePage({
   initialAnnouncements?: Announcement[];
   initialAgendas?: AgendaItem[];
   initialRts?: RegionLeader[];
+  initialStats?: VillageStats;
 }) {
   const { data: rawSettings } = useDocumentData<SiteSettings>(
     "siteSettings",
@@ -152,19 +155,30 @@ export default function HomePage({
   );
   const { data: rawAgendas } = useCollectionData<AgendaItem>("agendas", initialAgendas);
   const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
+  const { data: villageStats } = useDocumentData<VillageStats>("villageStats", "main", initialStats);
 
   const activeRtCount = useMemo(
     () =>
       Math.max(
         AMBORAWANG_RT_TOTAL,
+        Number(villageStats.rtCount) || 0,
         rawRts.filter((item) => {
           if (item.isActive === false) return false;
           const numeric = Number(String(item.number || "").replace(/\D/g, ""));
           return Number.isInteger(numeric) && numeric > 0;
         }).length,
       ),
-    [rawRts],
+    [rawRts, villageStats.rtCount],
   );
+
+
+  const publicStats = [
+    { label: "Penduduk", value: Number(villageStats.population) || 0, suffix: "jiwa" },
+    { label: "Kepala Keluarga", value: Number(villageStats.families) || 0, suffix: "KK" },
+    { label: "Laki-laki", value: Number(villageStats.male) || 0, suffix: "jiwa" },
+    { label: "Perempuan", value: Number(villageStats.female) || 0, suffix: "jiwa" },
+    { label: "Rukun Tetangga", value: activeRtCount, suffix: "RT" },
+  ];
 
   const slides = useMemo(
     () => rawSlides.filter((item) => item.isActive !== false),
@@ -409,6 +423,35 @@ export default function HomePage({
                 </Reveal>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className={styles.dataStatsSection}>
+          <div className="container">
+            <Reveal enabled={settings.animationEnabled}>
+              <div className={styles.dataStatsHeading}>
+                <div>
+                  <span className={styles.eyebrow}>Data Kelurahan</span>
+                  <h2>Statistik terkini</h2>
+                </div>
+                <Link href="/data-rt" className={styles.textLink}>
+                  Lihat Data RT
+                  <ArrowIcon size={17} />
+                </Link>
+              </div>
+            </Reveal>
+            <div className={styles.dataStatsGrid}>
+              {publicStats.map((item, index) => (
+                <Reveal key={item.label} enabled={settings.animationEnabled} delay={index * 35}>
+                  <div className={styles.dataStatCard}>
+                    <strong>{item.value.toLocaleString("id-ID")}</strong>
+                    <span>{item.suffix}</span>
+                    <small>{item.label}</small>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+            <p className={styles.dataStatsNote}>Statistik bersifat agregat. NIK, nomor KK, alamat rinci, dan data pribadi tidak ditampilkan pada website publik.</p>
           </div>
         </section>
 

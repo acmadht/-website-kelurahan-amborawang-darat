@@ -1,0 +1,14 @@
+File utama V5:
+1. src/app/api/spreadsheet-sync/route.ts
+   - menerima Firestore ID
+   - upsert aman untuk mode dua arah
+   - status publik/nonaktif ikut diperbarui
+2. src/app/api/spreadsheet-mirror/route.ts
+   - membaca Firestore dan mengubahnya ke format kolom spreadsheet
+3. scripts/google-apps-script/Code.gs
+   - trigger onEdit installable
+   - trigger pull setiap 1 menit
+   - Firestore ID tersembunyi
+   - tes koneksi
+   - tarik semua perubahan Admin
+4. TEST_DUA_ARAH.md

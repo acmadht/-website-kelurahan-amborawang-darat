@@ -29,6 +29,47 @@ export interface SiteSettings {
   whatsappEnabled: boolean;
 }
 
+
+export interface VillageStats {
+  population: number;
+  families: number;
+  male: number;
+  female: number;
+  rtCount: number;
+  syncedAt?: unknown;
+}
+
+export interface UmkmItem {
+  id?: string;
+  name: string;
+  ownerName?: string;
+  businessType?: string;
+  mainProduct?: string;
+  address?: string;
+  rt?: string;
+  phone?: string;
+  mapsUrl?: string;
+  imageUrl?: string;
+  isActive: boolean;
+  isPublic: boolean;
+  order: number;
+}
+
+export interface FacilityItem {
+  id?: string;
+  category?: string;
+  name: string;
+  address?: string;
+  rt?: string;
+  mapsUrl?: string;
+  condition?: string;
+  manager?: string;
+  status?: string;
+  imageUrl?: string;
+  isPublic: boolean;
+  order: number;
+}
+
 export interface HeroSlide {
   id?: string;
   title: string;

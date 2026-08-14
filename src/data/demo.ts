@@ -173,10 +173,7 @@ export const demoOfficials: Official[] = [
   },
 ];
 
-export const demoRws: RegionLeader[] = [
-  { id: "rw-01", number: "01", chairmanName: "Ketua RW 01", populationCount: 910, familyCount: 245, order: 1, isActive: true },
-  { id: "rw-02", number: "02", chairmanName: "Ketua RW 02", populationCount: 840, familyCount: 220, order: 2, isActive: true },
-];
+
 
 export const demoRts: RegionLeader[] = Array.from({ length: 13 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0");
@@ -208,7 +205,7 @@ export const demoPosts: PostItem[] = [
     title: "Kerja Bakti Warga untuk Lingkungan Bersih",
     slug: "kerja-bakti-warga-untuk-lingkungan-bersih",
     summary: "Warga bersama perangkat kelurahan melaksanakan kerja bakti di sejumlah titik lingkungan.",
-    content: "Kegiatan kerja bakti melibatkan warga, ketua RT, ketua RW, dan unsur kelurahan. Kegiatan difokuskan pada pembersihan saluran air dan fasilitas umum.",
+    content: "Kegiatan kerja bakti melibatkan warga, para ketua RT, dan unsur kelurahan. Kegiatan difokuskan pada pembersihan saluran air dan fasilitas umum.",
     coverImageUrl: "/images/news-2.svg",
     category: "Lingkungan",
     status: "published",
