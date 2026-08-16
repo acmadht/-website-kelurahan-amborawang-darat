@@ -10,6 +10,16 @@ type LinkedAdministrativeData = {
   residents?: Record<string, unknown>[];
 };
 
+type RtTotals = {
+  population: number;
+  families: number;
+  male: number;
+  female: number;
+  houses: number;
+  toddlers: number;
+  elderly: number;
+};
+
 type Props = {
   mode: Mode;
   settings: SiteSettings;
@@ -74,7 +84,7 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
       .filter((item) => item.isActive !== false)
       .sort((a, b) => numberValue(a.order) - numberValue(b.order) || normalizeRt(a.number ?? a.id).localeCompare(normalizeRt(b.number ?? b.id)));
 
-    const rtTotals = rts.reduce(
+    const rtTotals = rts.reduce<RtTotals>(
       (totals, item) => ({
         population: totals.population + numberValue(item.populationCount),
         families: totals.families + numberValue(item.familyCount),

@@ -35,6 +35,17 @@ function normalizeRt(value: unknown) {
   return Number.isInteger(numeric) && numeric > 0 ? String(numeric).padStart(2, "0") : "-";
 }
 
+type PublicRtTotals = {
+  population: number;
+  families: number;
+  male: number;
+  female: number;
+  houses: number;
+  toddlers: number;
+  elderly: number;
+  facilities: number;
+};
+
 function formatFacilities(value: unknown) {
   if (Array.isArray(value)) {
     const values = value.map((item) => String(item ?? "").trim()).filter(Boolean);
@@ -62,7 +73,7 @@ export default async function Page() {
     .filter((item) => item.isActive !== false)
     .sort((a, b) => numberValue(a.order) - numberValue(b.order) || normalizeRt(a.number).localeCompare(normalizeRt(b.number)));
 
-  const rtTotals = activeRts.reduce(
+  const rtTotals = activeRts.reduce<PublicRtTotals>(
     (totals, item) => ({
       population: totals.population + numberValue(item.populationCount),
       families: totals.families + numberValue(item.familyCount),
