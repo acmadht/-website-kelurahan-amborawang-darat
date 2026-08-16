@@ -32,7 +32,12 @@ export default function LoginPage() {
       await reloadProfile();
     } catch (loginError) {
       console.error("Login admin gagal", loginError);
-      setError("Email atau kata sandi tidak benar, atau profil admin belum terhubung dengan akun Authentication.");
+      const message = loginError instanceof Error ? loginError.message : "";
+      if (message.includes("auth/invalid-credential") || message.includes("auth/wrong-password") || message.includes("auth/user-not-found")) {
+        setError("Email atau kata sandi tidak benar.");
+      } else {
+        setError(message || "Login berhasil di Authentication, tetapi profil admin tidak dapat dimuat.");
+      }
     } finally {
       setBusy(false);
     }

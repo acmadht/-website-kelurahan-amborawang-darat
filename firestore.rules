@@ -15,7 +15,7 @@ service cloud.firestore {
     }
 
     function activeUser() {
-      return profileExists() && currentUser().data.isActive == true;
+      return profileExists() && (currentUser().data.isActive == true || currentUser().data.isActive == 'true');
     }
 
     function roleIs(roleName) {
