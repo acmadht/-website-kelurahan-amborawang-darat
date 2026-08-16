@@ -11,6 +11,8 @@ import {
   publishedDateIso,
 } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

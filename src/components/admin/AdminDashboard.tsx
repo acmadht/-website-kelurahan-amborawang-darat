@@ -32,6 +32,7 @@ const quickActions = [
   { title: "Kelola aparatur", text: "Perbarui pejabat, staf, lembaga, dan foto pemerintahan.", href: "/admin/aparatur", code: "PM" },
   { title: "Perbarui wilayah", text: "Sesuaikan statistik, batas wilayah, peta, dan data ringkas.", href: "/admin/wilayah", code: "WL" },
   { title: "Kontak & jam layanan", text: "Ubah nomor, alamat, Google Maps, dan jam pelayanan.", href: "/admin/kontak", code: "KT" },
+  { title: "Kelola KKN", text: "Perbarui tim, program, berita, galeri, Book Chapter, dan luaran KKN.", href: "/admin/tim-kkn", code: "KN" },
 ];
 
 export default function AdminDashboard() {
@@ -150,9 +151,9 @@ export default function AdminDashboard() {
           <h2>Admin fokus pada kebutuhan kelurahan.</h2>
           <p>
             Seluruh konten operasional kelurahan dapat diperbarui melalui dashboard dan Firestore.
-            Konten KKN sengaja dibuat statis sehingga tidak dapat diubah dari akun admin kelurahan.
+            Ruang KKN juga dapat dikelola dari menu KKN tanpa bercampur dengan berita dan galeri resmi kelurahan.
           </p>
-          <Link href="/admin/pengaturan">Buka Pengaturan Website →</Link>
+          <Link href="/admin/tim-kkn">Buka Pengelolaan KKN →</Link>
         </article>
       </section>
     </div>

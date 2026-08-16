@@ -37,6 +37,16 @@ const profileItems: MenuItem[] = [
   { label: "Pemerintahan / Aparatur", href: "/admin/aparatur", code: "PM" },
 ];
 
+
+const kknItems: MenuItem[] = [
+  { label: "Tim & Identitas", href: "/admin/tim-kkn", code: "KT" },
+  { label: "Program Kerja", href: "/admin/kkn-program", code: "KP" },
+  { label: "Berita KKN", href: "/admin/kkn-berita", code: "KB" },
+  { label: "Galeri KKN", href: "/admin/kkn-galeri", code: "KG" },
+  { label: "Book Chapter", href: "/admin/kkn-book-chapter", code: "BC" },
+  { label: "Luaran KKN", href: "/admin/kkn-luaran", code: "KL" },
+];
+
 const informationItems: MenuItem[] = [
   { label: "Wilayah", href: "/admin/wilayah", code: "WL" },
   { label: "Data RT", href: "/admin/rt", code: "RT" },
@@ -75,6 +85,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     home: false,
     profile: false,
     information: false,
+    kkn: false,
   });
 
   const systemItems = useMemo(() => {
@@ -95,6 +106,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         label: "Profil",
         code: "PR",
         items: profileItems,
+      },
+      {
+        id: "kkn",
+        label: "KKN",
+        code: "KN",
+        items: kknItems,
       },
       {
         id: "information",
@@ -278,14 +295,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     </Link>
                   );
                 })}
-
-                <div className={`${styles.navItem} ${styles.navStatic}`}>
-                  <span className={styles.navCode}>KN</span>
-                  <span className={styles.navLabelWrap}>
-                    <strong>KKN</strong>
-                    <small>Statis · tidak diedit dari Admin</small>
-                  </span>
-                </div>
 
                 {publicExpandableMenus.slice(2).map((group) => {
                   const groupActive = group.items.some((item) =>

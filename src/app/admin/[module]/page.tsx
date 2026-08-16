@@ -23,6 +23,6 @@ export default async function Page({
 
   if (target) redirect(target);
 
-  // Modul KKN bersifat statis; modul yang tidak dikenal tidak membuka editor lama.
+  // Modul yang tidak dikenal tidak membuka editor lama.
   notFound();
 }

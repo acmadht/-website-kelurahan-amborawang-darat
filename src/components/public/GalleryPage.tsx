@@ -87,7 +87,9 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
   const [selected, setSelected] = useState<GalleryItem | null>(null);
 
   const galleryItems = useMemo(() => {
-    const publishedAlbums = albums.filter((album) => album.status === "published" && (isKkn ? String(album.category || "").toUpperCase() === "KKN" : String(album.category || "").toUpperCase() !== "KKN"));
+    const publishedAlbums = albums
+      .filter((album) => album.status === "published" && (isKkn ? String(album.category || "").toUpperCase() === "KKN" : String(album.category || "").toUpperCase() !== "KKN"))
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
     const remoteItems: GalleryItem[] = [];
 
     publishedAlbums.forEach((album, albumIndex) => {
@@ -117,7 +119,7 @@ export default function GalleryPage({ initialAlbums = [], initialPhotos = [], in
       }
     });
 
-    return isKkn ? staticKknGalleryItems : remoteItems;
+    return isKkn ? (remoteItems.length ? remoteItems : staticKknGalleryItems) : remoteItems;
   }, [albums, photos, isKkn]);
 
   const categories = useMemo(() => ["Semua", ...Array.from(new Set(galleryItems.map((item) => item.category)))], [galleryItems]);

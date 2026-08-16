@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import GalleryPage from "@/components/public/GalleryPage";
 import JsonLd from "@/components/seo/JsonLd";
+import type { GalleryAlbum, GalleryPhoto } from "@/types";
 import {
   breadcrumbJsonLd,
   buildMetadata,
+  getServerCollection,
   getServerSettings,
 } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -18,7 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const settings = await getServerSettings();
+  const [settings, allAlbums, allPhotos] = await Promise.all([
+    getServerSettings(),
+    getServerCollection<GalleryAlbum>("galleryAlbums"),
+    getServerCollection<GalleryPhoto>("galleryPhotos"),
+  ]);
+  const albums = allAlbums.filter((item) => String(item.category || "").toUpperCase() === "KKN");
+  const albumIds = new Set(albums.map((item) => item.id).filter(Boolean));
+  const photos = allPhotos.filter((item) => item.albumId && albumIds.has(item.albumId));
 
   return (
     <>
@@ -29,7 +40,7 @@ export default async function Page() {
           { name: "Galeri KKN", path: "/kkn/galeri" },
         ])}
       />
-      <GalleryPage initialSettings={settings} scope="kkn" />
+      <GalleryPage initialAlbums={albums} initialPhotos={photos} initialSettings={settings} scope="kkn" />
     </>
   );
 }

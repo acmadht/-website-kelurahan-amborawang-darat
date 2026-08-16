@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PublicShell from "@/components/public/PublicShell";
 import JsonLd from "@/components/seo/JsonLd";
-import { staticKknPrograms } from "@/data/kknStatic";
-import { breadcrumbJsonLd, buildMetadata, getServerSettings } from "@/lib/seo";
+import { staticKknPrograms, staticKknTeam } from "@/data/kknStatic";
+import type { KknProgram, KknTeam } from "@/types";
+import { breadcrumbJsonLd, buildMetadata, getServerCollection, getServerDocument, getServerSettings } from "@/lib/seo";
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -17,8 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const settings = await getServerSettings();
-  const programs = staticKknPrograms
+  const [settings, remotePrograms, team] = await Promise.all([
+    getServerSettings(),
+    getServerCollection<KknProgram>("kknPrograms"),
+    getServerDocument<KknTeam>("kknTeam", "main", staticKknTeam),
+  ]);
+  const programs = (remotePrograms.length ? remotePrograms : staticKknPrograms)
     .filter((item) => item.isActive !== false)
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
@@ -40,13 +47,13 @@ export default async function Page() {
 
             <div className={`container ${styles.heroInner}`}>
               <div className={styles.heroCopy}>
-                <span className={styles.heroEyebrow}>Program KKN 2026</span>
+                <span className={styles.heroEyebrow}>Program KKN {team.year || ""}</span>
                 <h1>
                   Program Kerja
                   <strong>KKN {settings.villageName}</strong>
                 </h1>
                 <p>
-                  Daftar program kerja KKN yang disimpan sebagai arsip statis dan dipublikasikan khusus pada ruang KKN.
+                  Daftar program kerja KKN yang dikelola melalui dashboard admin dan dipublikasikan khusus pada ruang KKN.
                 </p>
               </div>
 
@@ -56,7 +63,7 @@ export default async function Page() {
                   <span>Program</span>
                 </div>
                 <div className={styles.heroStat}>
-                  <strong>2026</strong>
+                  <strong>{team.year || "-"}</strong>
                   <span>Periode KKN</span>
                 </div>
                 <div className={`${styles.heroStat} ${styles.heroStatWide}`}>

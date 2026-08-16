@@ -471,8 +471,21 @@ export async function getDynamicPublishedPostsServer(): Promise<PostItem[]> {
 }
 
 export async function getDynamicKknPublishedPostsServer(): Promise<PostItem[]> {
-  // Kompatibilitas untuk pemanggil lama. KKN tidak lagi membaca Firestore.
-  return staticKknPosts.map(serializePost);
+  try {
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
+    const snapshot = await getAdminDb()
+      .collection("posts")
+      .where("status", "==", "published")
+      .get();
+
+    const remote = snapshot.docs
+      .map((doc) => serializePost({ id: doc.id, ...doc.data() } as PostItem))
+      .filter((post) => String(post.category || "").toUpperCase() === "KKN");
+
+    return remote.length ? remote : staticKknPosts.map(serializePost);
+  } catch {
+    return staticKknPosts.map(serializePost);
+  }
 }
 
 export async function getPublicPostBySlugServer(slug: string): Promise<PostItem | undefined> {
@@ -499,6 +512,25 @@ export async function getPublicPostBySlugServer(slug: string): Promise<PostItem 
 }
 
 export async function getKknPostBySlugServer(slug: string): Promise<PostItem | undefined> {
+  try {
+    const { getAdminDb } = await import("@/lib/firebase/admin-db");
+    const snapshot = await getAdminDb()
+      .collection("posts")
+      .where("slug", "==", slug)
+      .limit(5)
+      .get();
+
+    const post = snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() } as PostItem))
+      .find(
+        (item) => item.status === "published" && String(item.category || "").toUpperCase() === "KKN",
+      );
+
+    if (post) return serializePost(post);
+  } catch {
+    // fallback statis di bawah
+  }
+
   const staticPost = staticKknPosts.find(
     (post) => post.status === "published" && post.slug === slug,
   );

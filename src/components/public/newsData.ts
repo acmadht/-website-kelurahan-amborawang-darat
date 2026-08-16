@@ -25,10 +25,17 @@ export function mergePublicPosts(remotePosts: PostItem[]) {
   return uniquePosts(publishedNonKkn);
 }
 
-// Berita KKN sengaja statis. Data Firestore apa pun tidak memengaruhi halaman KKN.
-export function mergeKknPosts(_remotePosts: PostItem[] = []) {
+// Berita KKN dinamis dari Firestore. Data statis hanya menjadi fallback agar
+// halaman lama tidak kosong sebelum admin melakukan migrasi pertama.
+export function mergeKknPosts(remotePosts: PostItem[] = []) {
+  const publishedKkn = remotePosts.filter(
+    (item) => item.status === "published" && String(item.category || "").toUpperCase() === "KKN",
+  );
+
   return uniquePosts(
-    staticKknPosts.filter((item) => item.status === "published"),
+    publishedKkn.length
+      ? publishedKkn
+      : staticKknPosts.filter((item) => item.status === "published"),
   );
 }
 

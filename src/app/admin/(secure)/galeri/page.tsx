@@ -7,7 +7,7 @@ export default function Page() {
       <AdminCollectionManager
         collectionName="galleryAlbums" publicHref="/galeri"
         title="Galeri"
-        description="Buat album dokumentasi kelurahan lalu unggah foto. Galeri KKN bersifat statis dan tidak dikelola dari dashboard admin."
+        description="Buat album dokumentasi kelurahan lalu unggah foto. Galeri KKN dikelola terpisah melalui menu KKN agar tidak bercampur dengan galeri resmi kelurahan."
         defaults={{
           title: "",
           slug: "",

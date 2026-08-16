@@ -3,9 +3,12 @@ import Link from "next/link";
 import PublicShell from "@/components/public/PublicShell";
 import JsonLd from "@/components/seo/JsonLd";
 import { staticKknOutputs } from "@/data/kknStatic";
-import { breadcrumbJsonLd, buildMetadata, getServerSettings } from "@/lib/seo";
+import type { KknOutput } from "@/types";
+import { breadcrumbJsonLd, buildMetadata, getServerCollection, getServerSettings } from "@/lib/seo";
 import styles from "./page.module.css";
 
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -18,9 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const settings = await getServerSettings();
+  const [settings, remoteOutputs] = await Promise.all([
+    getServerSettings(),
+    getServerCollection<KknOutput>("kknOutputs"),
+  ]);
 
-  const outputs = staticKknOutputs
+  const outputs = (remoteOutputs.length ? remoteOutputs : staticKknOutputs)
     .filter((item) => item.isActive !== false)
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
@@ -38,7 +44,7 @@ export default async function Page() {
             <div className={`container ${styles.heroInner}`}>
               <span>Hasil & Dokumentasi</span>
               <h1>Luaran KKN<strong>{settings.villageName}</strong></h1>
-              <p>Hasil digital, publikasi, media, dan dokumentasi KKN yang disimpan sebagai arsip statis.</p>
+              <p>Hasil digital, publikasi, media, dan dokumentasi KKN yang dikelola melalui dashboard admin.</p>
             </div>
           </section>
 

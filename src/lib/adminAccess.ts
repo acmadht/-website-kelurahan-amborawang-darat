@@ -1,6 +1,6 @@
 /**
- * Daftar modul yang dapat dikelola melalui dashboard admin.
- * Konten KKN bersifat statis dan sengaja tidak termasuk modul dashboard admin.
+ * Daftar modul utama yang dapat dikelola melalui dashboard admin.
+ * Modul KKN memiliki route editor khusus agar terpisah dari konten resmi kelurahan.
  */
 export const ADMIN_MODULES = [
   "profil",
@@ -13,6 +13,12 @@ export const ADMIN_MODULES = [
   "wilayah",
   "kontak",
   "pengaturan",
+  "tim-kkn",
+  "kkn-program",
+  "kkn-berita",
+  "kkn-galeri",
+  "kkn-book-chapter",
+  "kkn-luaran",
 ] as const;
 
 export type AdminModule = (typeof ADMIN_MODULES)[number];

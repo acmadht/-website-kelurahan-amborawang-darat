@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import NewsPage from "@/components/public/NewsPage";
 import JsonLd from "@/components/seo/JsonLd";
-import { staticKknPosts } from "@/data/kknStatic";
 import {
   breadcrumbJsonLd,
   buildMetadata,
+  getDynamicKknPublishedPostsServer,
   getServerSettings,
 } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -19,7 +21,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const settings = await getServerSettings();
+  const [settings, posts] = await Promise.all([
+    getServerSettings(),
+    getDynamicKknPublishedPostsServer(),
+  ]);
 
   return (
     <>
@@ -31,7 +36,7 @@ export default async function Page() {
         ])}
       />
       <NewsPage
-        initialPosts={staticKknPosts}
+        initialPosts={posts}
         initialSettings={settings}
         scope="kkn"
       />

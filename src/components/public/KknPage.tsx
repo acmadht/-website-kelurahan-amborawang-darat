@@ -16,6 +16,7 @@ type Member = {
   studyProgram: string;
   nim: string;
   quote: string;
+  description?: string;
 };
 
 // GANTI nilai studyProgram dan nim di bawah ini sesuai data asli mahasiswa.
@@ -245,6 +246,12 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 }
 
 function getMemberDetails(member: Member) {
+  if (member.description?.trim()) {
+    return {
+      description: member.description.trim(),
+      focus: [member.division, member.role, "Program KKN"].filter(Boolean).slice(0, 3),
+    };
+  }
   if (member.division === "Media") {
     return {
       description:
@@ -292,7 +299,7 @@ function getMemberDetails(member: Member) {
   };
 }
 
-function MemberCard({ member }: { member: Member }) {
+function MemberCard({ member, location, year }: { member: Member; location: string; year: string }) {
   const [flipped, setFlipped] = useState(false);
   const detail = getMemberDetails(member);
   const initials = member.name
@@ -350,7 +357,7 @@ function MemberCard({ member }: { member: Member }) {
             </span>
 
             <span className={styles.frontFooter}>
-              <span className={styles.frontLocation}>Amborawang Darat • KKN 2026</span>
+              <span className={styles.frontLocation}>{location} • KKN {year}</span>
             </span>
           </span>
         </span>
@@ -407,9 +414,9 @@ function MemberCard({ member }: { member: Member }) {
 
           <span className={styles.backFooter}>
             <span className={styles.backMeta}>
-              <span>Amborawang Darat</span>
+              <span>{location}</span>
               <i aria-hidden="true" />
-              <span>KKN 2026</span>
+              <span>KKN {year}</span>
             </span>
 
             <span className={styles.backAction}>
@@ -431,6 +438,8 @@ export default function KknPage({
   initialMembers?: KknMember[];
 }) {
   const team = { ...fallbackTeam, ...initialTeam };
+  const locationLabel = String(team.location || fallbackTeam.location).replace(/^Kelurahan\s+/i, "").trim() || "Amborawang Darat";
+  const yearLabel = String(team.year || fallbackTeam.year || "").trim() || "-";
 
   const displayedMembers = useMemo(() => {
     const fallbackByName = new Map(fallbackMembers.map((member) => [member.name.toLowerCase(), member]));
@@ -454,6 +463,7 @@ export default function KknPage({
           studyProgram: String(member.studyProgram || base?.studyProgram || "Belum diisi"),
           nim: String(member.nim || base?.nim || "Belum diisi"),
           quote: String(member.quote || base?.quote || "Bersama mengabdi untuk masyarakat."),
+          description: String(member.description || ""),
         } satisfies Member;
       });
   }, [initialMembers]);
@@ -484,12 +494,12 @@ export default function KknPage({
               <div className={styles.heroCopy}>
                 <div className={styles.heroBadge}>
                   <TeamIcon />
-                  <span>Tim KKN Reguler</span>
+                  <span>{team.groupName || "Tim KKN Reguler"}</span>
                 </div>
 
                 <h1>
                   Tim KKN
-                  <strong>Amborawang Darat</strong>
+                  <strong>{locationLabel}</strong>
                 </h1>
 
                 <p>
@@ -517,7 +527,7 @@ export default function KknPage({
               <div className={styles.heroVisual}>
                 <div className={styles.heroVisualTop}>
                   <span>Struktur Tim</span>
-                  <strong>KKN Amborawang Darat</strong>
+                  <strong>KKN {locationLabel}</strong>
                 </div>
 
                 <div className={styles.heroFlow}>
@@ -594,6 +604,10 @@ export default function KknPage({
                       <small>Lokasi</small>
                       <strong>{team.location.replace(/^Kelurahan\s+/i, "")}</strong>
                     </div>
+                    <div>
+                      <small>Universitas</small>
+                      <strong>{team.universityName}</strong>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -619,6 +633,8 @@ export default function KknPage({
                 <Reveal key={member.name} enabled delay={index * 45}>
                   <MemberCard
                     member={member}
+                    location={locationLabel}
+                    year={yearLabel}
                   />
                 </Reveal>
               ))}
@@ -658,6 +674,8 @@ export default function KknPage({
                       <Reveal key={member.name} enabled delay={index * 40}>
                         <MemberCard
                           member={member}
+                          location={locationLabel}
+                          year={yearLabel}
                         />
                       </Reveal>
                     ))}
@@ -865,7 +883,7 @@ export default function KknPage({
               <div className={styles.cta}>
                 <div>
                   <span>Program KKN</span>
-                  <h2>Kolaborasi untuk Amborawang Darat.</h2>
+                  <h2>Kolaborasi untuk {locationLabel}.</h2>
                   <p>
                     Program kerja, dokumentasi kegiatan, dan luaran KKN kini
                     dikelompokkan dalam ruang KKN agar lebih mudah ditelusuri.

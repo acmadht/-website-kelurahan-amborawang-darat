@@ -8,13 +8,11 @@ import type {
 } from "@/types";
 
 /**
- * Seluruh konten pada ruang KKN sengaja disimpan statis di source code.
- * Admin/Firebase TIDAK mengubah data di file ini.
+ * Data KKN awal / fallback.
  *
- * Tujuan pemisahan:
- * - Konten resmi kelurahan tetap dinamis dan dikelola lewat dashboard admin.
- * - Konten KKN menjadi arsip tetap yang tidak ikut berubah saat admin kelurahan
- *   memperbarui berita, galeri, profil, wilayah, layanan, dan konten publik lain.
+ * Website sekarang membaca data KKN dinamis dari Firestore dan dapat dikelola
+ * melalui dashboard Admin. Data di file ini hanya dipakai sebagai cadangan
+ * sebelum data lama diimpor ke Firestore atau bila koneksi server tidak tersedia.
  */
 
 export type StaticKknGalleryItem = {
@@ -242,10 +240,7 @@ export const staticKknGalleryItems: StaticKknGalleryItem[] = [
   },
 ];
 
-/**
- * Tambahkan Book Chapter KKN di sini saat naskah/berkas sudah final.
- * Bagian ini sengaja tidak terhubung ke Firestore.
- */
+/** Fallback Book Chapter; versi utama dikelola melalui Firestore/Admin. */
 export const staticKknBookChapters: KknBookChapter[] = [];
 
 export const staticKknOutputs: KknOutput[] = [

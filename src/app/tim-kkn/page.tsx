@@ -2,11 +2,16 @@ import type { Metadata } from "next";
 import KknPage from "@/components/public/KknPage";
 import JsonLd from "@/components/seo/JsonLd";
 import { staticKknMembers, staticKknTeam } from "@/data/kknStatic";
+import type { KknMember, KknTeam } from "@/types";
 import {
   breadcrumbJsonLd,
   buildMetadata,
+  getServerCollection,
+  getServerDocument,
   getServerSettings,
 } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -18,7 +23,14 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function Page() {
+export default async function Page() {
+  const [team, remoteMembers] = await Promise.all([
+    getServerDocument<KknTeam>("kknTeam", "main", staticKknTeam),
+    getServerCollection<KknMember>("kknMembers"),
+  ]);
+
+  const members = remoteMembers.length ? remoteMembers : staticKknMembers;
+
   return (
     <>
       <JsonLd
@@ -27,7 +39,7 @@ export default function Page() {
           { name: "Tim KKN", path: "/tim-kkn" },
         ])}
       />
-      <KknPage initialTeam={staticKknTeam} initialMembers={staticKknMembers} />
+      <KknPage initialTeam={team} initialMembers={members} />
     </>
   );
 }
