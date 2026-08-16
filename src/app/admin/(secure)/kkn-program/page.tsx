@@ -22,7 +22,7 @@ export default function Page() {
         status: "Berjalan",
         imageUrl: "",
         linkUrl: "",
-        linkLabel: "Lihat Detail",
+        linkLabel: "",
         order: 1,
         isActive: true,
       }}
@@ -39,8 +39,8 @@ export default function Page() {
         { key: "startDate", label: "Tanggal Mulai", type: "date", required: true },
         { key: "endDate", label: "Tanggal Selesai (opsional jika 1 hari)", type: "date" },
         { key: "personInCharge", label: "Penanggung Jawab", type: "text" },
-        { key: "linkUrl", label: "Tautan Detail", type: "text", placeholder: "/berita/... atau https://...", full: true },
-        { key: "linkLabel", label: "Teks Tombol", type: "text" },
+        { key: "linkUrl", label: "Tautan Detail (Opsional)", type: "text", placeholder: "Kosongkan jika tidak ada. Contoh: /berita/... atau https://...", full: true },
+        { key: "linkLabel", label: "Teks Tombol (Opsional)", type: "text", placeholder: "Kosong = Lihat Detail" },
         { key: "order", label: "Urutan Tampil", type: "number" },
         { key: "isActive", label: "Tampilkan di Website", type: "checkbox" },
       ]}
