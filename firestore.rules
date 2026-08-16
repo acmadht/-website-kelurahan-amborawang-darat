@@ -1,8 +1,13 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
       return request.auth != null;
+    }
+
+    function profileExists() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
     function currentUser() {
@@ -10,7 +15,7 @@ service cloud.firestore {
     }
 
     function activeUser() {
-      return signedIn() && currentUser().data.isActive == true;
+      return profileExists() && currentUser().data.isActive == true;
     }
 
     function roleIs(roleName) {
@@ -25,99 +30,132 @@ service cloud.firestore {
       return roleIs('superadmin');
     }
 
+    function isOwnRt(rtId) {
+      return roleIs('operator_rt') && currentUser().data.rtId == rtId;
+    }
+
+    // Akun admin. API server membuat/memperbarui akun memakai Firebase Admin.
     match /users/{userId} {
       allow read: if signedIn() && (request.auth.uid == userId || isSuperadmin());
       allow create, update, delete: if isSuperadmin();
     }
 
+    // Konten publik yang memang dibaca langsung oleh browser.
     match /siteSettings/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /pages/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /heroSlides/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /officials/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
-    match /rws/{docId} {
-      allow read: if true;
-      allow write: if isEditor();
-    }
-
     match /rts/{docId} {
       allow read: if true;
       allow create, delete: if isEditor();
-      allow update: if isEditor() || (
-        roleIs('operator_rt') &&
-        currentUser().data.rtId == docId
-      );
+      allow update: if isEditor() || isOwnRt(docId);
     }
-
     match /services/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /posts/{docId} {
       allow read: if resource.data.status == 'published' || isEditor();
-      allow create, update, delete: if isEditor();
+      allow write: if isEditor();
     }
-
     match /announcements/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /agendas/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /galleryAlbums/{docId} {
-      allow read: if resource.data.status == 'published' || isEditor();
-      allow create, update, delete: if isEditor();
+      allow read: if true;
+      allow write: if isEditor();
     }
-
     match /galleryPhotos/{docId} {
       allow read: if true;
-      allow create, update, delete: if isEditor();
+      allow write: if isEditor();
     }
-
+    match /documents/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+    match /publicDocuments/{docId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
     match /kknTeam/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
-
     match /kknMembers/{docId} {
       allow read: if true;
       allow write: if isEditor();
     }
 
-    match /documents/{docId} {
-      allow read: if true;
-      allow write: if isEditor();
+    // UMKM dan fasilitas dipublikasikan melalui Server Component.
+    // Dengan demikian field internal seperti NIK pemilik tidak bisa dibaca
+    // langsung melalui Firestore SDK publik.
+    match /umkm/{docId} {
+      allow read, write: if isEditor();
+    }
+    match /facilities/{docId} {
+      allow read, write: if isEditor();
     }
 
+    // Statistik beranda dibaca di server; admin dapat memperbarui.
+    match /villageStats/{docId} {
+      allow read, write: if isEditor();
+    }
+
+    // Administrasi layanan mengandung data pribadi. Form publik menggunakan
+    // API server sehingga koleksinya tidak perlu dibuka kepada browser umum.
+    match /serviceRequests/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
+    match /complaints/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
     match /messages/{docId} {
-      allow create: if true;
-      allow read, update, delete: if isEditor();
+      allow read, create, update, delete: if isEditor();
+    }
+
+    // Administrasi internal. Halaman publik hanya memperoleh agregat dari
+    // Server Component, bukan dokumen mentah.
+    match /residents/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
+    match /families/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
+    match /populationMutations/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
+    match /socialAssistance/{docId} {
+      allow read, create, update, delete: if isEditor();
+    }
+    match /inventory/{docId} {
+      allow read, create, update, delete: if isEditor();
     }
 
     match /activityLogs/{docId} {
       allow read: if isEditor();
       allow create: if activeUser();
       allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

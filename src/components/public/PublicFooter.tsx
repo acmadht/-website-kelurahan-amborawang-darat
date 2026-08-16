@@ -27,12 +27,13 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
               </div>
               <p style={{ color: "rgba(255,255,255,.65)", maxWidth: 420 }}>{settings.address}</p>
             </div>
-            <div><div className="footer-title">Menu cepat</div><div className="footer-list"><Link href="/profil">Profil</Link><Link href="/layanan">Layanan</Link><Link href="/berita">Berita</Link><Link href="/galeri">Galeri</Link></div></div>
-            <div><div className="footer-title">Pemerintahan</div><div className="footer-list"><Link href="/pemerintahan">Aparatur</Link><Link href="/data-rt">Data RT</Link><Link href="/dokumen">Dokumen publik</Link><Link href="/tim-kkn">Tim KKN</Link></div></div>
+            <div><div className="footer-title">Menu cepat</div><div className="footer-list"><Link href="/profil">Profil</Link><Link href="/layanan">Layanan</Link><Link href="/data-publik">Data Publik</Link><Link href="/transparansi">Transparansi</Link><Link href="/berita">Berita</Link></div></div>
+            <div><div className="footer-title">Data & Wilayah</div><div className="footer-list"><Link href="/data-rt">Data RT</Link><Link href="/penduduk">Penduduk</Link><Link href="/fasilitas">Fasilitas</Link><Link href="/umkm">UMKM</Link></div></div>
             <div>
               <div className="footer-title">Kontak</div>
               <div className="footer-list">
                 {contacts.map((item) => <span key={item}>{item}</span>)}
+                <Link href="/privasi">Kebijakan Privasi</Link>
                 <Link href="/admin/login">Login admin</Link>
               </div>
             </div>

@@ -4,8 +4,12 @@ export default function Page() {
   return (
     <AdminCollectionManager
       collectionName="rts" publicHref="/data-rt"
+      autoRecalculate
       title="Data RT"
-      description="Kelola data untuk 13 RT Kelurahan Amborawang Darat. Halaman publik selalu menampilkan RT 01 sampai RT 13; data yang belum diisi akan tampil sebagai belum dilengkapi sampai admin menambah atau memperbaruinya."
+      description="Kelola identitas 13 RT Kelurahan Amborawang Darat. Statistik penduduk dan KK di halaman ini dihitung otomatis dari Administrasi Penduduk dan Keluarga/KK, sehingga tidak perlu diketik ulang."
+
+      connectionNote="Jumlah penduduk, laki-laki/perempuan, balita, lansia, dan KK sekarang otomatis mengikuti Penduduk/Keluarga per RT. Jika warga/KK dipindah ke RT lain, RT asal dan RT tujuan akan dihitung ulang. Data ketua RT, area, rumah, fasilitas, dan keterangan tetap dikelola di sini."
+      relatedLinks={[{ label: "Penduduk", href: "/admin/penduduk" }, { label: "Keluarga / KK", href: "/admin/keluarga" }, { label: "Fasilitas", href: "/admin/fasilitas" }]}
       defaults={{
         number: "",
         chairmanName: "",
@@ -68,21 +72,25 @@ export default function Page() {
           key: "populationCount",
           label: "Jumlah Penduduk",
           type: "number",
+          readOnly: true,
         },
         {
           key: "familyCount",
           label: "Jumlah Kepala Keluarga",
           type: "number",
+          readOnly: true,
         },
         {
           key: "maleCount",
           label: "Jumlah Laki-laki",
           type: "number",
+          readOnly: true,
         },
         {
           key: "femaleCount",
           label: "Jumlah Perempuan",
           type: "number",
+          readOnly: true,
         },
         {
           key: "houseCount",
@@ -93,11 +101,13 @@ export default function Page() {
           key: "toddlerCount",
           label: "Jumlah Balita",
           type: "number",
+          readOnly: true,
         },
         {
           key: "elderlyCount",
           label: "Jumlah Lansia",
           type: "number",
+          readOnly: true,
         },
         {
           key: "facilities",

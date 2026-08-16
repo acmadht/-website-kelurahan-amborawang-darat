@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addDoc,
   collection,
@@ -15,7 +15,8 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
+import { auth, db } from "@/lib/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
 import { slugify, sortByOrder } from "@/lib/utils";
 import ImageUploader from "./ImageUploader";
 import styles from "./AdminVisualEditor.module.css";
@@ -38,6 +39,7 @@ export type FieldConfig = {
   options?: string[];
   full?: boolean;
   placeholder?: string;
+  readOnly?: boolean;
 };
 
 interface AdminCollectionManagerProps {
@@ -54,6 +56,9 @@ interface AdminCollectionManagerProps {
   filterField?: string;
   filterValue?: string;
   filterMode?: "include" | "exclude";
+  relatedLinks?: Array<{ label: string; href: string; note?: string }>;
+  connectionNote?: string;
+  autoRecalculate?: boolean;
 }
 
 function normalizeRtNumber(value: unknown) {
@@ -115,6 +120,60 @@ function monthShort(value: unknown) {
     day: new Intl.DateTimeFormat("id-ID", { day: "2-digit" }).format(date),
     month: new Intl.DateTimeFormat("id-ID", { month: "short" }).format(date),
   };
+}
+
+const EXPORTABLE_COLLECTIONS = new Set([
+  "residents",
+  "families",
+  "populationMutations",
+  "socialAssistance",
+  "inventory",
+  "rts",
+]);
+
+function exportValue(value: unknown) {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) return value.map((item) => String(item ?? "")).join("; ");
+  if (typeof value === "object") {
+    const maybeTimestamp = value as { toDate?: () => Date; seconds?: number };
+    if (typeof maybeTimestamp.toDate === "function") {
+      try {
+        return maybeTimestamp.toDate().toISOString();
+      } catch {
+        return "";
+      }
+    }
+    if (typeof maybeTimestamp.seconds === "number") {
+      return new Date(maybeTimestamp.seconds * 1000).toISOString();
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function csvCell(value: unknown) {
+  const normalized = exportValue(value).replace(/"/g, '""');
+  return `"${normalized}"`;
+}
+
+function downloadCsvFile(filename: string, rows: Record<string, unknown>[], columns: Array<{ key: string; label: string }>) {
+  const header = ["ID Firestore", ...columns.map((column) => column.label)].map(csvCell).join(",");
+  const body = rows.map((row) =>
+    [row.id, ...columns.map((column) => row[column.key])].map(csvCell).join(","),
+  );
+  const blob = new Blob(["\uFEFF", [header, ...body].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 function StatusPill({ active, label }: { active: boolean; label?: string }) {
@@ -351,6 +410,74 @@ function VisualCardContent({
     );
   }
 
+
+  if (collectionName === "residents") {
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}><span>Data Penduduk</span><span className={styles.metaChip}>Internal</span></div>
+        <h3>{text(item.fullName, "Nama penduduk")}</h3>
+        <p>RT {text(item.rt, "--")} · {text(item.gender, "Jenis kelamin belum diisi")} · {text(item.domicileStatus, "Status belum diisi")}</p>
+        <div className={styles.metaRow}>
+          <span className={styles.metaChip}>NIK {text(item.nik, "-")}</span>
+          <span className={styles.metaChip}>KK {text(item.familyCardNumber, "-")}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (collectionName === "families") {
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}><span>Keluarga / KK</span><span className={styles.metaChip}>Internal</span></div>
+        <h3>{text(item.headName, "Kepala keluarga")}</h3>
+        <p>RT {text(item.rt, "--")} · {Number(item.memberCount) || 0} anggota · {text(item.housingStatus, "Status rumah belum diisi")}</p>
+        <div className={styles.metaRow}><span className={styles.metaChip}>No. KK {text(item.familyCardNumber, "-")}</span></div>
+      </div>
+    );
+  }
+
+  if (collectionName === "populationMutations") {
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}><span>Mutasi Penduduk</span><span className={styles.metaChip}>Internal</span></div>
+        <h3>{text(item.name, "Nama penduduk")}</h3>
+        <p>{text(item.mutationType, "Jenis mutasi")} · {text(item.date, "Tanggal belum diisi")}</p>
+        <div className={styles.metaRow}>
+          {String(item.originRt ?? "") ? <span className={styles.metaChip}>RT asal {String(item.originRt)}</span> : null}
+          {String(item.destinationRt ?? "") ? <span className={styles.metaChip}>RT tujuan {String(item.destinationRt)}</span> : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (collectionName === "socialAssistance") {
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}><span>Bansos</span><span className={styles.metaChip}>Internal</span></div>
+        <h3>{text(item.recipientName, "Nama penerima")}</h3>
+        <p>{text(item.aidType, "Jenis bantuan")} · {text(item.receiptStatus, "Status belum diisi")}</p>
+        <div className={styles.metaRow}>
+          <span className={styles.metaChip}>RT {text(item.rt, "--")}</span>
+          {String(item.period ?? "") ? <span className={styles.metaChip}>{String(item.period)}</span> : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (collectionName === "inventory") {
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}><span>{text(item.category, "Inventaris")}</span><StatusPill active={String(item.condition).toLowerCase() !== "rusak berat"} label={text(item.condition, "Belum dinilai")} /></div>
+        <h3>{text(item.itemName, "Nama barang")}</h3>
+        <p>{Number(item.quantity) || 0} {text(item.unit, "unit")} · {text(item.location, "Lokasi belum diisi")}</p>
+        <div className={styles.metaRow}>
+          {String(item.itemCode ?? "") ? <span className={styles.metaChip}>Kode {String(item.itemCode)}</span> : null}
+          {String(item.acquisitionYear ?? "") ? <span className={styles.metaChip}>Perolehan {String(item.acquisitionYear)}</span> : null}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.cardBody}>
       <div className={styles.cardKicker}>
@@ -376,6 +503,9 @@ export default function AdminCollectionManager({
   filterField,
   filterValue,
   filterMode = "include",
+  relatedLinks = [],
+  connectionNote,
+  autoRecalculate = false,
 }: AdminCollectionManagerProps) {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [form, setForm] = useState<Record<string, unknown>>(defaults);
@@ -385,9 +515,46 @@ export default function AdminCollectionManager({
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState("");
   const [notice, setNotice] = useState("");
+  const autoRecalculatedRef = useRef(false);
 
   const isLocked = (item: Record<string, unknown>) =>
     Boolean(lockedField && lockedValues.includes(String(item[lockedField] ?? "")));
+
+  async function refreshLinkedAdministration() {
+    if (!["residents", "families", "rts", "socialAssistance"].includes(collectionName)) return null;
+    const user = auth?.currentUser;
+    if (!user) return null;
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/api/admin/recalculate-administration", {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return null;
+      const json = await response.json() as { result?: { familyMemberCountsUpdated?: number; rtStatisticsUpdated?: number; aidRtLinked?: number } };
+      return json.result ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    if (!autoRecalculate || !auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user || autoRecalculatedRef.current) return;
+      autoRecalculatedRef.current = true;
+      void refreshLinkedAdministration().then((result) => {
+        if (result?.rtStatisticsUpdated) {
+          setNotice(`Statistik RT otomatis diperbarui pada ${result.rtStatisticsUpdated} RT.`);
+        }
+      });
+    });
+
+    return unsubscribe;
+    // Sinkronisasi otomatis cukup sekali ketika halaman dibuka.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRecalculate, collectionName]);
 
   useEffect(() => {
     if (!db) {
@@ -423,6 +590,14 @@ export default function AdminCollectionManager({
 
     return unsubscribe;
   }, [collectionName, filterField, filterValue, filterMode]);
+
+  function exportCsv() {
+    if (!EXPORTABLE_COLLECTIONS.has(collectionName)) return;
+    const columns = fields.map((field) => ({ key: field.key, label: field.label }));
+    const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar" }).format(new Date());
+    downloadCsvFile(`${collectionName}-${date}.csv`, items, columns);
+    setNotice(`Export ${title} berhasil dibuat (${items.length} data).`);
+  }
 
   function startNew() {
     setEditing(null);
@@ -464,6 +639,8 @@ export default function AdminCollectionManager({
     const payload: Record<string, unknown> = {};
 
     for (const field of fields) {
+      // Field turunan (misalnya statistik RT) dihitung server, bukan disimpan dari form.
+      if (field.readOnly) continue;
       let value = form[field.key];
 
       if (field.type === "number") value = Math.max(0, Number(value) || 0);
@@ -546,8 +723,12 @@ export default function AdminCollectionManager({
         });
       }
 
+      const linked = await refreshLinkedAdministration();
       setOpen(false);
-      setNotice(editing ? "Data berhasil diperbarui dan langsung tampil pada website publik." : "Data baru berhasil ditambahkan dan langsung terhubung ke website publik.");
+      const linkedMessage = linked
+        ? ` Data terkait ikut diselaraskan${linked.aidRtLinked ? `; ${linked.aidRtLinked} data bansos mendapat RT otomatis` : ""}.`
+        : "";
+      setNotice((editing ? "Data berhasil diperbarui dan langsung tampil pada website publik." : "Data baru berhasil ditambahkan dan langsung terhubung ke website publik.") + linkedMessage);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Gagal menyimpan data.");
     } finally {
@@ -576,10 +757,11 @@ export default function AdminCollectionManager({
       }
 
       await deleteDoc(doc(db, collectionName, id));
+      const linked = await refreshLinkedAdministration();
       setNotice(
         collectionName === "galleryAlbums"
           ? "Album dan metadata foto terkait berhasil dihapus."
-          : "Data berhasil dihapus dari Firestore.",
+          : `Data berhasil dihapus dari Firestore.${linked ? " Data terkait ikut dihitung ulang." : ""}`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Gagal menghapus data.");
@@ -601,6 +783,37 @@ export default function AdminCollectionManager({
         <span>{items.length} data aktif di tampilan admin</span>
       </div>
 
+      {connectionNote || relatedLinks.length ? (
+        <div className={styles.connectionBar}>
+          <div>
+            <strong>Data saling terhubung</strong>
+            <span>{connectionNote || "Gunakan halaman terkait untuk melengkapi data yang memiliki hubungan."}</span>
+          </div>
+          {relatedLinks.length || ["residents", "families", "rts", "socialAssistance"].includes(collectionName) ? (
+            <div className={styles.connectionLinks}>
+              {relatedLinks.map((item) => (
+                <Link key={item.href} href={item.href} className={styles.connectionLink} title={item.note}>
+                  {item.label} →
+                </Link>
+              ))}
+              {["residents", "families", "rts", "socialAssistance"].includes(collectionName) ? (
+                <button
+                  type="button"
+                  className={styles.connectionSyncButton}
+                  onClick={async () => {
+                    setStatus("");
+                    const linked = await refreshLinkedAdministration();
+                    setNotice(linked ? "Data Penduduk, Keluarga/KK, Data RT, Bansos, dan ringkasan beranda berhasil diselaraskan." : "Sinkronisasi belum dapat dijalankan. Pastikan sesi admin aktif.");
+                  }}
+                >
+                  ↻ Sinkronkan Data
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {notice ? <div className="success-box" style={{ marginTop: 14 }}>{notice}</div> : null}
       {status && !open ? <div className="error-box" style={{ marginTop: 14 }}>{status}</div> : null}
 
@@ -611,6 +824,11 @@ export default function AdminCollectionManager({
             <span>Susunan kartu mengikuti urutan data yang digunakan website.</span>
           </div>
           <div className={styles.previewActions}>
+            {EXPORTABLE_COLLECTIONS.has(collectionName) ? (
+              <button type="button" className={styles.previewButton} onClick={exportCsv} disabled={loading || items.length === 0}>
+                ⇩ Export CSV
+              </button>
+            ) : null}
             {publicHref ? (
               <Link href={publicHref} target="_blank" className={styles.previewButton}>Lihat Website ↗</Link>
             ) : null}
@@ -667,6 +885,7 @@ export default function AdminCollectionManager({
                     <label>
                       {field.label}
                       {field.required ? " *" : ""}
+                      {field.readOnly ? " · Otomatis" : ""}
                     </label>
 
                     {field.type === "textarea" || field.type === "list" ? (
@@ -674,12 +893,14 @@ export default function AdminCollectionManager({
                         className="form-control"
                         placeholder={field.placeholder}
                         value={String(form[field.key] ?? "")}
+                        readOnly={field.readOnly}
                         onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
                       />
                     ) : field.type === "select" ? (
                       <select
                         className="form-control"
                         value={String(form[field.key] ?? "")}
+                        disabled={field.readOnly}
                         onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
                       >
                         <option value="">Pilih</option>
@@ -690,6 +911,7 @@ export default function AdminCollectionManager({
                         <input
                           type="checkbox"
                           checked={Boolean(form[field.key])}
+                          disabled={field.readOnly}
                           onChange={(event) => setForm({ ...form, [field.key]: event.target.checked })}
                         />
                         <span>Aktif</span>
@@ -707,6 +929,7 @@ export default function AdminCollectionManager({
                         min={field.type === "number" ? 0 : undefined}
                         placeholder={field.placeholder}
                         value={String(form[field.key] ?? "")}
+                        readOnly={field.readOnly}
                         onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
                       />
                     )}

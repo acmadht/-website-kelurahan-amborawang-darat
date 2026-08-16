@@ -466,9 +466,13 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
                 </div>
 
                 <div className={styles.ctaActions}>
-                  <Link href="/kontak" className={styles.ctaPrimary}>
-                    Hubungi Kelurahan
+                  <Link href="/permohonan-surat" className={styles.ctaPrimary}>
+                    Ajukan Surat Online
                     <ArrowIcon />
+                  </Link>
+
+                  <Link href="/pengaduan" className={styles.ctaSecondary}>
+                    Pengaduan
                   </Link>
 
                   {whatsapp ? (

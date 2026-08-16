@@ -11,5 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const [settings, facilities] = await Promise.all([getServerSettings(), getServerCollection<FacilityItem>("facilities")]);
-  return <><JsonLd data={breadcrumbJsonLd([{ name: "Beranda", path: "/" }, { name: "Fasilitas", path: "/fasilitas" }])} /><PublicDirectoryPage mode="facilities" initialSettings={settings} initialFacilities={facilities} /></>;
+  const publicFacilities = facilities.map(({ note: _note, ...item }) => item);
+  return <><JsonLd data={breadcrumbJsonLd([{ name: "Beranda", path: "/" }, { name: "Fasilitas", path: "/fasilitas" }])} /><PublicDirectoryPage mode="facilities" initialSettings={settings} initialFacilities={publicFacilities} /></>;
 }

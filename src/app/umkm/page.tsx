@@ -11,5 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const [settings, umkm] = await Promise.all([getServerSettings(), getServerCollection<UmkmItem>("umkm")]);
-  return <><JsonLd data={breadcrumbJsonLd([{ name: "Beranda", path: "/" }, { name: "UMKM", path: "/umkm" }])} /><PublicDirectoryPage mode="umkm" initialSettings={settings} initialUmkm={umkm} /></>;
+  const publicUmkm = umkm.map(({ ownerNik: _ownerNik, note: _note, ...item }) => item);
+  return <><JsonLd data={breadcrumbJsonLd([{ name: "Beranda", path: "/" }, { name: "UMKM", path: "/umkm" }])} /><PublicDirectoryPage mode="umkm" initialSettings={settings} initialUmkm={publicUmkm} /></>;
 }

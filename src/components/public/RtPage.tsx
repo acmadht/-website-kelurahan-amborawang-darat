@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
@@ -557,13 +558,28 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
                   <span>Pembaruan Data</span>
                   <h2>Data RT dikelola melalui dashboard admin</h2>
                   <p>
-                    Admin dapat memperbarui ketua RT, jumlah penduduk, KK,
-                    laki-laki, perempuan, rumah, balita, lansia, fasilitas,
-                    kontak, dan keterangan wilayah tanpa mengubah kode halaman.
+                    Data ketua RT, area, rumah, fasilitas, kontak, dan keterangan wilayah dikelola pada Data RT.
+                    Jumlah penduduk, laki-laki/perempuan, balita, lansia, dan KK dapat diselaraskan dari administrasi Penduduk dan Keluarga per RT.
                   </p>
                 </div>
               </div>
             </Reveal>
+          </div>
+        </section>
+
+        <section className={styles.relatedSection}>
+          <div className="container">
+            <div className={styles.relatedHeading}>
+              <span>Data terkait</span>
+              <h2>RT menjadi penghubung data wilayah dan administrasi</h2>
+              <p>Gunakan halaman berikut untuk melihat statistik agregat yang menjadi konteks data masing-masing RT.</p>
+            </div>
+            <div className={styles.relatedGrid}>
+              <Link href="/penduduk" className={styles.relatedCard}><strong>Penduduk</strong><span>Sebaran warga aktif, pendidikan, dan pekerjaan.</span><small>Buka →</small></Link>
+              <Link href="/keluarga" className={styles.relatedCard}><strong>Keluarga / KK</strong><span>Jumlah keluarga dan sebaran KK menurut RT.</span><small>Buka →</small></Link>
+              <Link href="/fasilitas" className={styles.relatedCard}><strong>Fasilitas</strong><span>Sarana prasarana publik pada wilayah kelurahan.</span><small>Buka →</small></Link>
+              <Link href="/data-publik" className={styles.relatedCard}><strong>Data Publik</strong><span>Portal seluruh statistik agregat kelurahan.</span><small>Buka →</small></Link>
+            </div>
           </div>
         </section>
 

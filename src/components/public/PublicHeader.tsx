@@ -25,6 +25,16 @@ const mainMenu = [
 
 const moreMenu = [
   {
+    label: "Transparansi",
+    href: "/transparansi",
+    description: "Pusat informasi publik, dokumen, statistik, pelayanan, dan partisipasi masyarakat",
+  },
+  {
+    label: "Data Publik",
+    href: "/data-publik",
+    description: "Statistik penduduk, keluarga, mutasi, bansos, dan inventaris tanpa membuka data pribadi",
+  },
+  {
     label: "Wilayah",
     href: "/wilayah",
     description: "Data wilayah, batas administratif, dan peta",
@@ -230,6 +240,54 @@ const staticSearchItems: SearchItem[] = [
     description: "Hasil digital, publikasi, dan dokumentasi luaran Tim KKN.",
     category: "KKN",
     href: "/kkn/luaran",
+  },
+  {
+    title: "Data Publik Kelurahan",
+    description: "Portal statistik penduduk, keluarga, mutasi, bansos, dan inventaris.",
+    category: "Data Publik",
+    href: "/data-publik",
+  },
+  {
+    title: "Statistik Penduduk",
+    description: "Data agregat penduduk tanpa NIK, No. KK, nama, atau alamat pribadi.",
+    category: "Data Publik",
+    href: "/penduduk",
+  },
+  {
+    title: "Statistik Keluarga / KK",
+    description: "Ringkasan jumlah keluarga, anggota keluarga, RT, dan status rumah.",
+    category: "Data Publik",
+    href: "/keluarga",
+  },
+  {
+    title: "Statistik Mutasi Penduduk",
+    description: "Ringkasan pindah masuk, pindah keluar, antar RT, dan perubahan status penduduk.",
+    category: "Data Publik",
+    href: "/mutasi",
+  },
+  {
+    title: "Statistik Bantuan Sosial",
+    description: "Ringkasan program dan penyaluran bansos tanpa identitas penerima.",
+    category: "Data Publik",
+    href: "/bansos",
+  },
+  {
+    title: "Inventaris Kelurahan",
+    description: "Ringkasan aset dan barang kelurahan menurut kategori, kondisi, dan lokasi.",
+    category: "Data Publik",
+    href: "/inventaris",
+  },
+  {
+    title: "Transparansi & Informasi Publik",
+    description: "Pusat akses data publik, dokumen, layanan, pengaduan, dan informasi kelurahan.",
+    category: "Informasi Publik",
+    href: "/transparansi",
+  },
+  {
+    title: "Kebijakan Privasi",
+    description: "Penjelasan pemisahan data publik dan data administrasi internal warga.",
+    category: "Informasi Publik",
+    href: "/privasi",
   },
   {
     title: "Kontak Kelurahan",

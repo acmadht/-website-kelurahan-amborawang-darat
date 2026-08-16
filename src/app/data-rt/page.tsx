@@ -9,6 +9,9 @@ import {
 } from "@/lib/seo";
 import type { RegionLeader } from "@/types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
   return buildMetadata({

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { useCollectionData, useDocumentData } from "@/hooks/useFirestoreData";
 import { demoSettings } from "@/data/demo";
@@ -32,8 +33,10 @@ export default function PublicDirectoryPage({
 }: Props) {
   const { data: rawSettings } = useDocumentData<SiteSettings>("siteSettings", "main", initialSettings);
   const settings = applyAmborawangPublicSettings(rawSettings);
-  const { data: umkm } = useCollectionData<UmkmItem>("umkm", initialUmkm);
-  const { data: facilities } = useCollectionData<FacilityItem>("facilities", initialFacilities);
+  // Data direktori dipasok oleh Server Component. Listener browser dimatikan agar
+  // field internal (mis. NIK pemilik UMKM) tidak pernah dapat dibaca langsung dari Firestore publik.
+  const { data: umkm } = useCollectionData<UmkmItem>("umkm", initialUmkm, [], false);
+  const { data: facilities } = useCollectionData<FacilityItem>("facilities", initialFacilities, [], false);
 
   const items = useMemo(() => {
     if (mode === "umkm") {
@@ -47,6 +50,17 @@ export default function PublicDirectoryPage({
   }, [mode, umkm, facilities]);
 
   const isUmkm = mode === "umkm";
+  const related = isUmkm
+    ? [
+        { href: "/data-rt", title: "Data RT", text: "Lihat konteks lingkungan RT tempat usaha berada." },
+        { href: "/wilayah", title: "Wilayah", text: "Lihat karakter dan konektivitas wilayah kelurahan." },
+        { href: "/fasilitas", title: "Fasilitas", text: "Lihat sarana publik pendukung aktivitas masyarakat." },
+      ]
+    : [
+        { href: "/inventaris", title: "Inventaris", text: "Lihat ringkasan aset/barang kelurahan yang aman dipublikasikan." },
+        { href: "/data-rt", title: "Data RT", text: "Lihat fasilitas dan ringkasan wilayah pada masing-masing RT." },
+        { href: "/wilayah", title: "Wilayah", text: "Lihat peta dan konteks lokasi fasilitas di kelurahan." },
+      ];
 
   return (
     <PublicShell>
@@ -147,6 +161,22 @@ export default function PublicDirectoryPage({
             <div className={styles.note}>
               Informasi yang tampil di halaman ini hanya data yang diberi izin publikasi pada spreadsheet. Data identitas pribadi tidak ditampilkan.
             </div>
+
+            <section className={styles.relatedSection}>
+              <div className={styles.relatedHeading}>
+                <span>Informasi terkait</span>
+                <h2>{isUmkm ? "Lihat konteks wilayah dan sarana pendukung" : "Hubungkan fasilitas dengan data wilayah dan aset"}</h2>
+              </div>
+              <div className={styles.relatedGrid}>
+                {related.map((item) => (
+                  <Link href={item.href} className={styles.relatedCard} key={item.href}>
+                    <strong>{item.title}</strong>
+                    <p>{item.text}</p>
+                    <span>Buka halaman →</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
           </div>
         </section>
       </main>

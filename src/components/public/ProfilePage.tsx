@@ -430,6 +430,9 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
                   <Link href="/wilayah" className={styles.secondaryButton}>
                     Lihat Data Wilayah
                   </Link>
+                  <Link href="/data-publik" className={styles.secondaryButton}>
+                    Data Publik
+                  </Link>
                 </div>
               </div>
             </Reveal>

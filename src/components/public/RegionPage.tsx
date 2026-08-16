@@ -66,7 +66,7 @@ export default function RegionPage({ initialSettings = demoSettings, initialRegi
     { value: region.area, label: "Luas wilayah", note: region.areaNote },
     { value: region.population, label: "Jumlah penduduk", note: region.populationNote },
     { value: rtCountLabel, label: "Wilayah RT", note: "Data RT aktif pada dashboard" },
-    { value: region.districtDistance, label: "Ke ibu kota kecamatan", note: region.districtDistanceNote },
+    { value: region.districtDistance, label: "Ke kecamatan Samboja Barat", note: region.districtDistanceNote },
   ];
 
   const boundaries = [
@@ -298,7 +298,8 @@ export default function RegionPage({ initialSettings = demoSettings, initialRegi
                 </div>
                 <div className={styles.ctaActions}>
                   <Link href="/kontak" className={styles.ctaPrimary}>Hubungi Kelurahan <ArrowIcon /></Link>
-                  <Link href="/profil" className={styles.ctaSecondary}>Lihat Profil</Link>
+                  <Link href="/data-rt" className={styles.ctaSecondary}>Data RT</Link>
+                  <Link href="/data-publik" className={styles.ctaSecondary}>Data Publik</Link>
                 </div>
               </div>
             </Reveal>

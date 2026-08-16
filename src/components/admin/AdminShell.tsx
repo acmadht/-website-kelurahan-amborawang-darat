@@ -48,10 +48,16 @@ const informationItems: MenuItem[] = [
 ];
 
 const systemBaseItems: MenuItem[] = [
+  { label: "Penduduk", href: "/admin/penduduk", code: "PD" },
+  { label: "Keluarga / KK", href: "/admin/keluarga", code: "KK" },
+  { label: "Mutasi Penduduk", href: "/admin/mutasi", code: "MT" },
+  { label: "Bansos", href: "/admin/bansos", code: "BS" },
+  { label: "Inventaris", href: "/admin/inventaris", code: "IV" },
   { label: "Permohonan Surat", href: "/admin/surat", code: "SR" },
   { label: "Pengaduan", href: "/admin/pengaduan", code: "AD" },
   { label: "Pesan Masuk", href: "/admin/pesan", code: "PS" },
   { label: "Pengaturan Website", href: "/admin/pengaturan", code: "ST" },
+  { label: "Backup & Export", href: "/admin/backup", code: "BK" },
   { label: "Pengguna Admin", href: "/admin/pengguna", code: "US" },
 ];
 
@@ -73,7 +79,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const systemItems = useMemo(() => {
     if (profile?.role === "superadmin") return systemBaseItems;
-    return systemBaseItems.filter((item) => item.href !== "/admin/pengguna");
+    return systemBaseItems.filter((item) => !["/admin/pengguna", "/admin/backup"].includes(item.href));
   }, [profile?.role]);
 
   const publicExpandableMenus = useMemo<ExpandableMenu[]>(
@@ -339,7 +345,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </section>
 
               <section className={`${styles.navGroup} ${styles.secondaryGroup}`}>
-                <span className={styles.groupTitle}>Administrasi</span>
+                <span className={styles.groupTitle}>Administrasi Kelurahan</span>
                 {systemItems.map((item) => {
                   const active = isItemActive(pathname, item.href);
                   return (

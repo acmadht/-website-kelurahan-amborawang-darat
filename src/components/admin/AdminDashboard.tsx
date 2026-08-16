@@ -20,6 +20,11 @@ const statsConfig = [
   { collection: "facilities", label: "Fasilitas", href: "/admin/fasilitas", code: "FS" },
   { collection: "serviceRequests", label: "Surat", href: "/admin/surat", code: "SR" },
   { collection: "complaints", label: "Pengaduan", href: "/admin/pengaduan", code: "AD" },
+  { collection: "residents", label: "Penduduk", href: "/admin/penduduk", code: "PD" },
+  { collection: "families", label: "Keluarga / KK", href: "/admin/keluarga", code: "KK" },
+  { collection: "populationMutations", label: "Mutasi", href: "/admin/mutasi", code: "MT" },
+  { collection: "socialAssistance", label: "Bansos", href: "/admin/bansos", code: "BS" },
+  { collection: "inventory", label: "Inventaris", href: "/admin/inventaris", code: "IV" },
 ] as const;
 
 const quickActions = [
@@ -72,10 +77,9 @@ export default function AdminDashboard() {
       <section className={styles.welcome}>
         <div>
           <span>Dashboard Kelurahan</span>
-          <h1>Pusat pengelolaan website</h1>
+          <h1>Pusat pengelolaan website & administrasi</h1>
           <p>
-            Kelola informasi publik {settings.villageName} dari satu dashboard yang
-            terhubung dengan Firestore.
+            Kelola informasi publik dan administrasi internal {settings.villageName} dari satu dashboard yang terhubung dengan Firestore.
           </p>
         </div>
         <div className={styles.welcomeMeta}>
@@ -136,7 +140,8 @@ export default function AdminDashboard() {
             <li>Lengkapi Pemerintahan, lembaga, dan data RT.</li>
             <li>Perbarui Wilayah, Layanan, Kontak, dan jam pelayanan.</li>
             <li>Publikasikan Berita, Pengumuman, Agenda, Galeri, dan Dokumen.</li>
-            <li>Periksa hasil akhir melalui tampilan website publik.</li>
+            <li>Kelola Penduduk, KK, Mutasi, Bansos, dan Inventaris pada menu administrasi.</li>
+            <li>Periksa hasil akhir melalui tampilan website publik dan Data Publik.</li>
           </ol>
         </article>
 

@@ -111,7 +111,7 @@ export const amborawangProfileFallback: ProfileContent = {
     { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
     { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
     { value: "Data RT", label: "Wilayah RT", note: "Terhubung ke Data RT" },
-    { value: "5,3 km", label: "Ke ibu kota kecamatan", note: "BPS, data 2023" },
+    { value: "5,8 km", label: "Jarak ke kecamatan Samboja Barat", note: "Googlemaps, data 2026" },
   ],
 
   timelineEyebrow: "Jejak Perkembangan",

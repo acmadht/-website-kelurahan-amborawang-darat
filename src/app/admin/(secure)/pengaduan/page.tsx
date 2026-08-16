@@ -7,7 +7,7 @@ export default function Page() {
       publicHref="/cek-pengaduan"
       title="Pengaduan Masyarakat"
       description="Kelola pengaduan yang masuk dari website dan Google Spreadsheet. Identitas pelapor tetap berada pada area admin."
-      defaults={{ticketId:"",name:"",phone:"",rt:"",category:"",message:"",location:"",status:"Baru",followUp:"",staff:"",targetDate:"",completedDate:"",publicNote:""}}
+      defaults={{ticketId:"",name:"",phone:"",rt:"",category:"",message:"",location:"",status:"Baru",followUp:"",staff:"",targetDate:"",completedDate:"",publicNote:"",showInPublicStats:false}}
       displayFields={["ticketId","name","category","status"]}
       fields={[
         {key:"ticketId",label:"ID Pengaduan",type:"text",required:true},
@@ -23,6 +23,7 @@ export default function Page() {
         {key:"targetDate",label:"Target Selesai",type:"date"},
         {key:"completedDate",label:"Tanggal Selesai",type:"date"},
         {key:"publicNote",label:"Keterangan Publik",type:"textarea",full:true},
+        {key:"showInPublicStats",label:"Masuk Statistik Publik",type:"checkbox"},
       ]}
     />
   );

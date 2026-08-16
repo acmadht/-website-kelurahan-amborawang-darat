@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         "Petugas": String(d.staff ?? ""),
         "Tanggal Selesai": String(d.completedDate ?? ""),
         "Keterangan": String(d.publicNote ?? ""),
+        "Tampil Statistik Publik": d.showInPublicStats === true ? "Ya" : "Tidak",
       }));
       return NextResponse.json({ ok: true, rows });
     }

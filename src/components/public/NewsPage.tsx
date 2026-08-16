@@ -75,7 +75,7 @@ export default function NewsPage({
   const { data: remotePosts } = useCollectionData<PostItem>(
     "posts",
     initialPosts,
-    [],
+    [{ field: "status", op: "==", value: "published" }],
     !isKkn,
   );
   const { settings } = usePublicSettings(initialSettings);

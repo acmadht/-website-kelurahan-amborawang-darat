@@ -148,14 +148,24 @@ export default function HomePage({
   );
   const { data: rawSlides } = useCollectionData<HeroSlide>("heroSlides", initialSlides);
   const { data: rawServices } = useCollectionData<ServiceItem>("services", initialServices);
-  const { data: rawPosts } = useCollectionData<PostItem>("posts", initialPosts);
+  const { data: rawPosts } = useCollectionData<PostItem>("posts", initialPosts, [
+    { field: "status", op: "==", value: "published" },
+  ]);
   const { data: rawAnnouncements } = useCollectionData<Announcement>(
     "announcements",
     initialAnnouncements,
   );
   const { data: rawAgendas } = useCollectionData<AgendaItem>("agendas", initialAgendas);
   const { data: rawRts } = useCollectionData<RegionLeader>("rts", initialRts);
-  const { data: villageStats } = useDocumentData<VillageStats>("villageStats", "main", initialStats);
+  // Statistik sudah dibaca oleh Server Component di app/page.tsx melalui
+  // Firebase Admin. Tidak perlu memasang listener browser yang bergantung
+  // pada Firestore public-read rules.
+  const { data: villageStats } = useDocumentData<VillageStats>(
+    "villageStats",
+    "main",
+    initialStats,
+    false,
+  );
 
   const activeRtCount = useMemo(
     () =>
@@ -230,7 +240,7 @@ export default function HomePage({
     rawAnnouncements.find((item) => item.isActive && item.priority === "penting") ??
     rawAnnouncements.find((item) => item.isActive);
   const nextAgenda = rawAgendas.find(
-    (item) => item.status === "akan-datang" || item.status === "berlangsung",
+    (item) => item.isPublic !== false && (item.status === "akan-datang" || item.status === "berlangsung"),
   );
 
   const infoCards = [
@@ -239,6 +249,7 @@ export default function HomePage({
           category: latestPost.category || "Berita",
           title: latestPost.title,
           description: latestPost.summary,
+          imageUrl: latestPost.coverImageUrl || "",
           href: `/berita/${latestPost.slug}`,
         }
       : null,
@@ -250,6 +261,7 @@ export default function HomePage({
               : "Pengumuman",
           title: importantAnnouncement.title,
           description: importantAnnouncement.summary,
+          imageUrl: importantAnnouncement.imageUrl || "",
           href: importantAnnouncement.attachmentUrl || "/kontak",
         }
       : null,
@@ -260,12 +272,18 @@ export default function HomePage({
           description: `${formatDate(nextAgenda.date)} • ${
             nextAgenda.time || "Waktu belum diisi"
           } • ${nextAgenda.location || `Kelurahan ${settings.villageName}`}`,
+          imageUrl: nextAgenda.imageUrl || "",
           href: "/berita",
         }
       : null,
   ].filter(
-    (item): item is { category: string; title: string; description: string; href: string } =>
-      item !== null,
+    (item): item is {
+      category: string;
+      title: string;
+      description: string;
+      imageUrl: string;
+      href: string;
+    } => item !== null,
   );
 
 
@@ -578,8 +596,19 @@ export default function HomePage({
                 >
                   <Link href={item.href} className={styles.infoCard}>
                     <div className={styles.infoVisual}>
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={`Foto ${item.title}`}
+                          className={styles.infoImage}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className={styles.infoFallback} aria-hidden="true">
+                          <div className={styles.infoOrb} />
+                        </div>
+                      )}
                       <span>{item.category}</span>
-                      <div className={styles.infoOrb} aria-hidden="true" />
                     </div>
 
                     <div className={styles.infoBody}>

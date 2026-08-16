@@ -43,6 +43,7 @@ export interface UmkmItem {
   id?: string;
   name: string;
   ownerName?: string;
+  ownerNik?: string;
   businessType?: string;
   mainProduct?: string;
   address?: string;
@@ -53,6 +54,7 @@ export interface UmkmItem {
   isActive: boolean;
   isPublic: boolean;
   order: number;
+  note?: string;
 }
 
 export interface FacilityItem {
@@ -68,6 +70,7 @@ export interface FacilityItem {
   imageUrl?: string;
   isPublic: boolean;
   order: number;
+  note?: string;
 }
 
 export interface HeroSlide {
@@ -162,6 +165,7 @@ export interface Announcement {
   id?: string;
   title: string;
   summary: string;
+  imageUrl?: string;
   attachmentUrl?: string;
   priority: "normal" | "penting";
   validUntil?: string;
@@ -182,6 +186,7 @@ export interface AgendaItem {
   status: "akan-datang" | "berlangsung" | "selesai" | "dibatalkan";
   imageUrl?: string;
   order: number;
+  isPublic?: boolean;
 }
 
 export interface GalleryAlbum {
@@ -305,4 +310,84 @@ export interface PublicDocument {
   fileType: string;
   isActive: boolean;
   order: number;
+}
+
+
+export interface ResidentRecord {
+  id?: string;
+  residentId: string;
+  nik: string;
+  familyCardNumber: string;
+  fullName: string;
+  gender: string;
+  birthPlace?: string;
+  birthDate?: string;
+  religion?: string;
+  maritalStatus?: string;
+  education?: string;
+  occupation?: string;
+  rt?: string;
+  address?: string;
+  domicileStatus?: string;
+  arrivalDate?: string;
+  departureDate?: string;
+  note?: string;
+}
+
+export interface FamilyRecord {
+  id?: string;
+  familyCardNumber: string;
+  headName: string;
+  rt?: string;
+  address?: string;
+  housingStatus?: string;
+  memberCount: number;
+  inputDate?: string;
+  note?: string;
+}
+
+export interface PopulationMutationRecord {
+  id?: string;
+  mutationId: string;
+  date: string;
+  nik?: string;
+  name?: string;
+  mutationType: string;
+  originRt?: string;
+  destinationRt?: string;
+  address?: string;
+  documentNumber?: string;
+  officer?: string;
+  note?: string;
+}
+
+export interface SocialAssistanceRecord {
+  id?: string;
+  recordId: string;
+  recipientName: string;
+  nik?: string;
+  familyCardNumber?: string;
+  rt?: string;
+  aidType: string;
+  period?: string;
+  receiptStatus?: string;
+  date?: string;
+  programSource?: string;
+  note?: string;
+}
+
+export interface InventoryRecord {
+  id?: string;
+  itemId: string;
+  itemName: string;
+  category?: string;
+  itemCode?: string;
+  quantity: number;
+  unit?: string;
+  condition?: string;
+  location?: string;
+  acquisitionYear?: string;
+  fundingSource?: string;
+  personInCharge?: string;
+  note?: string;
 }

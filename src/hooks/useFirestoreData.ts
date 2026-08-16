@@ -89,12 +89,22 @@ export function useDocumentData<T>(
   collectionName: string,
   documentId: string,
   fallback: T,
+  enabled = true,
 ) {
   const [data, setData] = useState<T>(fallback);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
+  const [loading, setLoading] = useState(isFirebaseConfigured && enabled);
   const [usingDemo, setUsingDemo] = useState(!isFirebaseConfigured);
 
   useEffect(() => {
+    if (!enabled) {
+      // Data sudah dipasok dari Server Component. Hindari read Firestore
+      // kedua dari browser bila dokumen memang tidak perlu realtime/public.
+      setData(fallback);
+      setLoading(false);
+      setUsingDemo(false);
+      return;
+    }
+
     if (!db) {
       setData(fallback);
       setLoading(false);
@@ -142,7 +152,7 @@ export function useDocumentData<T>(
     return unsubscribe;
   // fallback berfungsi sebagai nilai cadangan awal. Listener mengikuti identitas dokumen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionName, documentId]);
+  }, [collectionName, documentId, enabled]);
 
   return { data, loading, usingDemo };
 }

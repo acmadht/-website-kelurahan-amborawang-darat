@@ -71,7 +71,7 @@ export default function NewsDetailPage({
   const { data: remotePosts, loading } = useCollectionData<PostItem>(
     "posts",
     initialArticle ? [initialArticle] : [],
-    [],
+    [{ field: "status", op: "==", value: "published" }],
     !isKkn,
   );
   const articleBase = isKkn ? "/kkn/berita" : "/berita";

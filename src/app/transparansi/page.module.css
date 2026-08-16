@@ -1,0 +1,20 @@
+.page { background: #f4f7fb; min-height: 100vh; }
+.hero { padding: 86px 0 72px; background: linear-gradient(135deg, #061a3a 0%, #0b3468 55%, #145ba7 100%); color: #fff; }
+.heroInner { max-width: 850px; }
+.hero span { display: inline-flex; padding: 8px 13px; border: 1px solid rgba(125,196,255,.3); background: rgba(255,255,255,.07); border-radius: 999px; color: #7dc4ff; font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.hero h1 { margin: 18px 0 14px; font-size: clamp(2.35rem, 5vw, 4.4rem); line-height: 1.05; }
+.hero p { margin: 0; max-width: 760px; color: rgba(255,255,255,.76); font-size: 1.05rem; line-height: 1.8; }
+.section { padding: 64px 0 88px; }
+.intro { padding: 24px 26px; background: #fff; border: 1px solid #dce6f2; border-radius: 18px; box-shadow: 0 12px 30px rgba(6,26,58,.05); color: #52657e; line-height: 1.75; }
+.intro strong { display: block; margin-bottom: 6px; color: #082b58; font-size: 1.05rem; }
+.grid { margin-top: 24px; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+.card { min-height: 230px; padding: 24px; background: #fff; border: 1px solid #dce6f2; border-radius: 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: .2s ease; }
+.card:hover { transform: translateY(-4px); border-color: #8cc7f4; box-shadow: 0 16px 32px rgba(6,26,58,.08); }
+.code { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 12px; background: #e8f3fd; color: #0d61ad; font-size: .78rem; font-weight: 900; }
+.card h2 { margin: 18px 0 8px; color: #082b58; font-size: 1.18rem; }
+.card p { margin: 0; color: #60728a; line-height: 1.65; font-size: .93rem; flex: 1; }
+.card small { margin-top: 18px; color: #0d61ad; font-weight: 800; }
+.note { margin-top: 28px; padding: 22px 24px; border-radius: 18px; background: #eaf4fd; border: 1px solid #c9e3f8; color: #425f7d; line-height: 1.7; }
+.note strong { color: #082b58; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .hero { padding: 66px 0 54px; } .section { padding: 42px 0 65px; } .grid { grid-template-columns: 1fr; } }

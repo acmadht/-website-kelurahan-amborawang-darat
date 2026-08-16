@@ -4,6 +4,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { homeContentFallback, type HomeContent } from "@/data/siteContent";
 import {
   buildMetadata,
+  getDynamicPublishedPostsServer,
   getServerCollection,
   getServerDocument,
   getServerSettings,
@@ -14,7 +15,6 @@ import type {
   AgendaItem,
   Announcement,
   HeroSlide,
-  PostItem,
   RegionLeader,
   ServiceItem,
   VillageStats,
@@ -39,7 +39,7 @@ export default async function Page() {
       getServerDocument<HomeContent>("pages", "home", homeContentFallback),
       getServerCollection<HeroSlide>("heroSlides"),
       getServerCollection<ServiceItem>("services"),
-      getServerCollection<PostItem>("posts"),
+      getDynamicPublishedPostsServer(),
       getServerCollection<Announcement>("announcements"),
       getServerCollection<AgendaItem>("agendas"),
       getServerCollection<RegionLeader>("rts"),

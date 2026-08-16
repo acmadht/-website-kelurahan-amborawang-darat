@@ -958,10 +958,27 @@
 
 .mobileGroupButton {
   width: 100%;
-  border: 0;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(35, 112, 199, 0.2), rgba(255, 255, 255, 0.045));
+  border: 1px solid rgba(121, 200, 255, 0.12);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.mobileGroupButton:hover,
+.mobileGroupButton:focus-visible {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(47, 137, 231, 0.3), rgba(255, 255, 255, 0.08));
+  border-color: rgba(121, 200, 255, 0.24);
+}
+
+.mobileGroupButton.mobileNavLinkActive {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(54, 154, 255, 0.28), rgba(67, 168, 255, 0.12));
+  border-color: rgba(121, 200, 255, 0.28);
 }
 
 .mobileGroupChevron {
