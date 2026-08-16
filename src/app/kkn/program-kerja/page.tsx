@@ -28,12 +28,28 @@ function normalizeProgramType(item: KknProgram): ProgramWithType {
   };
 }
 
+function formatProgramDate(value?: string) {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
+
+function programPeriod(item: KknProgram) {
+  const start = formatProgramDate(item.startDate);
+  const end = formatProgramDate(item.endDate);
+  if (start && end) return start === end ? start : `${start} – ${end}`;
+  if (start || end) return start || end;
+  return item.schedule || "";
+}
+
 function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; keyPrefix: string }) {
   return (
     <>
       <div className={styles.desktopGrid}>
         {programs.map((item) => {
           const support = item.programType === "Program Pendukung";
+          const period = programPeriod(item);
           return (
             <article key={`${keyPrefix}-desktop-${item.id || `${item.code}-${item.title}`}`} className={`${styles.programCard} ${support ? styles.supportProgramCard : styles.mainProgramCard}`}>
               <div className={styles.programTopline}>
@@ -60,10 +76,10 @@ function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; ke
                     <p>{item.target}</p>
                   </div>
                 ) : null}
-                {item.schedule ? (
+                {period ? (
                   <div className={styles.detailItem}>
                     <span>Waktu</span>
-                    <p>{item.schedule}</p>
+                    <p>{period}</p>
                   </div>
                 ) : null}
                 {item.personInCharge ? (
@@ -95,6 +111,7 @@ function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; ke
         <div className={styles.programRail}>
           {programs.map((item, index) => {
             const support = item.programType === "Program Pendukung";
+            const period = programPeriod(item);
             return (
               <article key={`${keyPrefix}-mobile-${item.id || `${item.code}-${item.title}`}`} className={`${styles.mobileProgramCard} ${support ? styles.supportProgramCard : styles.mainProgramCard}`}>
                 <div className={styles.cardAccent} aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
@@ -112,10 +129,10 @@ function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; ke
                 <p className={styles.mobileDescription}>{item.description}</p>
 
                 <div className={styles.quickFacts}>
-                  {item.schedule ? (
+                  {period ? (
                     <span>
                       <small>Waktu</small>
-                      {item.schedule}
+                      {period}
                     </span>
                   ) : null}
                   {item.target ? (
@@ -144,10 +161,10 @@ function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; ke
                         <p>{item.target}</p>
                       </div>
                     ) : null}
-                    {item.schedule ? (
+                    {period ? (
                       <div>
                         <strong>Waktu</strong>
-                        <p>{item.schedule}</p>
+                        <p>{period}</p>
                       </div>
                     ) : null}
                     {item.personInCharge ? (

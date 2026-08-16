@@ -257,6 +257,8 @@ export interface KknProgram {
   objective?: string;
   target?: string;
   schedule?: string;
+  startDate?: string;
+  endDate?: string;
   personInCharge?: string;
   status: string;
   imageUrl?: string;

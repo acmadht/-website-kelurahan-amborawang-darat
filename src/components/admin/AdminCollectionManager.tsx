@@ -678,6 +678,21 @@ export default function AdminCollectionManager({
 
     Object.assign(payload, fixedValues);
 
+    if (collectionName === "kknPrograms") {
+      const startDate = String(payload.startDate ?? "").trim();
+      const endDate = String(payload.endDate ?? "").trim();
+
+      if (startDate && endDate && endDate < startDate) {
+        setStatus("Tanggal selesai tidak boleh lebih awal dari tanggal mulai.");
+        return;
+      }
+
+      // Tetap simpan field schedule agar data lama/komponen lain tetap kompatibel.
+      if (startDate || endDate) {
+        payload.schedule = startDate && endDate ? `${startDate} s.d. ${endDate}` : startDate || endDate;
+      }
+    }
+
     if (collectionName === "rts" && "number" in payload) {
       const normalized = normalizeRtNumber(payload.number);
 
