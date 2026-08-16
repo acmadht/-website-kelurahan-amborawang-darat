@@ -1021,3 +1021,146 @@
     font-size: .7rem;
   }
 }
+
+
+/* Pemisahan Program Utama dan Program Pendukung */
+.programGroups {
+  display: grid;
+  gap: 34px;
+}
+
+.programGroup {
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid #dfe8f2;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 18px 48px rgba(7, 26, 61, .045);
+}
+
+.mainGroup {
+  border-color: #cfe6fb;
+  background: linear-gradient(180deg, rgba(237,247,255,.92), rgba(255,255,255,.9));
+}
+
+.supportGroup {
+  border-color: #dde5ee;
+  background: linear-gradient(180deg, rgba(247,249,252,.96), rgba(255,255,255,.9));
+}
+
+.groupHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 22px;
+  margin-bottom: 20px;
+}
+
+.groupHeading h3 {
+  margin: 10px 0 7px;
+  color: #102a45;
+  font-size: clamp(1.5rem, 2.5vw, 2.05rem);
+  letter-spacing: -.025em;
+}
+
+.groupHeading p {
+  max-width: 760px;
+  margin: 0;
+  color: #6b7b8c;
+  line-height: 1.65;
+}
+
+.groupBadge,
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 850;
+  letter-spacing: .03em;
+}
+
+.groupBadge {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: .68rem;
+  text-transform: uppercase;
+}
+
+.mainGroupBadge,
+.mainTypeBadge {
+  color: #0b5d9b;
+  background: #e7f4ff;
+  border: 1px solid #cae6fb;
+}
+
+.supportGroupBadge,
+.supportTypeBadge {
+  color: #53657a;
+  background: #f1f4f7;
+  border: 1px solid #dce3ea;
+}
+
+.groupCount {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #0b64aa;
+  background: #fff;
+  border: 1px solid #dbe8f4;
+  box-shadow: 0 10px 25px rgba(7, 46, 84, .08);
+  font-size: 1.15rem;
+}
+
+.programIdentity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.typeBadge {
+  min-height: 31px;
+  padding: 0 10px;
+  font-size: .64rem;
+}
+
+.mainProgramCard {
+  border-top: 3px solid #2386cf;
+}
+
+.supportProgramCard {
+  border-top: 3px solid #9aaabc;
+}
+
+.groupEmpty {
+  padding: 26px;
+  border: 1px dashed #cfdbe6;
+  border-radius: 18px;
+  color: #708094;
+  background: rgba(255,255,255,.8);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .programGroup {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .groupHeading {
+    gap: 12px;
+  }
+
+  .groupCount {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .programIdentity {
+    max-width: 72%;
+  }
+}

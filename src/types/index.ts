@@ -250,6 +250,7 @@ export interface KknMember {
 export interface KknProgram {
   id?: string;
   code: string;
+  programType: "Program Utama" | "Program Pendukung";
   title: string;
   category: string;
   description: string;

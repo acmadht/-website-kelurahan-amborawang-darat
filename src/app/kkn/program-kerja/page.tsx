@@ -15,8 +15,196 @@ export async function generateMetadata(): Promise<Metadata> {
     settings,
     path: "/kkn/program-kerja",
     title: `Program Kerja KKN ${settings.villageName}`,
-    description: `Informasi program kerja Tim KKN Reguler di Kelurahan ${settings.villageName}.`,
+    description: `Informasi program utama dan program pendukung Tim KKN Reguler di Kelurahan ${settings.villageName}.`,
   });
+}
+
+type ProgramWithType = KknProgram & { programType: "Program Utama" | "Program Pendukung" };
+
+function normalizeProgramType(item: KknProgram): ProgramWithType {
+  return {
+    ...item,
+    programType: item.programType === "Program Pendukung" ? "Program Pendukung" : "Program Utama",
+  };
+}
+
+function ProgramCards({ programs, keyPrefix }: { programs: ProgramWithType[]; keyPrefix: string }) {
+  return (
+    <>
+      <div className={styles.desktopGrid}>
+        {programs.map((item) => {
+          const support = item.programType === "Program Pendukung";
+          return (
+            <article key={`${keyPrefix}-desktop-${item.id || `${item.code}-${item.title}`}`} className={`${styles.programCard} ${support ? styles.supportProgramCard : styles.mainProgramCard}`}>
+              <div className={styles.programTopline}>
+                <div className={styles.programIdentity}>
+                  <span className={styles.programCode}>{item.code || "PRG"}</span>
+                  <span className={`${styles.typeBadge} ${support ? styles.supportTypeBadge : styles.mainTypeBadge}`}>{item.programType}</span>
+                </div>
+                <span className={styles.statusBadge}>{item.status || "-"}</span>
+              </div>
+              <span className={styles.eyebrow}>{item.category}</span>
+              <h3>{item.title}</h3>
+              <p className={styles.programDescription}>{item.description}</p>
+
+              <div className={styles.detailGrid}>
+                {item.objective ? (
+                  <div className={styles.detailItem}>
+                    <span>Tujuan</span>
+                    <p>{item.objective}</p>
+                  </div>
+                ) : null}
+                {item.target ? (
+                  <div className={styles.detailItem}>
+                    <span>Sasaran</span>
+                    <p>{item.target}</p>
+                  </div>
+                ) : null}
+                {item.schedule ? (
+                  <div className={styles.detailItem}>
+                    <span>Waktu</span>
+                    <p>{item.schedule}</p>
+                  </div>
+                ) : null}
+                {item.personInCharge ? (
+                  <div className={styles.detailItem}>
+                    <span>Penanggung Jawab</span>
+                    <p>{item.personInCharge}</p>
+                  </div>
+                ) : null}
+              </div>
+
+              {item.linkUrl ? (
+                <div className={styles.featureLinks}>
+                  <Link href={item.linkUrl}>{item.linkLabel || "Lihat Detail"}</Link>
+                </div>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
+
+      <div className={styles.mobilePrograms}>
+        {programs.length > 1 ? (
+          <div className={styles.swipeHint}>
+            <span>{programs[0]?.programType}</span>
+            <span>Geser untuk melihat lainnya →</span>
+          </div>
+        ) : null}
+
+        <div className={styles.programRail}>
+          {programs.map((item, index) => {
+            const support = item.programType === "Program Pendukung";
+            return (
+              <article key={`${keyPrefix}-mobile-${item.id || `${item.code}-${item.title}`}`} className={`${styles.mobileProgramCard} ${support ? styles.supportProgramCard : styles.mainProgramCard}`}>
+                <div className={styles.cardAccent} aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
+
+                <div className={styles.programTopline}>
+                  <div className={styles.programIdentity}>
+                    <span className={styles.programCode}>{item.code || "PRG"}</span>
+                    <span className={`${styles.typeBadge} ${support ? styles.supportTypeBadge : styles.mainTypeBadge}`}>{item.programType}</span>
+                  </div>
+                  <span className={styles.statusBadge}>{item.status || "-"}</span>
+                </div>
+
+                <span className={styles.eyebrow}>{item.category}</span>
+                <h3>{item.title}</h3>
+                <p className={styles.mobileDescription}>{item.description}</p>
+
+                <div className={styles.quickFacts}>
+                  {item.schedule ? (
+                    <span>
+                      <small>Waktu</small>
+                      {item.schedule}
+                    </span>
+                  ) : null}
+                  {item.target ? (
+                    <span>
+                      <small>Sasaran</small>
+                      {item.target}
+                    </span>
+                  ) : null}
+                </div>
+
+                <details className={styles.mobileDetails}>
+                  <summary>
+                    <span>Detail program</span>
+                    <i aria-hidden="true" />
+                  </summary>
+                  <div className={styles.mobileDetailsBody}>
+                    {item.objective ? (
+                      <div>
+                        <strong>Tujuan</strong>
+                        <p>{item.objective}</p>
+                      </div>
+                    ) : null}
+                    {item.target ? (
+                      <div>
+                        <strong>Sasaran</strong>
+                        <p>{item.target}</p>
+                      </div>
+                    ) : null}
+                    {item.schedule ? (
+                      <div>
+                        <strong>Waktu</strong>
+                        <p>{item.schedule}</p>
+                      </div>
+                    ) : null}
+                    {item.personInCharge ? (
+                      <div>
+                        <strong>Penanggung jawab</strong>
+                        <p>{item.personInCharge}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                </details>
+
+                {item.linkUrl ? (
+                  <Link href={item.linkUrl} className={styles.mobilePrimaryLink}>
+                    {item.linkLabel || "Lihat Detail"}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ProgramGroup({
+  title,
+  description,
+  programs,
+  type,
+}: {
+  title: string;
+  description: string;
+  programs: ProgramWithType[];
+  type: "main" | "support";
+}) {
+  return (
+    <section className={`${styles.programGroup} ${type === "main" ? styles.mainGroup : styles.supportGroup}`}>
+      <div className={styles.groupHeading}>
+        <div>
+          <span className={`${styles.groupBadge} ${type === "support" ? styles.supportGroupBadge : styles.mainGroupBadge}`}>
+            {type === "main" ? "Program Utama" : "Program Pendukung"}
+          </span>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+        <strong className={styles.groupCount}>{programs.length}</strong>
+      </div>
+
+      {programs.length ? (
+        <ProgramCards programs={programs} keyPrefix={type} />
+      ) : (
+        <div className={styles.groupEmpty}>Belum ada {type === "main" ? "program utama" : "program pendukung"} yang dipublikasikan.</div>
+      )}
+    </section>
+  );
 }
 
 export default async function Page() {
@@ -25,9 +213,14 @@ export default async function Page() {
     getServerCollection<KknProgram>("kknPrograms"),
     getServerDocument<KknTeam>("kknTeam", "main", staticKknTeam),
   ]);
+
   const programs = (remotePrograms.length ? remotePrograms : staticKknPrograms)
     .filter((item) => item.isActive !== false)
+    .map(normalizeProgramType)
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+  const mainPrograms = programs.filter((item) => item.programType === "Program Utama");
+  const supportPrograms = programs.filter((item) => item.programType === "Program Pendukung");
 
   return (
     <>
@@ -53,22 +246,26 @@ export default async function Page() {
                   <strong>KKN {settings.villageName}</strong>
                 </h1>
                 <p>
-                  Daftar program kerja KKN yang dikelola melalui dashboard admin dan dipublikasikan khusus pada ruang KKN.
+                  Program kerja dibagi menjadi Program Utama sebagai fokus pengabdian dan Program Pendukung sebagai kegiatan penunjang pelaksanaan KKN.
                 </p>
               </div>
 
               <div className={styles.heroMeta} aria-label="Ringkasan program kerja KKN">
                 <div className={styles.heroStat}>
                   <strong>{programs.length}</strong>
-                  <span>Program</span>
+                  <span>Total Program</span>
+                </div>
+                <div className={styles.heroStat}>
+                  <strong>{mainPrograms.length}</strong>
+                  <span>Program Utama</span>
+                </div>
+                <div className={styles.heroStat}>
+                  <strong>{supportPrograms.length}</strong>
+                  <span>Program Pendukung</span>
                 </div>
                 <div className={styles.heroStat}>
                   <strong>{team.year || "-"}</strong>
                   <span>Periode KKN</span>
-                </div>
-                <div className={`${styles.heroStat} ${styles.heroStatWide}`}>
-                  <strong>KKN</strong>
-                  <span>{settings.villageName}</span>
                 </div>
               </div>
             </div>
@@ -91,140 +288,25 @@ export default async function Page() {
                 <div>
                   <span className={styles.eyebrow}>Program KKN</span>
                   <h2>{programs.length} program terdaftar</h2>
-                  <p>Program KKN didokumentasikan pada ruang khusus agar tidak bercampur dengan informasi resmi kelurahan.</p>
+                  <p>Setiap program memiliki jenis yang tetap—Utama atau Pendukung—sementara statusnya dapat berubah dari Rencana, Berjalan, Selesai, atau Ditunda.</p>
                 </div>
               </div>
 
               {programs.length ? (
-                <>
-                  <div className={styles.desktopGrid}>
-                    {programs.map((item) => (
-                      <article key={`desktop-${item.id || `${item.code}-${item.title}`}`} className={styles.programCard}>
-                        <div className={styles.programTopline}>
-                          <span className={styles.programCode}>{item.code || "PRG"}</span>
-                          <span className={styles.statusBadge}>{item.status || "-"}</span>
-                        </div>
-                        <span className={styles.eyebrow}>{item.category}</span>
-                        <h3>{item.title}</h3>
-                        <p className={styles.programDescription}>{item.description}</p>
-
-                        <div className={styles.detailGrid}>
-                          {item.objective ? (
-                            <div className={styles.detailItem}>
-                              <span>Tujuan</span>
-                              <p>{item.objective}</p>
-                            </div>
-                          ) : null}
-                          {item.target ? (
-                            <div className={styles.detailItem}>
-                              <span>Sasaran</span>
-                              <p>{item.target}</p>
-                            </div>
-                          ) : null}
-                          {item.schedule ? (
-                            <div className={styles.detailItem}>
-                              <span>Waktu</span>
-                              <p>{item.schedule}</p>
-                            </div>
-                          ) : null}
-                          {item.personInCharge ? (
-                            <div className={styles.detailItem}>
-                              <span>Penanggung Jawab</span>
-                              <p>{item.personInCharge}</p>
-                            </div>
-                          ) : null}
-                        </div>
-
-                        {item.linkUrl ? (
-                          <div className={styles.featureLinks}>
-                            <Link href={item.linkUrl}>{item.linkLabel || "Lihat Detail"}</Link>
-                          </div>
-                        ) : null}
-                      </article>
-                    ))}
-                  </div>
-
-                  <div className={styles.mobilePrograms}>
-                    {programs.length > 1 ? (
-                      <div className={styles.swipeHint}>
-                        <span>Program aktif</span>
-                        <span>Geser untuk melihat lainnya →</span>
-                      </div>
-                    ) : null}
-
-                    <div className={styles.programRail}>
-                      {programs.map((item, index) => (
-                        <article key={`mobile-${item.id || `${item.code}-${item.title}`}`} className={styles.mobileProgramCard}>
-                          <div className={styles.cardAccent} aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
-
-                          <div className={styles.programTopline}>
-                            <span className={styles.programCode}>{item.code || "PRG"}</span>
-                            <span className={styles.statusBadge}>{item.status || "-"}</span>
-                          </div>
-
-                          <span className={styles.eyebrow}>{item.category}</span>
-                          <h3>{item.title}</h3>
-                          <p className={styles.mobileDescription}>{item.description}</p>
-
-                          <div className={styles.quickFacts}>
-                            {item.schedule ? (
-                              <span>
-                                <small>Waktu</small>
-                                {item.schedule}
-                              </span>
-                            ) : null}
-                            {item.target ? (
-                              <span>
-                                <small>Sasaran</small>
-                                {item.target}
-                              </span>
-                            ) : null}
-                          </div>
-
-                          <details className={styles.mobileDetails}>
-                            <summary>
-                              <span>Detail program</span>
-                              <i aria-hidden="true" />
-                            </summary>
-                            <div className={styles.mobileDetailsBody}>
-                              {item.objective ? (
-                                <div>
-                                  <strong>Tujuan</strong>
-                                  <p>{item.objective}</p>
-                                </div>
-                              ) : null}
-                              {item.target ? (
-                                <div>
-                                  <strong>Sasaran</strong>
-                                  <p>{item.target}</p>
-                                </div>
-                              ) : null}
-                              {item.schedule ? (
-                                <div>
-                                  <strong>Waktu</strong>
-                                  <p>{item.schedule}</p>
-                                </div>
-                              ) : null}
-                              {item.personInCharge ? (
-                                <div>
-                                  <strong>Penanggung jawab</strong>
-                                  <p>{item.personInCharge}</p>
-                                </div>
-                              ) : null}
-                            </div>
-                          </details>
-
-                          {item.linkUrl ? (
-                            <Link href={item.linkUrl} className={styles.mobilePrimaryLink}>
-                              {item.linkLabel || "Lihat Detail"}
-                              <span aria-hidden="true">→</span>
-                            </Link>
-                          ) : null}
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                </>
+                <div className={styles.programGroups}>
+                  <ProgramGroup
+                    type="main"
+                    title="Program Utama"
+                    description="Fokus utama pengabdian yang menjadi prioritas dan kontribusi inti Tim KKN."
+                    programs={mainPrograms}
+                  />
+                  <ProgramGroup
+                    type="support"
+                    title="Program Pendukung"
+                    description="Kegiatan penunjang yang memperkuat pelaksanaan program utama dan partisipasi masyarakat."
+                    programs={supportPrograms}
+                  />
+                </div>
               ) : (
                 <div className={styles.emptyState}>
                   <span className={styles.emptyIcon} aria-hidden="true">01</span>

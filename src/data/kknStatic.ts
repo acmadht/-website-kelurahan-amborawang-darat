@@ -177,6 +177,7 @@ export const staticKknMembers: KknMember[] = [
 export const staticKknPrograms: KknProgram[] = [
   {
     code: "WEB",
+    programType: "Program Utama",
     title: "Pengembangan Website Kelurahan",
     category: "Digitalisasi Informasi",
     description:

@@ -361,6 +361,25 @@ function VisualCardContent({
     );
   }
 
+  if (collectionName === "kknPrograms") {
+    const isSupport = String(item.programType ?? "Program Utama") === "Program Pendukung";
+    return (
+      <div className={styles.cardBody}>
+        <div className={styles.cardKicker}>
+          <span>{isSupport ? "Program Pendukung" : "Program Utama"}</span>
+          <StatusPill active={item.isActive !== false} />
+        </div>
+        <h3>{text(item.title, "Nama Program KKN")}</h3>
+        <p>{excerpt(item.description, 110)}</p>
+        <div className={styles.metaRow}>
+          <span className={styles.metaChip}>{text(item.code, "PROG")}</span>
+          <span className={styles.metaChip}>{text(item.category, "Kategori")}</span>
+          <span className={styles.metaChip}>Status: {text(item.status, "Rencana")}</span>
+        </div>
+      </div>
+    );
+  }
+
   if (collectionName === "publicDocuments" || collectionName === "documents") {
     return (
       <div className={styles.cardBody}>

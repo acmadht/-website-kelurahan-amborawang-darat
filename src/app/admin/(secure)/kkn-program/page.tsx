@@ -9,6 +9,7 @@ export default function Page() {
       description="Kelola seluruh program kerja KKN yang tampil pada ruang publik KKN."
       defaults={{
         code: "PROG",
+        programType: "Program Utama",
         title: "",
         category: "Pengabdian Masyarakat",
         description: "",
@@ -23,8 +24,9 @@ export default function Page() {
         order: 1,
         isActive: true,
       }}
-      displayFields={["code", "title", "category", "status", "isActive"]}
+      displayFields={["programType", "code", "title", "category", "status", "isActive"]}
       fields={[
+        { key: "programType", label: "Jenis Program", type: "select", required: true, options: ["Program Utama", "Program Pendukung"] },
         { key: "code", label: "Kode Program", type: "text", required: true },
         { key: "title", label: "Nama Program", type: "text", required: true, full: true },
         { key: "category", label: "Kategori", type: "text", required: true },
