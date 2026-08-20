@@ -506,20 +506,6 @@ export default function KknPage({
                   {team.description}
                 </p>
 
-                <div className={styles.heroStats}>
-                  <div>
-                    <strong>{String(displayedMembers.length).padStart(2, "0")}</strong>
-                    <span>Mahasiswa</span>
-                  </div>
-                  <div>
-                    <strong>01</strong>
-                    <span>Dosen Pembimbing</span>
-                  </div>
-                  <div>
-                    <strong>{String(divisionCount).padStart(2, "0")}</strong>
-                    <span>Divisi</span>
-                  </div>
-                </div>
               </div>
             </Reveal>
 
@@ -547,10 +533,6 @@ export default function KknPage({
                   </div>
                 </div>
 
-                <a href="#struktur" className={styles.heroLink}>
-                  Lihat Struktur Tim
-                  <ArrowIcon size={16} />
-                </a>
               </div>
             </Reveal>
           </div>
@@ -563,7 +545,6 @@ export default function KknPage({
               <a href="#pembimbing">Pembimbing</a>
               <a href="#inti">Tim Inti</a>
               <a href="#divisi">Divisi</a>
-              <a href="#struktur">Struktur</a>
             </nav>
           </div>
         </section>
@@ -683,196 +664,6 @@ export default function KknPage({
                 </section>
               );
             })}
-          </div>
-        </section>
-
-        {/* STRUCTURE */}
-        <section id="struktur" className={styles.structureSection}>
-          <span className={styles.structureGlowOne} aria-hidden="true" />
-          <span className={styles.structureGlowTwo} aria-hidden="true" />
-          <span className={styles.structureGridPattern} aria-hidden="true" />
-
-          <div className="container">
-            <Reveal enabled>
-              <div className={styles.structureHeadingRow}>
-                <div className={styles.structureHeading}>
-                  <span>04</span>
-                  <small>Struktur Organisasi</small>
-                  <h2>Tim yang terhubung dalam satu alur kerja</h2>
-                  <p>
-                    Struktur ini menampilkan jalur koordinasi dari dosen
-                    pembimbing, tim inti, hingga setiap divisi pelaksana KKN.
-                  </p>
-                </div>
-
-                <div className={styles.structureSummary}>
-                  <div>
-                    <strong>01</strong>
-                    <span>Pembimbing</span>
-                  </div>
-                  <div>
-                    <strong>{String(coreTeamItems.length).padStart(2, "0")}</strong>
-                    <span>Tim Inti</span>
-                  </div>
-                  <div>
-                    <strong>{String(divisionCount).padStart(2, "0")}</strong>
-                    <span>Divisi</span>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-
-            <Reveal enabled delay={50}>
-              <div className={styles.structureBoard}>
-                <div className={styles.structureBoardTop}>
-                  <span className={styles.structureLiveBadge}>
-                    <i aria-hidden="true" />
-                    Jalur Koordinasi
-                  </span>
-
-                  <span className={styles.structureBoardMeta}>
-                    {team.groupName} • {team.year}
-                  </span>
-                </div>
-
-                <div className={styles.structureTree}>
-                  <div className={styles.structureLevel}>
-                    <article className={`${styles.structurePersonCard} ${styles.structureAdvisorCard}`}>
-                      <span className={styles.structureAvatar}>
-                        <img
-                          src={team.supervisorPhotoUrl || "/images/kkn/01-dosen-pembimbing.jpg"}
-                          alt={`Foto ${team.supervisorName}`}
-                          onError={(event) => {
-                            event.currentTarget.onerror = null;
-                            event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
-                          }}
-                        />
-                      </span>
-
-                      <span className={styles.structurePersonText}>
-                        <small>Dosen Pembimbing Lapangan</small>
-                        <strong>{team.supervisorName}</strong>
-                        <span>Pendamping akademik dan arah program</span>
-                      </span>
-
-                      <span className={styles.structureRoleBadge}>Pembimbing</span>
-                    </article>
-                  </div>
-
-                  <div className={styles.structureConnector}>
-                    <span />
-                  </div>
-
-                  <div className={styles.structureCoreLevel}>
-                    <div className={styles.structureLevelLabel}>
-                      <span>Tim Inti</span>
-                      <small>Koordinasi utama</small>
-                    </div>
-
-                    <div className={styles.structureCoreGrid}>
-                      {coreTeamItems.map((member, index) => (
-                        <article
-                          key={member.name}
-                          className={styles.structurePersonCard}
-                          style={{ animationDelay: `${index * 0.12}s` }}
-                        >
-                          <span className={styles.structureAvatar}>
-                            <img
-                              src={member.image}
-                              alt={`Foto ${member.name}`}
-                              onError={(event) => {
-                                event.currentTarget.onerror = null;
-                                event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
-                              }}
-                            />
-                          </span>
-
-                          <span className={styles.structurePersonText}>
-                            <small>{member.division}</small>
-                            <strong>{member.name}</strong>
-                            <span>{member.role}</span>
-                          </span>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={`${styles.structureConnector} ${styles.structureConnectorWide}`}>
-                    <span />
-                  </div>
-
-                  <div className={styles.structureDivisionLevel}>
-                    <div className={styles.structureLevelLabel}>
-                      <span>Divisi Pelaksana</span>
-                      <small>Eksekusi program di lapangan</small>
-                    </div>
-
-                    <div className={styles.structureDivisionGrid}>
-                      {divisionItems.map((division, divisionIndex) => (
-                        <article
-                          key={division.title}
-                          className={styles.structureDivisionCard}
-                          style={{ animationDelay: `${divisionIndex * 0.14}s` }}
-                        >
-                          <div className={styles.structureDivisionTop}>
-                            <div>
-                              <small>Divisi</small>
-                              <h3>{division.title}</h3>
-                            </div>
-                            <span>{String(division.members.length).padStart(2, "0")}</span>
-                          </div>
-
-                          <div className={styles.structureMemberList}>
-                            {division.members.map((member) => (
-                              <div key={member.name} className={styles.structureMiniMember}>
-                                <span className={styles.structureMiniAvatar}>
-                                  <img
-                                    src={member.image}
-                                    alt=""
-                                    aria-hidden="true"
-                                    onError={(event) => {
-                                      event.currentTarget.onerror = null;
-                                      event.currentTarget.src = "/images/kkn/placeholder-kkn.svg";
-                                    }}
-                                  />
-                                </span>
-
-                                <span>
-                                  <strong>{member.name}</strong>
-                                  <small>{member.role}</small>
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.structureFlowFooter}>
-                  <div className={styles.structureFlowSteps}>
-                    <span>Pembimbing</span>
-                    <i />
-                    <span>Tim Inti</span>
-                    <i />
-                    <span>Divisi</span>
-                    <i />
-                    <span>Program</span>
-                  </div>
-
-                  <a
-                    href={team.structureImageUrl || "/images/kkn/struktur-organisasi-kkn.png"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.structureImageLink}
-                  >
-                    Lihat bagan asli
-                    <ArrowIcon size={16} />
-                  </a>
-                </div>
-              </div>
-            </Reveal>
           </div>
         </section>
 

@@ -61,12 +61,20 @@ export default function RegionPage({ initialSettings = demoSettings, initialRegi
     }).length,
   );
   const rtCountLabel = activeRtCount ? `${activeRtCount} RT` : "Belum ada data RT";
+  const populationFromRt = rawRts
+    .filter((item) => {
+      if (item.isActive === false) return false;
+      const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+      return Number.isInteger(numeric) && numeric > 0;
+    })
+    .reduce((total, item) => total + (Number(item.populationCount) || 0), 0);
+  const populationLabel = `${new Intl.NumberFormat("id-ID").format(populationFromRt)} jiwa`;
 
   const stats = [
     { value: region.area, label: "Luas wilayah", note: region.areaNote },
-    { value: region.population, label: "Jumlah penduduk", note: region.populationNote },
-    { value: rtCountLabel, label: "Wilayah RT", note: "Data RT aktif pada dashboard" },
-    { value: region.districtDistance, label: "Ke kecamatan Samboja Barat", note: region.districtDistanceNote },
+    { value: populationLabel, label: "Jumlah penduduk", note: "Terhubung otomatis dengan Data RT" },
+    { value: rtCountLabel, label: "Wilayah RT", note: "Terhubung otomatis dengan Data RT" },
+    { value: region.districtDistance, label: "Ke Kantor Kecamatan Samboja Barat", note: region.districtDistanceNote },
   ];
 
   const boundaries = [

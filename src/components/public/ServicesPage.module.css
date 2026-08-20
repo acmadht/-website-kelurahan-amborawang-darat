@@ -417,6 +417,51 @@
   gap: 13px;
 }
 
+.serviceGroups {
+  display: grid;
+  gap: 42px;
+}
+
+.serviceGroup {
+  min-width: 0;
+}
+
+.serviceGroup + .serviceGroup {
+  padding-top: 34px;
+  border-top: 1px solid rgba(255,255,255,.09);
+}
+
+.serviceGroupHeading {
+  display: grid;
+  grid-template-columns: minmax(220px,.7fr) minmax(280px,1.3fr);
+  gap: 28px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.serviceGroupHeading span {
+  color: #7dccff;
+  font-size: .56rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.serviceGroupHeading h3 {
+  margin: 5px 0 0;
+  color: #fff;
+  font-size: clamp(1.35rem,2.5vw,1.9rem);
+  line-height: 1.12;
+}
+
+.serviceGroupHeading > p {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(255,255,255,.5);
+  font-size: .72rem;
+  line-height: 1.6;
+}
+
 .serviceCard {
   min-width: 0;
   padding: 22px;
@@ -997,6 +1042,11 @@
 }
 
 @media (max-width: 760px) {
+  /* Informasi Pelayanan tetap tampil di desktop, disembunyikan di HP */
+  .serviceStatus {
+    display: none;
+  }
+
   .page {
     background:
       radial-gradient(circle at 100% 12%, rgba(22,128,216,.07), transparent 21rem),
@@ -1251,6 +1301,30 @@
     max-width: 330px;
     font-size: .72rem;
     line-height: 1.55;
+  }
+
+  .serviceGroups {
+    gap: 30px;
+  }
+
+  .serviceGroup + .serviceGroup {
+    padding-top: 26px;
+  }
+
+  .serviceGroupHeading {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+
+  .serviceGroupHeading h3 {
+    font-size: 1.25rem;
+  }
+
+  .serviceGroupHeading > p {
+    max-width: 350px;
+    font-size: .67rem;
+    line-height: 1.5;
   }
 
   .servicesGrid {

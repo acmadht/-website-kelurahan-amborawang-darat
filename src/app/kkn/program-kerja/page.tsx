@@ -288,27 +288,9 @@ export default async function Page() {
             </div>
           </section>
 
-          <nav className={styles.kknNav} aria-label="Navigasi ruang KKN">
-            <div className={`container ${styles.kknNavInner}`}>
-              <Link href="/tim-kkn">Tim KKN</Link>
-              <Link href="/kkn/program-kerja" className={styles.activeNav}>Program Kerja</Link>
-              <Link href="/kkn/berita">Berita KKN</Link>
-              <Link href="/kkn/galeri">Galeri</Link>
-              <Link href="/kkn/luaran">Luaran</Link>
-            </div>
-          </nav>
 
           <section className={styles.content}>
             <div className="container">
-              <div className={styles.sectionHeading}>
-                <span className={styles.sectionNumber}>01</span>
-                <div>
-                  <span className={styles.eyebrow}>Program KKN</span>
-                  <h2>{programs.length} program terdaftar</h2>
-                  <p>Setiap program memiliki jenis yang tetap—Utama atau Pendukung—sementara statusnya dapat berubah dari Rencana, Berjalan, Selesai, atau Ditunda.</p>
-                </div>
-              </div>
-
               {programs.length ? (
                 <div className={styles.programGroups}>
                   <ProgramGroup

@@ -2547,6 +2547,11 @@
    Menjaga desktop tetap sama dan mengurangi tumpukan di HP.
 ========================================================= */
 @media (max-width: 760px) {
+  /* Kartu Struktur Tim hanya tampil di desktop. */
+  .heroVisual {
+    display: none;
+  }
+
   .page {
     background:
       radial-gradient(circle at 100% 15%, rgba(22,128,216,.06), transparent 22rem),

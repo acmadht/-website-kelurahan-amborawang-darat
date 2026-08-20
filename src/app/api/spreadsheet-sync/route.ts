@@ -195,7 +195,9 @@ async function syncUmkm(rows: SheetRow[]) {
       isPublic: r["Tampil Website"] === undefined ? true : yes(r["Tampil Website"]), order: numberValue(r["Urutan"]) || i + 1, note: text(r["Keterangan"]),
     }
   }));
-  return upsertDocs("umkm", "UMKM", docs);
+  const result = await upsertDocs("umkm", "UMKM", docs);
+  await recalculateAdministrativeData();
+  return result;
 }
 
 async function syncFacilities(rows: SheetRow[]) {
@@ -205,7 +207,9 @@ async function syncFacilities(rows: SheetRow[]) {
       condition: text(r["Kondisi"]), manager: text(r["Pengelola"]), status: text(r["Status"]), imageUrl: text(r["Foto/Link"]), isPublic: r["Tampil Website"] === undefined ? true : yes(r["Tampil Website"]), order: numberValue(r["Urutan"]) || i + 1, note: text(r["Keterangan"]),
     }
   }));
-  return upsertDocs("facilities", "Fasilitas", docs);
+  const result = await upsertDocs("facilities", "Fasilitas", docs);
+  await recalculateAdministrativeData();
+  return result;
 }
 
 async function syncServiceRequests(rows: SheetRow[]) {
@@ -221,6 +225,7 @@ async function syncServiceRequests(rows: SheetRow[]) {
       isPublicVerification: yes(r["Tampil Cek Publik"]), syncSource: "Surat", syncedAt: now, updatedAt: now
     }, true); written++;
   }
+  await recalculateAdministrativeData();
   return { written };
 }
 
@@ -236,6 +241,7 @@ async function syncComplaints(rows: SheetRow[]) {
       showInPublicStats: yes(r["Tampil Statistik Publik"]), syncSource: "Pengaduan", syncedAt: now, updatedAt: now
     }, true); written++;
   }
+  await recalculateAdministrativeData();
   return { written };
 }
 
@@ -304,7 +310,9 @@ async function syncPopulationMutations(rows: SheetRow[]) {
       note: text(r["Keterangan"]),
     },
   }));
-  return upsertDocs("populationMutations", "Mutasi", docs);
+  const result = await upsertDocs("populationMutations", "Mutasi", docs);
+  await recalculateAdministrativeData();
+  return result;
 }
 
 async function syncSocialAssistance(rows: SheetRow[]) {
@@ -341,13 +349,16 @@ async function syncInventory(rows: SheetRow[]) {
       unit: text(r["Satuan"]),
       condition: text(r["Kondisi"]),
       location: text(r["Lokasi"]),
+      rt: normalizeRt(r["RT"] || r["RT Lokasi"]),
       acquisitionYear: text(r["Tahun Perolehan"]),
       fundingSource: text(r["Sumber Dana"]),
       personInCharge: text(r["Penanggung Jawab"]),
       note: text(r["Keterangan"]),
     },
   }));
-  return upsertDocs("inventory", "Inventaris", docs);
+  const result = await upsertDocs("inventory", "Inventaris", docs);
+  await recalculateAdministrativeData();
+  return result;
 }
 
 async function syncSingleton(collectionName: string, documentId: string, sheetName: string, row: SheetRow, mapping: Record<string, string | { key: string; type?: "number" | "boolean" | "list" }>) {
@@ -365,7 +376,7 @@ async function syncSingleton(collectionName: string, documentId: string, sheetNa
 }
 
 const HOME_MAP = { "Label Status Portal": "portalStatus", "Label Kecil Hero": "heroEyebrow", "Label Sambutan / Profil Singkat": "welcomeEyebrow", "Judul Sambutan": "welcomeTitle", "Paragraf Sambutan": "welcomeText", "Paragraf Pendukung": "welcomeSecondText", "Teks Aspirasi / Pengaduan": "complaintText", "Label Bagian Layanan": "servicesEyebrow", "Judul Bagian Layanan": "servicesTitle", "Label Informasi Terkini": "infoEyebrow", "Judul Informasi Terkini": "infoTitle", "Label Panel Bantuan": "ctaKicker", "Judul Panel Bantuan": "ctaTitle", "Deskripsi Panel Bantuan": "ctaText" };
-const REGION_MAP = { "Luas Wilayah": "area", "Sumber / Catatan Luas": "areaNote", "Jumlah Penduduk": "population", "Sumber / Catatan Penduduk": "populationNote", "Jarak ke Kecamatan Samboja Barat": "districtDistance", "Sumber / Catatan Jarak": "districtDistanceNote", "Batas Utara": "northBoundary", "Batas Timur": "eastBoundary", "Batas Selatan": "southBoundary", "Batas Barat": "westBoundary", "Gambaran Wilayah": "geography", "Detail Geografi / Luas": "geographyDetail", "Konektivitas Wilayah": "connectivity", "Catatan Dasar Batas Wilayah": "boundaryNote", "Judul Karakter 1": "climateTitle", "Isi Karakter 1": "climateText", "Judul Karakter 2": "corridorTitle", "Isi Karakter 2": "corridorText", "Judul Karakter 3": "landTitle", "Isi Karakter 3": "landText", "Peta Administratif": "mapImageUrl" };
+const REGION_MAP = { "Luas Wilayah": "area", "Sumber / Catatan Luas": "areaNote", "Jumlah Penduduk": "population", "Sumber / Catatan Penduduk": "populationNote", "Jarak ke Kecamatan Samboja Barat": "districtDistance", "Jarak ke Kantor Kecamatan Samboja Barat": "districtDistance", "Sumber / Catatan Jarak": "districtDistanceNote", "Batas Utara": "northBoundary", "Batas Timur": "eastBoundary", "Batas Selatan": "southBoundary", "Batas Barat": "westBoundary", "Gambaran Wilayah": "geography", "Detail Geografi / Luas": "geographyDetail", "Konektivitas Wilayah": "connectivity", "Catatan Dasar Batas Wilayah": "boundaryNote", "Judul Karakter 1": "climateTitle", "Isi Karakter 1": "climateText", "Judul Karakter 2": "corridorTitle", "Isi Karakter 2": "corridorText", "Judul Karakter 3": "landTitle", "Isi Karakter 3": "landText", "Peta Administratif": "mapImageUrl" };
 const SETTINGS_MAP: Record<string, any> = { "Nama Website": "siteName", "Nama Kelurahan": "villageName", "Nama Kecamatan": "subdistrictName", "Nama Kabupaten / Kota": "regencyName", "Nama Provinsi": "provinceName", "Slogan": "tagline", "Logo": "logoUrl", "Favicon / Ikon Browser": "faviconUrl", "Instagram": "instagramUrl", "Facebook": "facebookUrl", "YouTube": "youtubeUrl", "Teks Footer": "footerText", "Judul SEO": "seoTitle", "Deskripsi SEO": "seoDescription", "Kode Verifikasi Google Search Console": "googleSiteVerification", "Animasi Aktif": { key: "animationEnabled", type: "boolean" }, "Slider Otomatis": { key: "heroAutoplay", type: "boolean" }, "Interval Slider (ms)": { key: "heroInterval", type: "number" } };
 const CONTACT_MAP: Record<string, any> = { "Alamat Kantor": "address", "Telepon": "phone", "WhatsApp": "whatsapp", "Email": "email", "Jam Pelayanan": "serviceHours", "URL Embed Google Maps": "mapsEmbedUrl", "Foto Kantor": "officeImageUrl", "Tombol WhatsApp Aktif": { key: "whatsappEnabled", type: "boolean" } };
 const PROFILE_MAP: Record<string, any> = { "Label Hero": "heroEyebrow", "Judul Hero": "heroTitle", "Deskripsi Hero": "heroDescription", "Foto Utama": "imageUrl", "Judul Foto": "heroImageTitle", "Caption Foto": "heroImageCaption", "Kredit Foto": "heroImageCredit", "Label Ringkasan": "summaryEyebrow", "Nama Ringkasan": "summaryName", "Deskripsi Ringkasan": "summaryDescription", "Judul Sejarah": "historyTitle", "Sejarah": "history", "Catatan Sejarah": "historyCallout", "Label Timeline": "timelineEyebrow", "Judul Timeline": "timelineTitle", "Deskripsi Timeline": "timelineDescription", "Visi": "vision", "Catatan Visi": "visionNote", "Judul Misi": "missionTitle", "Misi": { key: "missions", type: "list" }, "Label Wilayah": "regionEyebrow", "Judul Wilayah": "regionTitle", "Geografi": "geography", "Peta Profil": "mapImageUrl", "Judul Peta": "mapTitle", "Ringkasan Batas": "boundaries", "Label Potensi": "potentialEyebrow", "Judul Potensi": "potentialTitle", "Narasi Potensi": "potential", "Label Fasilitas": "facilityEyebrow", "Judul Fasilitas": "facilityTitle", "Pengantar Fasilitas": "facilityIntro", "Teks Utama Fasilitas": "facilityLeadText", "Daftar Fasilitas": { key: "facilities", type: "list" }, "Label Prioritas": "priorityEyebrow", "Judul Prioritas": "priorityTitle", "Pengantar Prioritas": "priorityIntro", "Daftar Prioritas": { key: "priorities", type: "list" }, "Label Pembaruan": "updateKicker", "Judul Pembaruan": "updateTitle", "Teks Pembaruan": "updateText" };

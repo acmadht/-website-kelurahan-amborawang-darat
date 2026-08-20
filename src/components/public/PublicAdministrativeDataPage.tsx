@@ -18,6 +18,11 @@ type RtTotals = {
   houses: number;
   toddlers: number;
   elderly: number;
+  facilities: number;
+  umkm: number;
+  aid: number;
+  inventory: number;
+  mutations: number;
 };
 
 type Props = {
@@ -25,6 +30,7 @@ type Props = {
   settings: SiteSettings;
   records: Record<string, unknown>[];
   linkedData?: LinkedAdministrativeData;
+  scopeRt?: string;
 };
 
 const MODULES = [
@@ -93,8 +99,13 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
         houses: totals.houses + numberValue(item.houseCount),
         toddlers: totals.toddlers + numberValue(item.toddlerCount),
         elderly: totals.elderly + numberValue(item.elderlyCount),
+        facilities: totals.facilities + numberValue(item.facilityCount || (Array.isArray(item.facilities) ? item.facilities.length : 0)),
+        umkm: totals.umkm + numberValue(item.umkmCount),
+        aid: totals.aid + numberValue(item.socialAssistanceCount),
+        inventory: totals.inventory + numberValue(item.inventoryItemCount),
+        mutations: totals.mutations + numberValue(item.mutationCount),
       }),
-      { population: 0, families: 0, male: 0, female: 0, houses: 0, toddlers: 0, elderly: 0 },
+      { population: 0, families: 0, male: 0, female: 0, houses: 0, toddlers: 0, elderly: 0, facilities: 0, umkm: 0, aid: 0, inventory: 0, mutations: 0 },
     );
 
     const maleFromResidents = active.filter((item) => text(item.gender, "").toLowerCase().includes("laki")).length;
@@ -120,6 +131,10 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
       Fasilitas: Array.isArray(item.facilities) && item.facilities.length
         ? item.facilities.map((value) => String(value)).filter(Boolean).join(", ")
         : "Belum diisi",
+      UMKM: numberValue(item.umkmCount),
+      Bansos: numberValue(item.socialAssistanceCount),
+      Inventaris: numberValue(item.inventoryItemCount),
+      Mutasi: numberValue(item.mutationCount),
     }));
 
     const distribution = rts.length
@@ -136,6 +151,11 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
         { label: "Balita", value: rtTotals.toddlers, suffix: "jiwa" },
         { label: "Lansia", value: rtTotals.elderly, suffix: "jiwa" },
         { label: "RT terdata", value: rts.length || new Set(active.map((item) => normalizeRt(item.rt)).filter((value) => value !== "Belum diisi")).size, suffix: "RT" },
+        { label: "Fasilitas Terhubung", value: rtTotals.facilities, suffix: "fasilitas" },
+        { label: "UMKM Terhubung", value: rtTotals.umkm, suffix: "usaha" },
+        { label: "Bansos Terhubung", value: rtTotals.aid, suffix: "data" },
+        { label: "Inventaris Terhubung", value: rtTotals.inventory, suffix: "jenis barang" },
+        { label: "Mutasi Terkait", value: rtTotals.mutations, suffix: "catatan" },
       ],
       groups: [
         { title: "Sebaran warga per RT", items: distribution },
@@ -144,6 +164,9 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
           { title: "Sebaran rumah per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.houseCount) })) },
           { title: "Balita per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.toddlerCount) })) },
           { title: "Lansia per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.elderlyCount) })) },
+          { title: "Fasilitas per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.facilityCount || (Array.isArray(item.facilities) ? item.facilities.length : 0)) })) },
+          { title: "UMKM per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.umkmCount) })) },
+          { title: "Bansos per RT", items: rts.map((item) => ({ label: `RT ${normalizeRt(item.number ?? item.id)}`, value: numberValue(item.socialAssistanceCount) })) },
         ] : []),
         ...(records.length ? [
           { title: "Status domisili", items: countBy(records, (item) => text(item.domicileStatus)) },
@@ -244,10 +267,12 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
       { label: "Total kuantitas", value: totalQuantity, suffix: "unit/satuan" },
       { label: "Kategori", value: new Set(records.map((item) => text(item.category, "")).filter(Boolean)).size, suffix: "kategori" },
       { label: "Lokasi aset", value: new Set(records.map((item) => text(item.location, "")).filter(Boolean)).size, suffix: "lokasi" },
+      { label: "RT terkait", value: new Set(records.map((item) => normalizeRt(item.rt)).filter((value) => value !== "Belum diisi")).size, suffix: "RT" },
     ],
     groups: [
       { title: "Kondisi inventaris", items: countBy(records, (item) => text(item.condition)) },
       { title: "Kategori inventaris", items: countBy(records, (item) => text(item.category)) },
+      { title: "Sebaran inventaris per RT", items: countBy(records.filter((item) => normalizeRt(item.rt) !== "Belum diisi"), (item) => `RT ${normalizeRt(item.rt)}`) },
     ],
     rows: records.map((item) => ({
       "Nama Barang": text(item.itemName),
@@ -256,6 +281,7 @@ function buildData(mode: Mode, records: Record<string, unknown>[], linkedData: L
       Satuan: text(item.unit),
       Kondisi: text(item.condition),
       Lokasi: text(item.location),
+      RT: normalizeRt(item.rt),
       "Tahun Perolehan": text(item.acquisitionYear),
       "Sumber Dana": text(item.fundingSource),
     })),
@@ -294,14 +320,33 @@ function relatedFor(mode: Mode) {
   return map[mode];
 }
 
-export default function PublicAdministrativeDataPage({ mode, settings, records, linkedData }: Props) {
-  const data = buildData(mode, records, linkedData);
+export default function PublicAdministrativeDataPage({ mode, settings, records, linkedData, scopeRt }: Props) {
+  const normalizedScopeRt = scopeRt ? normalizeRt(scopeRt) : "";
+  const hasRtScope = Boolean(normalizedScopeRt && normalizedScopeRt !== "Belum diisi");
+  const scopedRecords = hasRtScope
+    ? records.filter((item) => {
+        if (mode === "mutasi") {
+          return normalizeRt(item.originRt) === normalizedScopeRt || normalizeRt(item.destinationRt) === normalizedScopeRt;
+        }
+        return normalizeRt(item.rt) === normalizedScopeRt;
+      })
+    : records;
+  const scopedLinkedData = hasRtScope
+    ? {
+        ...linkedData,
+        rts: linkedData?.rts?.filter((item) => normalizeRt(item.number ?? item.id) === normalizedScopeRt),
+        residents: linkedData?.residents?.filter((item) => normalizeRt(item.rt) === normalizedScopeRt),
+      }
+    : linkedData;
+  const data = buildData(mode, scopedRecords, scopedLinkedData);
   const isInventory = mode === "inventaris";
   const isPopulation = mode === "penduduk";
   const related = relatedFor(mode);
+  const rtAwarePaths = new Set(["/penduduk", "/keluarga", "/mutasi", "/bansos", "/inventaris", "/data-rt", "/umkm", "/fasilitas"]);
+  const relatedHref = (href: string) => hasRtScope && rtAwarePaths.has(href) ? `${href}?rt=${normalizedScopeRt}` : href;
   const hasLinkedFallback =
     (mode === "penduduk" || mode === "keluarga") &&
-    Boolean(linkedData?.rts?.some((item) =>
+    Boolean(scopedLinkedData?.rts?.some((item) =>
       numberValue(item.populationCount) > 0 || numberValue(item.familyCount) > 0,
     ));
 
@@ -312,8 +357,9 @@ export default function PublicAdministrativeDataPage({ mode, settings, records, 
           <div className={`container ${styles.heroInner}`}>
             <div>
               <span className={styles.eyebrow}>Data Publik Kelurahan</span>
-              <h1>{titleFor(mode)}</h1>
-              <p>{descriptionFor(mode, settings.villageName)}</p>
+              <h1>{titleFor(mode)}{hasRtScope ? ` · RT ${normalizedScopeRt}` : ""}</h1>
+              <p>{descriptionFor(mode, settings.villageName)}{hasRtScope ? ` Data pada halaman ini sedang difilter untuk RT ${normalizedScopeRt}.` : ""}</p>
+              {hasRtScope ? <Link href={MODULES.find((item) => item.mode === mode)?.href || "/data-publik"} className={styles.scopeClear}>Lihat semua RT →</Link> : null}
             </div>
             <Link href="/data-publik" className={styles.heroLink}>Lihat Semua Data Publik →</Link>
           </div>
@@ -323,7 +369,7 @@ export default function PublicAdministrativeDataPage({ mode, settings, records, 
           <div className="container">
             <nav className={styles.moduleNav} aria-label="Navigasi data publik">
               {MODULES.map((item) => (
-                <Link key={item.href} href={item.href} className={item.mode === mode ? styles.moduleActive : styles.moduleLink}>
+                <Link key={item.href} href={hasRtScope ? `${item.href}?rt=${normalizedScopeRt}` : item.href} className={item.mode === mode ? styles.moduleActive : styles.moduleLink}>
                   {item.label}
                 </Link>
               ))}
@@ -384,7 +430,7 @@ export default function PublicAdministrativeDataPage({ mode, settings, records, 
               </article>
             ) : null}
 
-            {!records.length && !hasLinkedFallback ? <div className={styles.emptyState}>Belum ada data administrasi yang tersedia untuk dihitung.</div> : null}
+            {!scopedRecords.length && !hasLinkedFallback ? <div className={styles.emptyState}>Belum ada data administrasi yang tersedia untuk dihitung.</div> : null}
 
             <section className={styles.relatedSection}>
               <div className={styles.relatedHeading}>
@@ -396,7 +442,7 @@ export default function PublicAdministrativeDataPage({ mode, settings, records, 
               </div>
               <div className={styles.relatedGrid}>
                 {related.map((item) => (
-                  <Link href={item.href} className={styles.relatedCard} key={item.href}>
+                  <Link href={relatedHref(item.href)} className={styles.relatedCard} key={item.href}>
                     <strong>{item.title}</strong>
                     <p>{item.text}</p>
                     <span>Buka halaman →</span>

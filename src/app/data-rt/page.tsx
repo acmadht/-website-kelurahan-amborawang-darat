@@ -7,10 +7,15 @@ import {
   getServerCollection,
   getServerSettings,
 } from "@/lib/seo";
+import { normalizeRtNumber } from "@/lib/rtSlots";
 import type { RegionLeader } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+type PageProps = {
+  searchParams: Promise<{ rt?: string | string[] }>;
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getServerSettings();
@@ -22,7 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const selectedRt = normalizeRtNumber(Array.isArray(params.rt) ? params.rt[0] : params.rt);
   const [settings, rts] = await Promise.all([
     getServerSettings(),
     getServerCollection<RegionLeader>("rts"),
@@ -31,7 +38,7 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={breadcrumbJsonLd([{ name: "Beranda", path: "/" }, { name: "Data RT", path: "/data-rt" }])} />
-      <RtPage initialSettings={settings} initialRts={rts} />
+      <RtPage initialSettings={settings} initialRts={rts} initialSelectedRt={selectedRt} />
     </>
   );
 }

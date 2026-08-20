@@ -15,7 +15,7 @@ export default function Page() {
         { key: "areaNote", label: "Sumber / Catatan Luas", type: "text" },
         { key: "population", label: "Jumlah Penduduk", type: "text" },
         { key: "populationNote", label: "Sumber / Catatan Penduduk", type: "text" },
-        { key: "districtDistance", label: "Jarak ke Kecamatan Samboja Barat", type: "text" },
+        { key: "districtDistance", label: "Jarak ke Kantor Kecamatan Samboja Barat", type: "text" },
         { key: "districtDistanceNote", label: "Sumber / Catatan Jarak", type: "text" },
         { key: "northBoundary", label: "Batas Utara", type: "text", full: true },
         { key: "eastBoundary", label: "Batas Timur", type: "text", full: true },

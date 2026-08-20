@@ -28,7 +28,7 @@ export default function PublicFooter({ settings }: { settings: SiteSettings }) {
               <p style={{ color: "rgba(255,255,255,.65)", maxWidth: 420 }}>{settings.address}</p>
             </div>
             <div><div className="footer-title">Menu cepat</div><div className="footer-list"><Link href="/profil">Profil</Link><Link href="/layanan">Layanan</Link><Link href="/data-publik">Data Publik</Link><Link href="/transparansi">Transparansi</Link><Link href="/berita">Berita</Link></div></div>
-            <div><div className="footer-title">Data & Wilayah</div><div className="footer-list"><Link href="/data-rt">Data RT</Link><Link href="/penduduk">Penduduk</Link><Link href="/fasilitas">Fasilitas</Link><Link href="/umkm">UMKM</Link></div></div>
+            <div><div className="footer-title">Data & Wilayah</div><div className="footer-list"><Link href="/wilayah">Wilayah</Link><Link href="/data-rt">Data RT</Link><Link href="/penduduk">Penduduk</Link><Link href="/fasilitas">Fasilitas</Link><Link href="/umkm">UMKM</Link></div></div>
             <div>
               <div className="footer-title">Kontak</div>
               <div className="footer-list">

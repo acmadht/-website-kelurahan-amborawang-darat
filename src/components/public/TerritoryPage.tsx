@@ -54,7 +54,7 @@ export default function TerritoryPage() {
               [data.area, "Luas wilayah"],
               [data.population, "Jumlah penduduk"],
               [data.rtCount, "Wilayah RT"],
-              [data.districtDistance, "Ke kecamatan Samboja Barat"],
+              [data.districtDistance, "Ke Kantor Kecamatan Samboja Barat"],
             ].map(([value, label]) => (
               <div className="stat-item" key={label}>
                 <div className="stat-value" style={{ fontSize: "clamp(1.45rem,3vw,2.2rem)" }}>{value}</div>

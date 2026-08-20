@@ -1,4 +1,5 @@
 import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
+import { AMBORAWANG_RT_OPTIONS } from "@/lib/rtSlots";
 
 export default function Page() {
   return (
@@ -6,14 +7,16 @@ export default function Page() {
       collectionName="serviceRequests"
       publicHref="/cek-surat"
       title="Permohonan Surat"
-      description="Kelola permohonan surat dari website dan Google Spreadsheet. Data ini memakai Firestore yang sama sehingga perubahan status tetap sejalur."
+      connectionNote="Permohonan dengan RT terisi ikut dihitung pada Data RT. Jika NIK cocok dengan Penduduk dan RT kosong, sinkronisasi dapat mengisi RT dari Penduduk."
+      relatedLinks={[{ label: "Data RT", href: "/admin/rt" }, { label: "Penduduk", href: "/admin/penduduk" }]}
+      description="Kelola permohonan surat dari website dan Google Spreadsheet. RT memakai daftar RT yang sama; bila RT kosong dan NIK ditemukan pada Penduduk, sistem dapat mengisi RT otomatis."
       defaults={{ticketId:"",name:"",nik:"",rt:"",letterType:"",purpose:"",letterNumber:"",status:"Baru",staff:"",completedDate:"",documentUrl:"",verificationUrl:"",publicNote:"",isPublicVerification:false}}
       displayFields={["ticketId","name","letterType","status"]}
       fields={[
         {key:"ticketId",label:"ID Surat",type:"text",required:true},
         {key:"name",label:"Nama Pemohon",type:"text",required:true},
         {key:"nik",label:"NIK",type:"text"},
-        {key:"rt",label:"RT",type:"text"},
+        {key:"rt",label:"RT",type:"select",options:AMBORAWANG_RT_OPTIONS},
         {key:"letterType",label:"Jenis Surat",type:"text",required:true},
         {key:"purpose",label:"Keperluan",type:"textarea",full:true},
         {key:"letterNumber",label:"Nomor Surat",type:"text"},

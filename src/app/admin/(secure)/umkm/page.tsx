@@ -1,4 +1,5 @@
 import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
+import { AMBORAWANG_RT_OPTIONS } from "@/lib/rtSlots";
 
 export default function Page() {
   return (
@@ -7,7 +8,7 @@ export default function Page() {
       publicHref="/umkm"
       title="UMKM & Potensi Usaha"
       description="Kelola direktori UMKM. Data ini sama dengan sheet UMKM dan Firestore."
-      connectionNote="UMKM dapat dikaitkan dengan RT melalui field RT dan dengan potensi wilayah melalui halaman Wilayah. NIK pemilik tetap internal dan tidak ditampilkan di publik."
+      connectionNote="Pilih RT usaha. Jika NIK Pemilik cocok dengan Penduduk, RT UMKM akan mengikuti RT penduduk tersebut. Jumlah UMKM publik otomatis dihitung pada Data RT; NIK tetap internal dan tidak ditampilkan di publik."
       relatedLinks={[
         { label: "Data RT", href: "/admin/rt" },
         { label: "Wilayah", href: "/admin/wilayah" },
@@ -22,7 +23,7 @@ export default function Page() {
         { key: "businessType", label: "Jenis Usaha", type: "text" },
         { key: "mainProduct", label: "Produk Utama", type: "text" },
         { key: "address", label: "Alamat", type: "textarea", full: true },
-        { key: "rt", label: "RT", type: "text" },
+        { key: "rt", label: "RT", type: "select", options: AMBORAWANG_RT_OPTIONS },
         { key: "phone", label: "Kontak", type: "text" },
         { key: "mapsUrl", label: "Link Maps", type: "text", full: true },
         { key: "imageUrl", label: "Foto", type: "image", full: true },

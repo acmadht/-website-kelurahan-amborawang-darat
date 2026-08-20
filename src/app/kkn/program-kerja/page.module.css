@@ -1164,3 +1164,353 @@
     max-width: 72%;
   }
 }
+
+/* =========================================================
+   REVISI MOBILE PROGRAM KKN
+   - Navigasi ruang KKN dihapus dari halaman melalui TSX.
+   - Ringkasan statistik hanya tampil di desktop.
+   - Mobile dibuat vertikal agar tidak ada konten terpotong.
+========================================================= */
+@media (max-width: 680px) {
+  .hero {
+    padding: 30px 0 34px;
+    border-radius: 0 0 22px 22px;
+  }
+
+  .heroInner {
+    display: block;
+  }
+
+  .heroMeta {
+    display: none !important;
+  }
+
+  .heroCopy {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .heroEyebrow {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .hero h1 {
+    margin: 13px 0 12px;
+    font-size: clamp(2rem, 10vw, 2.75rem);
+    line-height: 1.02;
+    overflow-wrap: anywhere;
+  }
+
+  .hero h1 strong {
+    display: block;
+    margin-top: 5px;
+    font-size: .72em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+  }
+
+  .hero p {
+    max-width: 100%;
+    display: block;
+    overflow: visible;
+    font-size: .8rem;
+    line-height: 1.58;
+    -webkit-line-clamp: unset;
+  }
+
+  .content {
+    padding: 34px 0 48px;
+  }
+
+  .sectionHeading {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .sectionNumber {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: .6rem;
+  }
+
+  .sectionHeading > div {
+    min-width: 0;
+  }
+
+  .sectionHeading h2 {
+    margin: 4px 0 6px;
+    font-size: 1.3rem;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+
+  .sectionHeading p {
+    display: block;
+    overflow: visible;
+    font-size: .75rem;
+    line-height: 1.5;
+    -webkit-line-clamp: unset;
+  }
+
+  .programGroups {
+    gap: 20px;
+  }
+
+  .programGroup {
+    padding: 13px;
+    overflow: hidden;
+    border-radius: 18px;
+  }
+
+  .groupHeading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .groupHeading > div {
+    min-width: 0;
+  }
+
+  .groupBadge {
+    min-height: 28px;
+    padding: 0 9px;
+    font-size: .58rem;
+  }
+
+  .groupHeading h3 {
+    margin: 8px 0 5px;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .groupHeading p {
+    font-size: .72rem;
+    line-height: 1.5;
+  }
+
+  .groupCount {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: .95rem;
+  }
+
+  .desktopGrid {
+    display: none !important;
+  }
+
+  .mobilePrograms {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .swipeHint {
+    display: none !important;
+  }
+
+  .programRail {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 11px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .mobileProgramCard {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    flex: none;
+    padding: 15px;
+    border-radius: 16px;
+    scroll-snap-align: none;
+    box-shadow: 0 10px 24px rgba(9, 42, 79, .07);
+  }
+
+  .cardAccent {
+    right: 10px;
+    top: 56px;
+    font-size: 4.4rem;
+  }
+
+  .programTopline {
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .programIdentity {
+    max-width: none;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .programCode,
+  .typeBadge,
+  .statusBadge {
+    min-height: 27px;
+    padding: 0 8px;
+    font-size: .56rem;
+  }
+
+  .statusBadge {
+    flex: 0 0 auto;
+    max-width: 42%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .mobileProgramCard h3 {
+    max-width: 100%;
+    margin: 6px 0 7px;
+    padding-right: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .mobileDescription {
+    display: block;
+    overflow: visible;
+    font-size: .75rem;
+    line-height: 1.55;
+    -webkit-line-clamp: unset;
+  }
+
+  .quickFacts {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .quickFacts > span {
+    min-height: 0;
+    padding: 9px 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .mobileDetails {
+    margin-top: 10px;
+  }
+
+  .mobileDetails summary {
+    min-height: 40px;
+  }
+
+  .mobileDetailsBody > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mobilePrimaryLink {
+    min-height: 40px;
+    margin-top: 5px;
+  }
+
+  .notice {
+    gap: 14px;
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .notice h2 {
+    max-width: 100%;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  .notice p {
+    display: block;
+    overflow: visible;
+    font-size: .72rem;
+    line-height: 1.5;
+    -webkit-line-clamp: unset;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   MOBILE: PROGRAM UTAMA & PENDUKUNG DIGESER HORIZONTAL
+   - Desktop tidak berubah.
+   - Pada HP kartu program tidak lagi menumpuk penuh ke bawah.
+========================================================= */
+@media (max-width: 680px) {
+  .programGroup {
+    overflow: hidden;
+  }
+
+  .mobilePrograms {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .swipeHint {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 9px;
+    color: #7b8999;
+    font-size: .61rem;
+    font-weight: 700;
+  }
+
+  .swipeHint span:first-child {
+    color: #0b64aa;
+    font-weight: 850;
+    letter-spacing: .04em;
+  }
+
+  .swipeHint span:last-child {
+    white-space: nowrap;
+  }
+
+  .programRail {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px;
+    width: auto;
+    margin: 0 -13px;
+    padding: 2px 13px 12px;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 13px;
+  }
+
+  .programRail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobileProgramCard {
+    flex: 0 0 88%;
+    width: 88%;
+    min-width: 0;
+    max-width: 350px;
+    padding: 15px;
+    border-radius: 16px;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+
+  .mobileProgramCard:last-child {
+    margin-right: 2px;
+  }
+}

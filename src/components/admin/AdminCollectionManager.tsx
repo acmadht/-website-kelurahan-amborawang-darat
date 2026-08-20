@@ -63,9 +63,22 @@ interface AdminCollectionManagerProps {
 
 function normalizeRtNumber(value: unknown) {
   const numeric = Number(String(value ?? "").replace(/\D/g, ""));
-  if (!Number.isInteger(numeric) || numeric < 1) return "";
+  if (!Number.isInteger(numeric) || numeric < 1 || numeric > 13) return "";
   return String(numeric).padStart(2, "0");
 }
+
+const RT_LINKED_COLLECTIONS = new Set([
+  "residents",
+  "families",
+  "rts",
+  "socialAssistance",
+  "umkm",
+  "facilities",
+  "populationMutations",
+  "inventory",
+  "serviceRequests",
+  "complaints",
+]);
 
 function witaNow() {
   const now = new Date();
@@ -540,7 +553,7 @@ export default function AdminCollectionManager({
     Boolean(lockedField && lockedValues.includes(String(item[lockedField] ?? "")));
 
   async function refreshLinkedAdministration() {
-    if (!["residents", "families", "rts", "socialAssistance"].includes(collectionName)) return null;
+    if (!RT_LINKED_COLLECTIONS.has(collectionName)) return null;
     const user = auth?.currentUser;
     if (!user) return null;
     try {
@@ -550,7 +563,7 @@ export default function AdminCollectionManager({
         headers: { authorization: `Bearer ${token}` },
       });
       if (!response.ok) return null;
-      const json = await response.json() as { result?: { familyMemberCountsUpdated?: number; rtStatisticsUpdated?: number; aidRtLinked?: number } };
+      const json = await response.json() as { result?: { familyMemberCountsUpdated?: number; familyRtLinked?: number; rtStatisticsUpdated?: number; aidRtLinked?: number; umkmRtLinked?: number; inventoryRtLinked?: number; serviceRequestRtLinked?: number } };
       return json.result ?? null;
     } catch {
       return null;
@@ -678,6 +691,23 @@ export default function AdminCollectionManager({
 
     Object.assign(payload, fixedValues);
 
+    // Semua field wilayah RT memakai format yang sama (01-13) agar koleksi
+    // yang berbeda benar-benar dapat disambungkan dengan Data RT.
+    for (const rtField of ["rt", "originRt", "destinationRt"]) {
+      if (!(rtField in payload)) continue;
+      const raw = String(payload[rtField] ?? "").trim();
+      if (!raw) {
+        payload[rtField] = "";
+        continue;
+      }
+      const normalized = normalizeRtNumber(raw);
+      if (!normalized) {
+        setStatus(`${rtField === "rt" ? "RT" : rtField === "originRt" ? "RT Asal" : "RT Tujuan"} harus berada pada RT 01 sampai RT 13.`);
+        return;
+      }
+      payload[rtField] = normalized;
+    }
+
     if (collectionName === "kknPrograms") {
       const startDate = String(payload.startDate ?? "").trim();
       const endDate = String(payload.endDate ?? "").trim();
@@ -760,7 +790,7 @@ export default function AdminCollectionManager({
       const linked = await refreshLinkedAdministration();
       setOpen(false);
       const linkedMessage = linked
-        ? ` Data terkait ikut diselaraskan${linked.aidRtLinked ? `; ${linked.aidRtLinked} data bansos mendapat RT otomatis` : ""}.`
+        ? ` Data terkait ikut diselaraskan${linked.familyRtLinked ? `; ${linked.familyRtLinked} KK mengikuti RT penduduk` : ""}${linked.aidRtLinked ? `; ${linked.aidRtLinked} bansos terhubung RT` : ""}${linked.umkmRtLinked ? `; ${linked.umkmRtLinked} UMKM mengikuti NIK pemilik` : ""}${linked.inventoryRtLinked ? `; ${linked.inventoryRtLinked} inventaris mengikuti lokasi fasilitas` : ""}${linked.serviceRequestRtLinked ? `; ${linked.serviceRequestRtLinked} permohonan surat mendapat RT dari NIK` : ""}.`
         : "";
       setNotice((editing ? "Data berhasil diperbarui dan langsung tampil pada website publik." : "Data baru berhasil ditambahkan dan langsung terhubung ke website publik.") + linkedMessage);
     } catch (error) {
@@ -823,21 +853,21 @@ export default function AdminCollectionManager({
             <strong>Data saling terhubung</strong>
             <span>{connectionNote || "Gunakan halaman terkait untuk melengkapi data yang memiliki hubungan."}</span>
           </div>
-          {relatedLinks.length || ["residents", "families", "rts", "socialAssistance"].includes(collectionName) ? (
+          {relatedLinks.length || RT_LINKED_COLLECTIONS.has(collectionName) ? (
             <div className={styles.connectionLinks}>
               {relatedLinks.map((item) => (
                 <Link key={item.href} href={item.href} className={styles.connectionLink} title={item.note}>
                   {item.label} →
                 </Link>
               ))}
-              {["residents", "families", "rts", "socialAssistance"].includes(collectionName) ? (
+              {RT_LINKED_COLLECTIONS.has(collectionName) ? (
                 <button
                   type="button"
                   className={styles.connectionSyncButton}
                   onClick={async () => {
                     setStatus("");
                     const linked = await refreshLinkedAdministration();
-                    setNotice(linked ? "Data Penduduk, Keluarga/KK, Data RT, Bansos, dan ringkasan beranda berhasil diselaraskan." : "Sinkronisasi belum dapat dijalankan. Pastikan sesi admin aktif.");
+                    setNotice(linked ? "Data yang memiliki hubungan RT berhasil diselaraskan: Penduduk, KK, Bansos, UMKM, Fasilitas, Mutasi, Inventaris, Surat, Pengaduan, dan Data RT." : "Sinkronisasi belum dapat dijalankan. Pastikan sesi admin aktif.");
                   }}
                 >
                   ↻ Sinkronkan Data

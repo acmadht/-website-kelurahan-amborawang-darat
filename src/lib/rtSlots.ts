@@ -1,6 +1,11 @@
 import { AMBORAWANG_RT_TOTAL } from "@/data/amborawang";
 import type { RegionLeader } from "@/types";
 
+export const AMBORAWANG_RT_OPTIONS = Array.from(
+  { length: AMBORAWANG_RT_TOTAL },
+  (_, index) => String(index + 1).padStart(2, "0"),
+);
+
 export function normalizeRtNumber(value: unknown) {
   const numeric = Number(String(value ?? "").replace(/\D/g, ""));
   if (!Number.isInteger(numeric) || numeric < 1 || numeric > AMBORAWANG_RT_TOTAL) {

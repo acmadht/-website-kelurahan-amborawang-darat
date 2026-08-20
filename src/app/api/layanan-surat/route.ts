@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { setDocument } from "@/lib/firebase/firestore-rest-admin";
+import { recalculateAdministrativeData } from "@/lib/admin/administrative-sync";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,9 @@ export async function POST(request: Request) {
     const name = clean(body.name, 120);
     const nik = clean(body.nik, 24).replace(/\D/g, "");
     const kk = clean(body.kk, 24).replace(/\D/g, "");
-    const rt = clean(body.rt, 4).replace(/\D/g, "").padStart(2, "0");
+    const rtDigits = clean(body.rt, 4).replace(/\D/g, "");
+    const rtNumber = Number(rtDigits);
+    const rt = rtDigits && Number.isInteger(rtNumber) && rtNumber >= 1 && rtNumber <= 13 ? String(rtNumber).padStart(2, "0") : "";
     const phone = clean(body.phone, 40);
     const letterType = clean(body.letterType, 160);
     const purpose = clean(body.purpose, 700);
@@ -50,6 +53,7 @@ export async function POST(request: Request) {
       updatedAt: now,
     }, false);
 
+    await recalculateAdministrativeData();
     return NextResponse.json({ ok: true, ticketId: id });
   } catch (error) {
     console.error("[layanan-surat]", error);

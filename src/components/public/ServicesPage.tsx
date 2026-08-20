@@ -14,43 +14,79 @@ import styles from "./ServicesPage.module.css";
 const steps = [
   {
     number: "01",
-    title: "Pilih jenis layanan",
-    text: "Pastikan layanan yang dibutuhkan dan baca persyaratan dasar terlebih dahulu.",
+    title: "Bawa surat pengantar RT",
+    text: "Membawa surat pengantar dari RT yang telah dicap dan ditandatangani.",
   },
   {
     number: "02",
-    title: "Siapkan dokumen",
-    text: "Lengkapi identitas dan berkas pendukung sesuai jenis pelayanan.",
+    title: "Pemeriksaan kelengkapan",
+    text: "Berkas diperiksa kelengkapannya di Kantor Kelurahan Amborawang Darat.",
   },
   {
     number: "03",
-    title: "Datang atau konsultasi",
-    text: "Datang ke kantor kelurahan atau hubungi petugas apabila masih ada informasi yang perlu dikonfirmasi.",
+    title: "Berkas diproses",
+    text: "Berkas yang lengkap diproses oleh petugas pelayanan kelurahan.",
   },
   {
     number: "04",
-    title: "Proses pelayanan",
-    text: "Petugas memeriksa kelengkapan dan membantu proses administrasi sesuai ketentuan.",
+    title: "Penandatanganan",
+    text: "Berkas yang telah diproses dilanjutkan untuk penandatanganan oleh Lurah.",
   },
 ];
 
 const faq = [
   {
-    question: "Apakah semua layanan dapat selesai di kelurahan?",
+    question: "Apa persyaratan dasar pelayanan administrasi?",
     answer:
-      "Tidak semua. Beberapa layanan menggunakan surat pengantar atau verifikasi dari kelurahan sebelum dilanjutkan ke instansi terkait.",
+      "Berdasarkan SOP yang tersedia, masyarakat menyiapkan fotokopi KTP, fotokopi KK, dan surat pengantar RT. Dokumen tambahan dapat diminta sesuai jenis keperluan.",
   },
   {
-    question: "Apakah harus membawa dokumen asli?",
+    question: "Apa persyaratan dasar pelayanan pertanahan?",
     answer:
-      "Sebaiknya bawa dokumen asli dan salinan apabila diperlukan untuk pencocokan data.",
+      "Siapkan fotokopi KTP dan KK, fotokopi SPPT PBB terakhir, fotokopi akta jual beli/hibah/waris jika ada, surat pernyataan kepemilikan tanah yang diketahui RT, serta dokumen pendukung lain sesuai kebutuhan.",
   },
   {
-    question: "Bagaimana jika belum yakin dengan persyaratan?",
+    question: "Bagaimana alur pelayanan di kantor kelurahan?",
     answer:
-      "Hubungi petugas terlebih dahulu agar berkas yang dibawa sesuai dengan jenis layanan yang akan diurus.",
+      "Masyarakat membawa pengantar RT, petugas mengecek kelengkapan, berkas lengkap diproses, kemudian berkas dilanjutkan untuk penandatanganan oleh Lurah.",
   },
 ];
+
+
+const adminRequirements = [
+  "Fotokopi KTP",
+  "Fotokopi KK",
+  "Surat pengantar RT",
+];
+
+const landRequirements = [
+  "Fotokopi KTP dan KK",
+  "Fotokopi SPPT PBB terakhir",
+  "Fotokopi akta jual beli/hibah/waris (jika ada)",
+  "Surat pernyataan kepemilikan tanah yang diketahui RT",
+  "Dokumen pendukung lainnya sesuai kebutuhan",
+];
+
+const officialServices: ServiceItem[] = [
+  { id: "sop-adm-01", name: "Surat Pengantar KTP/KK", slug: "surat-pengantar-ktp-kk", category: "Administrasi Kelurahan", icon: "01", summary: "Pelayanan surat pengantar untuk keperluan administrasi KTP dan Kartu Keluarga.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 1, isFeatured: true, isActive: true },
+  { id: "sop-adm-02", name: "Surat Keterangan Pindah Datang/Keluar", slug: "surat-keterangan-pindah-datang-keluar", category: "Administrasi Kelurahan", icon: "02", summary: "Pelayanan keterangan untuk administrasi perpindahan penduduk datang maupun keluar.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 2, isFeatured: true, isActive: true },
+  { id: "sop-adm-03", name: "Surat Keterangan Domisili", slug: "surat-keterangan-domisili", category: "Administrasi Kelurahan", icon: "03", summary: "Pelayanan surat keterangan domisili bagi warga sesuai kebutuhan administrasi.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 3, isFeatured: true, isActive: true },
+  { id: "sop-adm-04", name: "Surat Keterangan Usaha", slug: "surat-keterangan-usaha", category: "Administrasi Kelurahan", icon: "04", summary: "Pelayanan surat keterangan usaha bagi warga atau pelaku usaha di wilayah kelurahan.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 4, isFeatured: true, isActive: true },
+  { id: "sop-adm-05", name: "Surat Keterangan Kematian", slug: "surat-keterangan-kematian", category: "Administrasi Kelurahan", icon: "05", summary: "Pelayanan surat keterangan kematian untuk kebutuhan administrasi keluarga.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 5, isFeatured: true, isActive: true },
+  { id: "sop-adm-06", name: "Surat Keterangan Kelahiran", slug: "surat-keterangan-kelahiran", category: "Administrasi Kelurahan", icon: "06", summary: "Pelayanan surat keterangan kelahiran sebagai dokumen pendukung administrasi kependudukan.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 6, isFeatured: true, isActive: true },
+  { id: "sop-adm-07", name: "Surat Keterangan Tidak Mampu", slug: "surat-keterangan-tidak-mampu", category: "Administrasi Kelurahan", icon: "07", summary: "Pelayanan surat keterangan tidak mampu sesuai keperluan administrasi masyarakat.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 7, isFeatured: true, isActive: true },
+  { id: "sop-adm-08", name: "Surat Pengantar Nikah", slug: "surat-pengantar-nikah", category: "Administrasi Kelurahan", icon: "08", summary: "Pelayanan surat pengantar untuk melengkapi administrasi pengurusan pernikahan.", requirements: adminRequirements, procedures: [], duration: "", cost: "", order: 8, isFeatured: true, isActive: true },
+  { id: "sop-tanah-01", name: "Surat Keterangan Tanah", slug: "surat-keterangan-tanah", category: "Pertanahan", icon: "01", summary: "Pelayanan surat keterangan tanah sesuai data dan dokumen pendukung yang diajukan.", requirements: landRequirements, procedures: [], duration: "", cost: "", order: 9, isFeatured: true, isActive: true },
+  { id: "sop-tanah-02", name: "Surat Keterangan Riwayat Tanah", slug: "surat-keterangan-riwayat-tanah", category: "Pertanahan", icon: "02", summary: "Pelayanan surat keterangan yang menerangkan riwayat tanah berdasarkan dokumen pendukung.", requirements: landRequirements, procedures: [], duration: "", cost: "", order: 10, isFeatured: true, isActive: true },
+  { id: "sop-tanah-03", name: "Surat Keterangan Waris Tanah", slug: "surat-keterangan-waris-tanah", category: "Pertanahan", icon: "03", summary: "Pelayanan surat keterangan waris yang berkaitan dengan administrasi tanah.", requirements: landRequirements, procedures: [], duration: "", cost: "", order: 11, isFeatured: true, isActive: true },
+  { id: "sop-tanah-04", name: "Surat Rekomendasi Pendaftaran Sertifikasi Tanah", slug: "surat-rekomendasi-pendaftaran-sertifikasi-tanah", category: "Pertanahan", icon: "04", summary: "Pelayanan rekomendasi kelurahan sebagai dokumen pendukung pendaftaran sertifikasi tanah.", requirements: landRequirements, procedures: [], duration: "", cost: "", order: 12, isFeatured: true, isActive: true },
+];
+
+const legacyServiceSlugs = new Set([
+  "administrasi-kependudukan",
+  "pengaduan-masyarakat",
+  "dokumen-publik",
+]);
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -121,7 +157,31 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
     initialServices,
   );
 
-  const displayServices = rawServices.filter((item) => item.isActive !== false);
+  const adminServices = rawServices.filter((item) => item.isActive !== false);
+  const officialSlugs = new Set(officialServices.map((item) => item.slug));
+  const additionalServices = adminServices.filter(
+    (item) => item.slug && !officialSlugs.has(item.slug) && !legacyServiceSlugs.has(item.slug),
+  );
+  const displayServices = [...officialServices, ...additionalServices].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0),
+  );
+  const serviceGroups = [
+    {
+      name: "Administrasi Kelurahan",
+      description: "",
+      items: displayServices.filter((item) => item.category === "Administrasi Kelurahan"),
+    },
+    {
+      name: "Pertanahan",
+      description: "Pelayanan pertanahan yang tercantum pada SOP Pelayanan Pertanahan Kelurahan Amborawang Darat.",
+      items: displayServices.filter((item) => item.category === "Pertanahan"),
+    },
+    {
+      name: "Layanan Tambahan",
+      description: "Layanan aktif lain yang ditambahkan melalui dashboard admin.",
+      items: displayServices.filter((item) => !["Administrasi Kelurahan", "Pertanahan"].includes(item.category)),
+    },
+  ].filter((group) => group.items.length > 0);
   const [openService, setOpenService] = useState<string | null>(null);
   const serviceHours = parseServiceHours(settings.serviceHours);
   const whatsapp = normalizeWhatsapp(settings.whatsapp);
@@ -165,9 +225,8 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
                 </h1>
 
                 <p>
-                  Informasi layanan administrasi masyarakat Kelurahan {settings.villageName}
-                  yang dikelola langsung dari dashboard admin agar persyaratan dan
-                  informasi pelayanan tetap mudah diperbarui.
+                  Informasi pelayanan administrasi dan pertanahan Kelurahan {settings.villageName}
+                  berdasarkan data SOP pelayanan yang tersedia di kantor kelurahan.
                 </p>
 
                 <div className={styles.heroActions}>
@@ -230,143 +289,120 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
           </div>
         </section>
 
-        {/* INTRO */}
-        <section className={styles.introSection}>
-          <div className={`container ${styles.introGrid}`}>
-            <Reveal enabled={settings.animationEnabled}>
-              <div className={styles.introAside}>
-                <span className={styles.sectionNumber}>01</span>
-                <span className={styles.eyebrow}>Panduan Layanan</span>
-                <h2>Siapkan kebutuhan sebelum datang</h2>
-              </div>
-            </Reveal>
-
-            <Reveal enabled={settings.animationEnabled} delay={60}>
-              <div className={styles.introArticle}>
-                <p className={styles.lead}>
-                  Informasi pelayanan dibuat agar masyarakat dapat memahami jenis
-                  layanan, persyaratan dasar, dan langkah pengurusan secara lebih cepat.
-                </p>
-
-                <p>
-                  Persyaratan dapat berbeda tergantung keperluan administrasi. Karena
-                  itu, apabila masih ragu terhadap berkas yang harus dibawa, masyarakat
-                  disarankan menghubungi petugas kelurahan terlebih dahulu.
-                </p>
-
-                <div className={styles.introCallout}>
-                  <span>Catatan</span>
-                  <strong>
-                    Bawa identitas dan dokumen pendukung asli apabila diperlukan untuk
-                    pencocokan data.
-                  </strong>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
         {/* SERVICES */}
         <section id="daftar-layanan" className={styles.servicesSection}>
           <div className="container">
             <Reveal enabled={settings.animationEnabled}>
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>Daftar Layanan</span>
-                <h2>Layanan utama untuk kebutuhan masyarakat</h2>
-                <p>
-                  Seluruh daftar di bawah ini berasal dari menu Layanan pada dashboard admin.
-                </p>
+                <h2>Pelayanan Administrasi & Pertanahan</h2>
               </div>
             </Reveal>
 
             {displayServices.length ? (
-              <div className={styles.servicesGrid}>
-                {displayServices.map((service, index) => {
-                  const serviceKey = service.id ?? service.slug ?? service.name;
-                  const isOpen = openService === serviceKey;
+              <div className={styles.serviceGroups}>
+                {serviceGroups.map((group) => (
+                  <section key={group.name} className={styles.serviceGroup}>
+                    <div className={styles.serviceGroupHeading}>
+                      <div>
+                        <span>{String(group.items.length).padStart(2, "0")} layanan</span>
+                        <h3>{group.name}</h3>
+                      </div>
+                      {group.description ? <p>{group.description}</p> : null}
+                    </div>
 
-                  return (
-                    <Reveal key={serviceKey} enabled={settings.animationEnabled} delay={index * 50}>
-                      <article
-                        id={service.slug || undefined}
-                        className={`${styles.serviceCard} ${isOpen ? styles.serviceCardOpen : ""}`}
-                      >
-                        <div className={styles.serviceToggle}>
-                          <div className={styles.serviceCardTop}>
-                            <span>{String(index + 1).padStart(2, "0")}</span>
-                            <small>{service.category}</small>
-                          </div>
+                    <div className={styles.servicesGrid}>
+                      {group.items.map((service, index) => {
+                        const serviceKey = service.id ?? service.slug ?? service.name;
+                        const isOpen = openService === serviceKey;
 
-                          <h3>{service.name}</h3>
-                          <p>{service.summary}</p>
+                        return (
+                          <Reveal key={serviceKey} enabled={settings.animationEnabled} delay={index * 35}>
+                            <article
+                              id={service.slug || undefined}
+                              className={`${styles.serviceCard} ${isOpen ? styles.serviceCardOpen : ""}`}
+                            >
+                              <div className={styles.serviceToggle}>
+                                <div className={styles.serviceCardTop}>
+                                  <span>{service.icon || String(index + 1).padStart(2, "0")}</span>
+                                  <small>{service.category}</small>
+                                </div>
 
-                          <button
-                            type="button"
-                            className={styles.serviceToggleHint}
-                            onClick={() => setOpenService(isOpen ? null : serviceKey)}
-                            aria-expanded={isOpen}
-                            aria-controls={`service-detail-${index}`}
-                          >
-                            {isOpen ? "Tutup detail" : "Lihat detail"}
-                            <ChevronIcon />
-                          </button>
-                        </div>
+                                <h3>{service.name}</h3>
+                                <p>{service.summary}</p>
 
-                        <div id={`service-detail-${index}`} className={styles.serviceBody}>
-                          <span className={styles.serviceSubheading}>Persyaratan</span>
-                          <div className={styles.requirements}>
-                            {(service.requirements?.length
-                              ? service.requirements
-                              : ["Konfirmasi persyaratan kepada petugas kelurahan"]
-                            ).map((item) => (
-                              <div key={item}>
-                                <span><CheckIcon /></span>
-                                <p>{item}</p>
+                                <button
+                                  type="button"
+                                  className={styles.serviceToggleHint}
+                                  onClick={() => setOpenService(isOpen ? null : serviceKey)}
+                                  aria-expanded={isOpen}
+                                  aria-controls={`service-detail-${service.slug || index}`}
+                                >
+                                  {isOpen ? "Tutup persyaratan" : "Lihat persyaratan"}
+                                  <ChevronIcon />
+                                </button>
                               </div>
-                            ))}
-                          </div>
 
-                          {service.procedures?.length ? (
-                            <>
-                              <span className={styles.serviceSubheading}>Prosedur</span>
-                              <div className={styles.procedureList}>
-                                {service.procedures.map((item, procedureIndex) => (
-                                  <div key={`${item}-${procedureIndex}`}>
-                                    <span>{String(procedureIndex + 1).padStart(2, "0")}</span>
-                                    <p>{item}</p>
+                              <div id={`service-detail-${service.slug || index}`} className={styles.serviceBody}>
+                                <span className={styles.serviceSubheading}>Persyaratan</span>
+                                <div className={styles.requirements}>
+                                  {(service.requirements?.length
+                                    ? service.requirements
+                                    : ["Konfirmasi persyaratan kepada petugas kelurahan"]
+                                  ).map((item) => (
+                                    <div key={item}>
+                                      <span><CheckIcon /></span>
+                                      <p>{item}</p>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {service.procedures?.length ? (
+                                  <>
+                                    <span className={styles.serviceSubheading}>Prosedur</span>
+                                    <div className={styles.procedureList}>
+                                      {service.procedures.map((item, procedureIndex) => (
+                                        <div key={`${item}-${procedureIndex}`}>
+                                          <span>{String(procedureIndex + 1).padStart(2, "0")}</span>
+                                          <p>{item}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </>
+                                ) : null}
+
+                                {service.duration || service.cost ? (
+                                  <div className={styles.serviceMetaLine}>
+                                    {service.duration ? <span><small>Waktu</small><strong>{service.duration}</strong></span> : null}
+                                    {service.cost ? <span><small>Biaya</small><strong>{service.cost}</strong></span> : null}
                                   </div>
-                                ))}
+                                ) : null}
+
+                                <div className={styles.serviceActions}>
+                                  <Link href="/kontak" className={styles.serviceLink}>
+                                    {service.contact ? `Kontak: ${service.contact}` : "Konfirmasi Layanan"}
+                                    <ArrowIcon size={16} />
+                                  </Link>
+                                  {service.documentUrl ? (
+                                    <a href={service.documentUrl} target="_blank" rel="noopener noreferrer" className={styles.serviceDocumentLink}>
+                                      Dokumen
+                                      <ArrowIcon size={15} />
+                                    </a>
+                                  ) : null}
+                                </div>
                               </div>
-                            </>
-                          ) : null}
-
-                          <div className={styles.serviceMetaLine}>
-                            <span><small>Waktu</small><strong>{service.duration || "Konfirmasi petugas"}</strong></span>
-                            <span><small>Biaya</small><strong>{service.cost || "Konfirmasi petugas"}</strong></span>
-                          </div>
-
-                          <div className={styles.serviceActions}>
-                            <Link href="/kontak" className={styles.serviceLink}>
-                              {service.contact ? `Kontak: ${service.contact}` : "Konfirmasi Layanan"}
-                              <ArrowIcon size={16} />
-                            </Link>
-                            {service.documentUrl ? (
-                              <a href={service.documentUrl} target="_blank" rel="noopener noreferrer" className={styles.serviceDocumentLink}>
-                                Dokumen
-                                <ArrowIcon size={15} />
-                              </a>
-                            ) : null}
-                          </div>
-                        </div>
-                      </article>
-                    </Reveal>
-                  );
-                })}
+                            </article>
+                          </Reveal>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </div>
             ) : (
               <div className={styles.emptyState}>
                 <strong>Belum ada layanan aktif.</strong>
-                <p>Tambahkan layanan melalui menu Layanan pada dashboard admin.</p>
+                <p>Informasi pelayanan akan ditampilkan setelah data tersedia.</p>
               </div>
             )}
           </div>
@@ -380,13 +416,9 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
                 <div>
                   <span className={styles.sectionNumber}>02</span>
                   <span className={styles.eyebrow}>Alur Pelayanan</span>
-                  <h2>Empat langkah sederhana</h2>
+                  <h2>Empat tahap pelayanan kelurahan</h2>
                 </div>
 
-                <p>
-                  Alur ini membantu masyarakat memahami proses dasar pelayanan sebelum
-                  berkas diproses oleh petugas.
-                </p>
               </div>
             </Reveal>
 
@@ -458,10 +490,10 @@ export default function ServicesPage({ initialSettings = demoSettings, initialSe
               <div className={styles.cta}>
                 <div>
                   <span>Butuh Bantuan?</span>
-                  <h2>Konfirmasi persyaratan sebelum datang.</h2>
+                  <h2>Pastikan berkas sudah lengkap sebelum datang.</h2>
                   <p>
-                    Petugas kelurahan dapat membantu memastikan dokumen yang perlu
-                    disiapkan sesuai kebutuhan pelayanan.
+                    Gunakan daftar persyaratan di atas sebagai panduan awal. Untuk kondisi
+                    khusus, konfirmasikan kebutuhan berkas kepada petugas kelurahan.
                   </p>
                 </div>
 

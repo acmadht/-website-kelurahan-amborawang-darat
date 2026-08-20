@@ -1,4 +1,5 @@
 import AdminCollectionManager from "@/components/admin/AdminCollectionManager";
+import { AMBORAWANG_RT_OPTIONS } from "@/lib/rtSlots";
 
 export default function Page() {
   return (
@@ -7,7 +8,7 @@ export default function Page() {
       publicHref="/fasilitas"
       title="Fasilitas & Sarana Prasarana"
       description="Kelola fasilitas publik dan sarana prasarana. Data ini sama dengan sheet Fasilitas dan Firestore."
-      connectionNote="Fasilitas adalah direktori sarana publik. Jika ada aset/barang kelurahan yang berada pada fasilitas tersebut, catat asetnya di Inventaris dengan Lokasi yang sesuai."
+      connectionNote="RT pada Fasilitas menjadi sumber otomatis daftar Fasilitas di Data RT. Jika nama Lokasi Inventaris sama dengan nama Fasilitas, RT Inventaris juga dapat mengikuti RT fasilitas tersebut."
       relatedLinks={[
         { label: "Inventaris", href: "/admin/inventaris" },
         { label: "Wilayah", href: "/admin/wilayah" },
@@ -19,7 +20,7 @@ export default function Page() {
         { key: "category", label: "Kategori", type: "text" },
         { key: "name", label: "Nama Fasilitas", type: "text", required: true },
         { key: "address", label: "Alamat", type: "textarea", full: true },
-        { key: "rt", label: "RT", type: "text" },
+        { key: "rt", label: "RT", type: "select", options: AMBORAWANG_RT_OPTIONS },
         { key: "mapsUrl", label: "Link Maps / Koordinat", type: "text", full: true },
         { key: "condition", label: "Kondisi", type: "select", options: ["Baik", "Rusak Ringan", "Rusak Sedang", "Rusak Berat"] },
         { key: "manager", label: "Pengelola", type: "text" },

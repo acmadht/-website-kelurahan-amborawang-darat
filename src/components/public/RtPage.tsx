@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useCollectionData } from "@/hooks/useFirestoreData";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { AMBORAWANG_RT_TOTAL } from "@/data/amborawang";
@@ -14,6 +14,11 @@ import styles from "./RtPage.module.css";
 function displayNumber(value?: number) {
   if (!value || value <= 0) return "Belum diisi";
   return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function displayCount(value?: number) {
+  const numeric = Number(value) || 0;
+  return new Intl.NumberFormat("id-ID").format(Math.max(0, numeric));
 }
 
 function normalizePhone(value?: string) {
@@ -233,18 +238,29 @@ function StatBox({
   );
 }
 
-export default function RtPage({ initialRts = [], initialSettings }: { initialRts?: RegionLeader[]; initialSettings?: SiteSettings }) {
+export default function RtPage({ initialRts = [], initialSettings, initialSelectedRt = "" }: { initialRts?: RegionLeader[]; initialSettings?: SiteSettings; initialSelectedRt?: string }) {
   const { data: rawRts, loading } = useCollectionData<RegionLeader>(
     "rts",
     initialRts,
   );
   const { settings } = usePublicSettings(initialSettings);
   const [selectedRt, setSelectedRt] = useState<RegionLeader | null>(null);
+  const queryOpenedRef = useRef(false);
 
   const rts = useMemo(
     () => buildAmborawangRtSlots(rawRts),
     [rawRts],
   );
+
+  useEffect(() => {
+    if (queryOpenedRef.current) return;
+    const requested = String(initialSelectedRt ?? "").replace(/\D/g, "").padStart(2, "0");
+    if (!requested || requested === "00") return;
+    const match = rts.find((item) => item.number === requested);
+    if (!match) return;
+    queryOpenedRef.current = true;
+    setSelectedRt(match);
+  }, [rts, initialSelectedRt]);
 
   const totals = useMemo(() => {
     const population = rts.reduce(
@@ -305,8 +321,8 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
 
                 <p>
                   Informasi publik setiap RT meliputi ketua RT, jumlah warga,
-                  kepala keluarga, komposisi penduduk, fasilitas, dan gambaran
-                  wilayah. Data dapat diperbarui melalui dashboard kelurahan.
+                  kepala keluarga, komposisi penduduk, fasilitas, UMKM, bansos,
+                  inventaris, mutasi, dan gambaran wilayah yang saling terhubung.
                 </p>
 
                 <div className={styles.heroStatus}>
@@ -558,8 +574,8 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
                   <span>Pembaruan Data</span>
                   <h2>Data RT dikelola melalui dashboard admin</h2>
                   <p>
-                    Data ketua RT, area, rumah, fasilitas, kontak, dan keterangan wilayah dikelola pada Data RT.
-                    Jumlah penduduk, laki-laki/perempuan, balita, lansia, dan KK dapat diselaraskan dari administrasi Penduduk dan Keluarga per RT.
+                    Data ketua RT, area, rumah, kontak, dan keterangan wilayah dikelola pada Data RT.
+                    Demografi berasal dari Penduduk/KK, fasilitas berasal dari menu Fasilitas, dan jumlah UMKM, bansos, inventaris, mutasi, surat, serta pengaduan dihitung otomatis menurut RT.
                   </p>
                 </div>
               </div>
@@ -719,6 +735,39 @@ export default function RtPage({ initialRts = [], initialSettings }: { initialRt
                     )}
                   </div>
                 </div>
+
+                <section className={styles.modalLinkedSection}>
+                  <div className={styles.modalLinkedTitle}>
+                    <div>
+                      <span>Data Terhubung</span>
+                      <strong>Ringkasan modul yang memakai RT {selectedRt.number}</strong>
+                    </div>
+                    <small>Agregat aman tanpa identitas pribadi</small>
+                  </div>
+                  <div className={styles.modalLinkedGrid}>
+                    <Link href={`/penduduk?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Penduduk</span><strong>{displayCount(selectedRt.populationCount)}</strong><small>jiwa aktif</small>
+                    </Link>
+                    <Link href={`/keluarga?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Keluarga / KK</span><strong>{displayCount(selectedRt.familyCount)}</strong><small>KK terhubung</small>
+                    </Link>
+                    <Link href={`/fasilitas?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Fasilitas</span><strong>{displayCount(selectedRt.facilityCount)}</strong><small>fasilitas publik</small>
+                    </Link>
+                    <Link href={`/umkm?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>UMKM</span><strong>{displayCount(selectedRt.umkmCount)}</strong><small>usaha publik</small>
+                    </Link>
+                    <Link href={`/bansos?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Bansos</span><strong>{displayCount(selectedRt.socialAssistanceCount)}</strong><small>data bantuan</small>
+                    </Link>
+                    <Link href={`/inventaris?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Inventaris</span><strong>{displayCount(selectedRt.inventoryItemCount)}</strong><small>{displayCount(selectedRt.inventoryQuantity)} kuantitas</small>
+                    </Link>
+                    <Link href={`/mutasi?rt=${selectedRt.number}`} className={styles.modalLinkedCard}>
+                      <span>Mutasi</span><strong>{displayCount(selectedRt.mutationCount)}</strong><small>catatan terkait</small>
+                    </Link>
+                  </div>
+                </section>
 
                 <div className={styles.modalFooter}>
                   <div className={styles.updatedInfo}>

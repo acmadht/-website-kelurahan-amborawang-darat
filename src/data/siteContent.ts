@@ -78,7 +78,7 @@ export const regionContentFallback: RegionContent = {
   geography:
     "Kelurahan Amborawang Darat merupakan bagian dari Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur.",
   geographyDetail:
-    "Luas wilayahnya sekitar 19,47 km² atau sekitar 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan sekitar 5,3 km.",
+    "Luas wilayahnya sekitar 19,47 km² atau sekitar 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju Kantor Kecamatan Samboja Barat sekitar 5,3 km.",
   connectivity:
     "Wilayah ini terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan yang mendukung aktivitas masyarakat, pelayanan, pendidikan, perdagangan, dan mobilitas antarkawasan.",
   boundaryNote:

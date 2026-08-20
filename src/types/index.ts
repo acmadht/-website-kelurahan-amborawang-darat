@@ -118,6 +118,14 @@ export interface RegionLeader {
   toddlerCount?: number;
   elderlyCount?: number;
   facilities?: string[];
+  facilityCount?: number;
+  umkmCount?: number;
+  socialAssistanceCount?: number;
+  inventoryItemCount?: number;
+  inventoryQuantity?: number;
+  mutationCount?: number;
+  serviceRequestCount?: number;
+  complaintCount?: number;
   rwId?: string;
   order: number;
   isActive: boolean;
@@ -389,6 +397,7 @@ export interface InventoryRecord {
   unit?: string;
   condition?: string;
   location?: string;
+  rt?: string;
   acquisitionYear?: string;
   fundingSource?: string;
   personInCharge?: string;

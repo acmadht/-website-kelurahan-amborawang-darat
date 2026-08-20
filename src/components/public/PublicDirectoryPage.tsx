@@ -17,6 +17,7 @@ type Props = {
   initialSettings?: SiteSettings;
   initialUmkm?: UmkmItem[];
   initialFacilities?: FacilityItem[];
+  scopeRt?: string;
 };
 
 function safeLink(value?: string) {
@@ -30,6 +31,7 @@ export default function PublicDirectoryPage({
   initialSettings = demoSettings,
   initialUmkm = [],
   initialFacilities = [],
+  scopeRt = "",
 }: Props) {
   const { data: rawSettings } = useDocumentData<SiteSettings>("siteSettings", "main", initialSettings);
   const settings = applyAmborawangPublicSettings(rawSettings);
@@ -37,17 +39,21 @@ export default function PublicDirectoryPage({
   // field internal (mis. NIK pemilik UMKM) tidak pernah dapat dibaca langsung dari Firestore publik.
   const { data: umkm } = useCollectionData<UmkmItem>("umkm", initialUmkm, [], false);
   const { data: facilities } = useCollectionData<FacilityItem>("facilities", initialFacilities, [], false);
+  const rtFilterRaw = String(scopeRt ?? "").replace(/\D/g, "");
+  const rtFilter = rtFilterRaw ? String(Number(rtFilterRaw)).padStart(2, "0") : "";
 
   const items = useMemo(() => {
     if (mode === "umkm") {
       return umkm
         .filter((item) => item.isPublic !== false && item.isActive !== false)
+        .filter((item) => !rtFilter || String(item.rt || "").replace(/\D/g, "").padStart(2, "0") === rtFilter)
         .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
     return facilities
       .filter((item) => item.isPublic !== false)
+      .filter((item) => !rtFilter || String(item.rt || "").replace(/\D/g, "").padStart(2, "0") === rtFilter)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
-  }, [mode, umkm, facilities]);
+  }, [mode, umkm, facilities, rtFilter]);
 
   const isUmkm = mode === "umkm";
   const related = isUmkm
@@ -61,6 +67,8 @@ export default function PublicDirectoryPage({
         { href: "/data-rt", title: "Data RT", text: "Lihat fasilitas dan ringkasan wilayah pada masing-masing RT." },
         { href: "/wilayah", title: "Wilayah", text: "Lihat peta dan konteks lokasi fasilitas di kelurahan." },
       ];
+  const rtAwareRelated = new Set(["/data-rt", "/fasilitas", "/umkm", "/inventaris"]);
+  const relatedHref = (href: string) => rtFilter && rtAwareRelated.has(href) ? `${href}?rt=${rtFilter}` : href;
 
   return (
     <PublicShell>
@@ -87,8 +95,9 @@ export default function PublicDirectoryPage({
           <div className="container">
             <div className={styles.toolbar}>
               <div>
-                <h2>{isUmkm ? "Daftar UMKM" : "Daftar Fasilitas"}</h2>
-                <p>Data diperbarui dari sistem administrasi kelurahan.</p>
+                <h2>{isUmkm ? "Daftar UMKM" : "Daftar Fasilitas"}{rtFilter ? ` · RT ${rtFilter}` : ""}</h2>
+                <p>Data diperbarui dari sistem administrasi kelurahan.{rtFilter ? ` Menampilkan data yang terhubung ke RT ${rtFilter}.` : ""}</p>
+                {rtFilter ? <Link href={isUmkm ? "/umkm" : "/fasilitas"}>Lihat semua RT →</Link> : null}
               </div>
             </div>
 
@@ -108,7 +117,7 @@ export default function PublicDirectoryPage({
                           <div className={styles.body}>
                             <div className={styles.meta}>
                               {item.businessType ? <span className={styles.pill}>{item.businessType}</span> : null}
-                              {item.rt ? <span className={styles.pill}>RT {item.rt}</span> : null}
+                              {item.rt ? <Link href={`/data-rt?rt=${item.rt}`} className={styles.pill}>RT {item.rt}</Link> : null}
                             </div>
                             <h3>{item.name}</h3>
                             <p>{item.mainProduct || "Informasi produk belum diisi."}</p>
@@ -136,7 +145,7 @@ export default function PublicDirectoryPage({
                         <div className={styles.body}>
                           <div className={styles.meta}>
                             {item.category ? <span className={styles.pill}>{item.category}</span> : null}
-                            {item.rt ? <span className={styles.pill}>RT {item.rt}</span> : null}
+                            {item.rt ? <Link href={`/data-rt?rt=${item.rt}`} className={styles.pill}>RT {item.rt}</Link> : null}
                             {item.condition ? <span className={styles.pill}>{item.condition}</span> : null}
                           </div>
                           <h3>{item.name}</h3>
@@ -169,7 +178,7 @@ export default function PublicDirectoryPage({
               </div>
               <div className={styles.relatedGrid}>
                 {related.map((item) => (
-                  <Link href={item.href} className={styles.relatedCard} key={item.href}>
+                  <Link href={relatedHref(item.href)} className={styles.relatedCard} key={item.href}>
                     <strong>{item.title}</strong>
                     <p>{item.text}</p>
                     <span>Buka halaman →</span>

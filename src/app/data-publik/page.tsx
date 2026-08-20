@@ -4,11 +4,13 @@ import PublicShell from "@/components/public/PublicShell";
 import { buildMetadata, getServerCollection, getServerSettings } from "@/lib/seo";
 import type {
   FamilyRecord,
+  FacilityItem,
   InventoryRecord,
   PopulationMutationRecord,
   RegionLeader,
   ResidentRecord,
   SocialAssistanceRecord,
+  UmkmItem,
 } from "@/types";
 import styles from "./page.module.css";
 
@@ -44,6 +46,10 @@ type PublicRtTotals = {
   toddlers: number;
   elderly: number;
   facilities: number;
+  umkm: number;
+  aid: number;
+  inventoryItems: number;
+  mutations: number;
 };
 
 function formatFacilities(value: unknown) {
@@ -56,7 +62,7 @@ function formatFacilities(value: unknown) {
 }
 
 export default async function Page() {
-  const [settings, residents, families, mutations, aid, inventory, rts] = await Promise.all([
+  const [settings, residents, families, mutations, aid, inventory, rts, facilities, umkm] = await Promise.all([
     getServerSettings(),
     getServerCollection<ResidentRecord>("residents"),
     getServerCollection<FamilyRecord>("families"),
@@ -64,6 +70,8 @@ export default async function Page() {
     getServerCollection<SocialAssistanceRecord>("socialAssistance"),
     getServerCollection<InventoryRecord>("inventory"),
     getServerCollection<RegionLeader>("rts"),
+    getServerCollection<FacilityItem>("facilities"),
+    getServerCollection<UmkmItem>("umkm"),
   ]);
 
   const activeResidents = residents.filter(
@@ -82,9 +90,13 @@ export default async function Page() {
       houses: totals.houses + numberValue(item.houseCount),
       toddlers: totals.toddlers + numberValue(item.toddlerCount),
       elderly: totals.elderly + numberValue(item.elderlyCount),
-      facilities: totals.facilities + (Array.isArray(item.facilities) ? item.facilities.filter(Boolean).length : 0),
+      facilities: totals.facilities + numberValue(item.facilityCount || (Array.isArray(item.facilities) ? item.facilities.filter(Boolean).length : 0)),
+      umkm: totals.umkm + numberValue(item.umkmCount),
+      aid: totals.aid + numberValue(item.socialAssistanceCount),
+      inventoryItems: totals.inventoryItems + numberValue(item.inventoryItemCount),
+      mutations: totals.mutations + numberValue(item.mutationCount),
     }),
-    { population: 0, families: 0, male: 0, female: 0, houses: 0, toddlers: 0, elderly: 0, facilities: 0 },
+    { population: 0, families: 0, male: 0, female: 0, houses: 0, toddlers: 0, elderly: 0, facilities: 0, umkm: 0, aid: 0, inventoryItems: 0, mutations: 0 },
   );
 
   // Data rinci menjadi sumber utama bila sudah tersedia. Angka yang memang
@@ -99,11 +111,17 @@ export default async function Page() {
     : rtTotals.female;
 
   const inventoryUnits = inventory.reduce((sum, item) => sum + numberValue(item.quantity), 0);
+  const publicFacilities = facilities.filter((item) => item.isPublic !== false).length;
+  const publicUmkm = umkm.filter((item) => item.isPublic !== false && item.isActive !== false).length;
+  const linkedFacilityCount = rtTotals.facilities || publicFacilities;
+  const linkedUmkmCount = rtTotals.umkm || publicUmkm;
 
   const cards = [
     { href: "/penduduk", code: "PD", title: "Penduduk", value: publicPopulation, suffix: "jiwa aktif", text: "Demografi lengkap, KK, rumah, balita, lansia, dan sebaran RT dalam bentuk agregat." },
     { href: "/keluarga", code: "KK", title: "Keluarga / KK", value: publicFamilies, suffix: "keluarga", text: "Jumlah keluarga, anggota keluarga, sebaran RT, dan status rumah tanpa membuka No. KK." },
-    { href: "/data-rt", code: "RT", title: "Data RT", value: activeRts.length, suffix: "RT aktif", text: "Ringkasan lengkap tiap RT: warga, KK, laki-laki, perempuan, rumah, balita, lansia, dan fasilitas." },
+    { href: "/data-rt", code: "RT", title: "Data RT", value: activeRts.length, suffix: "RT aktif", text: "Ringkasan lengkap tiap RT dan seluruh data wilayah yang terhubung." },
+    { href: "/fasilitas", code: "FS", title: "Fasilitas", value: linkedFacilityCount, suffix: "fasilitas publik", text: "Fasilitas mengikuti RT yang dipilih di admin dan otomatis muncul pada detail Data RT." },
+    { href: "/umkm", code: "UM", title: "UMKM", value: linkedUmkmCount, suffix: "usaha publik", text: "UMKM terhubung ke RT; NIK pemilik dapat membantu menyelaraskan RT secara internal." },
     { href: "/mutasi", code: "MT", title: "Mutasi Penduduk", value: mutations.length, suffix: "catatan", text: "Tren pindah masuk, pindah keluar, antar-RT, dan perubahan status penduduk." },
     { href: "/bansos", code: "BS", title: "Bantuan Sosial", value: aid.length, suffix: "penerimaan", text: "Ringkasan jenis bantuan, status penyaluran, sumber program, dan sebaran RT." },
     { href: "/inventaris", code: "IV", title: "Inventaris", value: inventoryUnits, suffix: "total kuantitas", text: "Aset/barang kelurahan menurut kategori, kondisi, lokasi, dan sumber perolehan." },
@@ -118,6 +136,11 @@ export default async function Page() {
     { label: "Balita", value: rtTotals.toddlers, suffix: "jiwa" },
     { label: "Lansia", value: rtTotals.elderly, suffix: "jiwa" },
     { label: "RT Aktif", value: activeRts.length, suffix: "RT" },
+    { label: "Fasilitas Terhubung", value: linkedFacilityCount, suffix: "fasilitas" },
+    { label: "UMKM Terhubung", value: linkedUmkmCount, suffix: "usaha" },
+    { label: "Bansos Terhubung", value: rtTotals.aid || aid.length, suffix: "data" },
+    { label: "Inventaris Terhubung", value: rtTotals.inventoryItems, suffix: "jenis barang" },
+    { label: "Mutasi Terkait RT", value: rtTotals.mutations || mutations.length, suffix: "catatan" },
   ];
 
   return (
@@ -197,12 +220,16 @@ export default async function Page() {
                         <th>Balita</th>
                         <th>Lansia</th>
                         <th>Fasilitas</th>
+                        <th>UMKM</th>
+                        <th>Bansos</th>
+                        <th>Inventaris</th>
+                        <th>Mutasi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {activeRts.length ? activeRts.map((rt) => (
                         <tr key={rt.id || rt.number}>
-                          <td><Link href="/data-rt">RT {normalizeRt(rt.number || rt.id)}</Link></td>
+                          <td><Link href={`/data-rt?rt=${normalizeRt(rt.number || rt.id)}`}>RT {normalizeRt(rt.number || rt.id)}</Link></td>
                           <td>{String(rt.chairmanName || "Belum diisi")}</td>
                           <td>{numberValue(rt.populationCount)}</td>
                           <td>{numberValue(rt.familyCount)}</td>
@@ -212,9 +239,13 @@ export default async function Page() {
                           <td>{numberValue(rt.toddlerCount)}</td>
                           <td>{numberValue(rt.elderlyCount)}</td>
                           <td>{formatFacilities(rt.facilities)}</td>
+                          <td>{numberValue(rt.umkmCount)}</td>
+                          <td>{numberValue(rt.socialAssistanceCount)}</td>
+                          <td>{numberValue(rt.inventoryItemCount)}</td>
+                          <td>{numberValue(rt.mutationCount)}</td>
                         </tr>
                       )) : (
-                        <tr><td colSpan={10} className={styles.rtEmpty}>Belum ada Data RT yang dapat ditampilkan.</td></tr>
+                        <tr><td colSpan={14} className={styles.rtEmpty}>Belum ada Data RT yang dapat ditampilkan.</td></tr>
                       )}
                     </tbody>
                   </table>

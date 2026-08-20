@@ -2045,6 +2045,94 @@
   }
 }
 
+
+/* =========================================================
+   MOBILE TEXT SAFETY
+   Semua teks profil tampil penuh di layar kecil.
+========================================================= */
+@media (max-width: 760px) {
+  .page,
+  .page * {
+    box-sizing: border-box;
+  }
+
+  .heroCopy,
+  .article,
+  .timelineContent,
+  .missionArea,
+  .missionItem,
+  .potentialCard,
+  .facilityItem,
+  .priorityItem,
+  .updateCopy,
+  .sectionHeading,
+  .sectionHeadingDark,
+  .facilityHeading {
+    min-width: 0;
+  }
+
+  .heroCopy p,
+  .quickBandIntro p,
+  .facilityItem strong {
+    display: block;
+    overflow: visible;
+    max-height: none;
+    -webkit-box-orient: initial;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .heroCopy h1,
+  .heroCopy p,
+  .quickBandIntro strong,
+  .quickBandIntro p,
+  .article h2,
+  .article p,
+  .factCallout,
+  .timelineContent h3,
+  .timelineContent p,
+  .visionCard blockquote,
+  .missionItem p,
+  .sectionHeading h2,
+  .sectionHeading p,
+  .sectionHeadingDark h2,
+  .sectionHeadingDark p,
+  .boundaryItem strong,
+  .potentialCard h3,
+  .potentialCard p,
+  .facilityHeading h2,
+  .facilityLead p,
+  .facilityItem strong,
+  .priorityItem strong,
+  .updateCopy h2,
+  .updateCopy p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    white-space: normal;
+  }
+
+  .quickBandIntro,
+  .quickBandItem,
+  .timelineItem,
+  .missionItem,
+  .potentialCard,
+  .facilityItem,
+  .priorityItem {
+    height: auto;
+  }
+
+  .facilityItem {
+    min-height: 0;
+  }
+
+  .facilityItem strong {
+    line-height: 1.5;
+  }
+}
+
 @media (max-width: 390px) {
   .heroCopy h1 {
     font-size: 2.15rem;

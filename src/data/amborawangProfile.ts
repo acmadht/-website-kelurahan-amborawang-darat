@@ -111,7 +111,7 @@ export const amborawangProfileFallback: ProfileContent = {
     { value: "19,47 km²", label: "Luas wilayah", note: "BPS, data 2023" },
     { value: "2.921 jiwa", label: "Jumlah penduduk", note: "BPS, data 2023" },
     { value: "Data RT", label: "Wilayah RT", note: "Terhubung ke Data RT" },
-    { value: "5,8 km", label: "Jarak ke kecamatan Samboja Barat", note: "Googlemaps, data 2026" },
+    { value: "5,3 km", label: "Jarak ke Kantor Kecamatan Samboja Barat", note: "Google Maps, data 2026" },
   ],
 
   timelineEyebrow: "Jejak Perkembangan",
@@ -157,10 +157,10 @@ export const amborawangProfileFallback: ProfileContent = {
   regionEyebrow: "Kondisi Wilayah",
   regionTitle: "Geografi dan batas administratif",
   geography:
-    "Kelurahan Amborawang Darat berada di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Luas wilayahnya sekitar 19,47 km² atau 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju ibu kota kecamatan sekitar 5,3 km. Wilayah ini berada pada kawasan beriklim tropis basah dan terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan.",
+    "Kelurahan Amborawang Darat berada di Kecamatan Samboja Barat, Kabupaten Kutai Kartanegara, Kalimantan Timur. Luas wilayahnya sekitar 19,47 km² atau 4,68 persen dari luas Kecamatan Samboja Barat. Jarak menuju Kantor Kecamatan Samboja Barat sekitar 5,3 km. Wilayah ini berada pada kawasan beriklim tropis basah dan terhubung dengan koridor Jalan Balikpapan–Handil II serta jaringan jalan lingkungan.",
   regionFacts: [
     { value: "04,68%", label: "Proporsi luas terhadap Kecamatan Samboja Barat" },
-    { value: "5,3 km", label: "Jarak menuju ibu kota kecamatan" },
+    { value: "5,3 km", label: "Jarak menuju Kantor Kecamatan Samboja Barat" },
     { value: "Tropis", label: "Karakter iklim wilayah" },
   ],
   mapImageUrl: "/images/peta-amborawang-darat.png",

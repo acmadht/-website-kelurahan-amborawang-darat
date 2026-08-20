@@ -69,15 +69,36 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
       return Number.isInteger(numeric) && numeric > 0;
     }).length,
   );
-  const profileStats = profile.stats.map((item) =>
-    /(?:wilayah|jumlah)\s*rt|\brt\b/i.test(item.label)
-      ? {
-          ...item,
-          value: activeRtCount ? `${activeRtCount} RT` : "Belum ada data",
-          note: "Data RT aktif pada dashboard",
-        }
-      : item,
+  const activeRts = rawRts.filter((item) => {
+    if (item.isActive === false) return false;
+    const numeric = Number(String(item.number || "").replace(/\D/g, ""));
+    return Number.isInteger(numeric) && numeric > 0;
+  });
+  const populationFromRt = activeRts.reduce(
+    (total, item) => total + (Number(item.populationCount) || 0),
+    0,
   );
+  const formatNumber = (value: number) => new Intl.NumberFormat("id-ID").format(value);
+
+  const profileStats = profile.stats.map((item) => {
+    if (/jumlah\s*penduduk|penduduk/i.test(item.label)) {
+      return {
+        ...item,
+        value: `${formatNumber(populationFromRt)} jiwa`,
+        note: "Terhubung otomatis dengan Data RT",
+      };
+    }
+
+    if (/(?:wilayah|jumlah)\s*rt|\brt\b/i.test(item.label)) {
+      return {
+        ...item,
+        value: activeRtCount ? `${activeRtCount} RT` : "Belum ada data",
+        note: "Terhubung otomatis dengan Data RT",
+      };
+    }
+
+    return item;
+  });
   const quickStats = profileStats.slice(0, 3);
   const historyParagraphs = profile.history
     .split(/\n\s*\n/)
@@ -169,23 +190,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
           </div>
         </section>
 
-        {/* STATS */}
-        <section className={styles.statsSection}>
-          <div className="container">
-            <div className={styles.statsGrid}>
-              {profileStats.map((item, index) => (
-                <Reveal key={`${item.label}-${index}`} enabled delay={index * 45}>
-                  <div className={styles.statItem}>
-                    <strong>{item.value}</strong>
-                    <span>{item.label}</span>
-                    <small>{item.note}</small>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* TIMELINE */}
         <section className={styles.timelineSection}>
           <div className="container">
@@ -193,7 +197,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.timelineEyebrow}</span>
                 <h2>{profile.timelineTitle}</h2>
-                <p>{profile.timelineDescription}</p>
               </div>
             </Reveal>
 
@@ -223,7 +226,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
                 <div className={styles.visionCard}>
                   <span className={styles.eyebrowLight}>Visi Pelayanan</span>
                   <blockquote>{profile.vision}</blockquote>
-                  <p>{profile.visionNote}</p>
                 </div>
               </Reveal>
 
@@ -257,7 +259,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.regionEyebrow}</span>
                 <h2>{profile.regionTitle}</h2>
-                <p>{profile.geography}</p>
               </div>
             </Reveal>
 
@@ -314,10 +315,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
                 ))}
               </div>
             </div>
-
-            <Reveal enabled={settings.animationEnabled}>
-              <p className={styles.regionNote}>{profile.boundaries}</p>
-            </Reveal>
           </div>
         </section>
 
@@ -328,7 +325,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
               <div className={styles.sectionHeading}>
                 <span className={styles.eyebrow}>{profile.potentialEyebrow}</span>
                 <h2>{profile.potentialTitle}</h2>
-                <p>{profile.potential}</p>
               </div>
             </Reveal>
 
@@ -357,7 +353,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
                   <span className={styles.eyebrow}>{profile.facilityEyebrow}</span>
                   <h2>{profile.facilityTitle}</h2>
                 </div>
-                <p>{profile.facilityIntro}</p>
               </div>
             </Reveal>
 
@@ -389,7 +384,6 @@ export default function ProfilePage({ initialProfile = amborawangProfileFallback
               <div className={styles.sectionHeadingDark}>
                 <span className={styles.eyebrowLight}>{profile.priorityEyebrow}</span>
                 <h2>{profile.priorityTitle}</h2>
-                <p>{profile.priorityIntro}</p>
               </div>
             </Reveal>
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { setDocument } from "@/lib/firebase/firestore-rest-admin";
+import { recalculateAdministrativeData } from "@/lib/admin/administrative-sync";
 
 export const runtime = "nodejs";
 function clean(value: unknown, max = 1000) { return String(value ?? "").trim().slice(0, max); }
@@ -15,7 +16,9 @@ export async function POST(request: Request) {
     if (clean(body.website, 120)) return NextResponse.json({ ok: true });
     const name = clean(body.name, 120);
     const phone = clean(body.phone, 40);
-    const rt = clean(body.rt, 4).replace(/\D/g, "").padStart(2, "0");
+    const rtDigits = clean(body.rt, 4).replace(/\D/g, "");
+    const rtNumber = Number(rtDigits);
+    const rt = rtDigits && Number.isInteger(rtNumber) && rtNumber >= 1 && rtNumber <= 13 ? String(rtNumber).padStart(2, "0") : "";
     const category = clean(body.category, 120);
     const location = clean(body.location, 240);
     const message = clean(body.message, 3000);
@@ -28,6 +31,7 @@ export async function POST(request: Request) {
       ticketId: id, name, phone, rt, category, location, message,
       status: "Baru", source: "website", createdAt: now, updatedAt: now,
     }, false);
+    await recalculateAdministrativeData();
     return NextResponse.json({ ok: true, ticketId: id });
   } catch (error) {
     console.error("[pengaduan]", error);

@@ -878,12 +878,23 @@
   }
 
   .brandText strong {
-    max-width: 140px;
+    max-width: 165px;
     font-size: 0.83rem;
+    line-height: 1.15;
+    white-space: nowrap;
   }
 
   .brandText small {
-    display: none;
+    display: block;
+    max-width: 165px;
+    margin-top: 3px;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.61rem;
+    font-weight: 500;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .officialLabel {

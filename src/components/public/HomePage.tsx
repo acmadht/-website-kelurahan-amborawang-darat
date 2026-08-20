@@ -182,14 +182,6 @@ export default function HomePage({
   );
 
 
-  const publicStats = [
-    { label: "Penduduk", value: Number(villageStats.population) || 0, suffix: "jiwa" },
-    { label: "Kepala Keluarga", value: Number(villageStats.families) || 0, suffix: "KK" },
-    { label: "Laki-laki", value: Number(villageStats.male) || 0, suffix: "jiwa" },
-    { label: "Perempuan", value: Number(villageStats.female) || 0, suffix: "jiwa" },
-    { label: "Rukun Tetangga", value: activeRtCount, suffix: "RT" },
-  ];
-
   const slides = useMemo(
     () => rawSlides.filter((item) => item.isActive !== false),
     [rawSlides],
@@ -444,34 +436,6 @@ export default function HomePage({
           </div>
         </section>
 
-        <section className={styles.dataStatsSection}>
-          <div className="container">
-            <Reveal enabled={settings.animationEnabled}>
-              <div className={styles.dataStatsHeading}>
-                <div>
-                  <span className={styles.eyebrow}>Data Kelurahan</span>
-                  <h2>Statistik terkini</h2>
-                </div>
-                <Link href="/data-rt" className={styles.textLink}>
-                  Lihat Data RT
-                  <ArrowIcon size={17} />
-                </Link>
-              </div>
-            </Reveal>
-            <div className={styles.dataStatsGrid}>
-              {publicStats.map((item, index) => (
-                <Reveal key={item.label} enabled={settings.animationEnabled} delay={index * 35}>
-                  <div className={styles.dataStatCard}>
-                    <strong>{item.value.toLocaleString("id-ID")}</strong>
-                    <span>{item.suffix}</span>
-                    <small>{item.label}</small>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-            <p className={styles.dataStatsNote}>Statistik bersifat agregat. NIK, nomor KK, alamat rinci, dan data pribadi tidak ditampilkan pada website publik.</p>
-          </div>
-        </section>
 
         {/* PROFILE / SAMBUTAN */}
         <section className={styles.aboutSection}>
