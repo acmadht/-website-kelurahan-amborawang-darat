@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { addDocument } from "@/lib/firebase/firestore-rest-admin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function cleanText(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);

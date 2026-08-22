@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { setDocument } from "@/lib/firebase/firestore-rest-admin";
-import { recalculateAdministrativeData } from "@/lib/admin/administrative-sync";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function clean(value: unknown, max = 500) {
   return String(value ?? "").trim().slice(0, max);
@@ -53,7 +53,10 @@ export async function POST(request: Request) {
       updatedAt: now,
     }, false);
 
-    await recalculateAdministrativeData();
+    // Jangan menjalankan sinkronisasi seluruh administrasi di request publik.
+    // Proses tersebut membaca banyak koleksi Firestore dan dapat membuat
+    // Serverless Function Vercel timeout. Sinkronisasi tetap tersedia melalui
+    // endpoint admin /api/admin/recalculate-administration.
     return NextResponse.json({ ok: true, ticketId: id });
   } catch (error) {
     console.error("[layanan-surat]", error);

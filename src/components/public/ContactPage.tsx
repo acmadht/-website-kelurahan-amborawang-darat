@@ -10,6 +10,7 @@ import type { SiteSettings } from "@/types";
 import PublicShell from "./PublicShell";
 import Reveal from "./Reveal";
 import styles from "./ContactPage.module.css";
+import { readApiJson } from "@/lib/http-response";
 
 function ArrowIcon({ size = 18 }: { size?: number }) {
   return (
@@ -150,7 +151,7 @@ export default function ContactPage({ initialSettings = demoSettings }: { initia
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, contact, subject, message, website }),
       });
-      const result = (await response.json()) as { error?: string };
+      const result = await readApiJson<{ error?: string }>(response);
       if (!response.ok) throw new Error(result.error || "Pesan gagal dikirim.");
 
       form.reset();
